@@ -15,7 +15,7 @@ class Crawlect:
         self.path = path
         self.paths = Path(path)
         self.dest = dest
-        self.files = self.listFilesIn(paths = self.paths)
+        self.files = self.listFilesIn(paths = self.paths,recur=True)
         self.title = self.paths.name
         self.digest = ""
 
@@ -27,8 +27,11 @@ class Crawlect:
             if path.is_file():
                 files.append(path)
             elif path.is_dir() and recur is True:
-                self.listFilesIn(path = path, files = files, recur = recur)
+                self.listFilesIn(paths = path, files = files, recur = recur)
         return files
+
+
+
 
 if __name__ == "__main__":
     try:
@@ -130,9 +133,15 @@ if __name__ == "__main__":
 
         args = parser.parse_args()
 
-        from inspect import getmembers
-        from pprint import pprint
-        pprint(getmembers(args))
+        # from inspect import getmembers
+        # from pprint import pprint
+        # pprint(getmembers(args))
+    
+        crawlect = Crawlect(args.path)
+        
+
+        for path in crawlect.files:
+            print(path)
 
     except KeyboardInterrupt:
         print("Interupted by user.")
