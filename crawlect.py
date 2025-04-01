@@ -3,7 +3,7 @@
 
 import argparse
 from pathlib import Path
-
+from format import Format
 class Crawlect:
     """Crawl a given path to list and describe all files on a single markdown file."""
 
@@ -137,11 +137,13 @@ if __name__ == "__main__":
         # from pprint import pprint
         # pprint(getmembers(args))
     
-        crawlect = Crawlect(args.path)
+        toto = Crawlect(args.path)
         
 
-        for path in crawlect.files:
-            print(path)
+        
+        a = Format(toto)
+        print("pass")
+        a.typeCodeBox()
 
     except KeyboardInterrupt:
         print("Interupted by user.")
