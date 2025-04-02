@@ -3,8 +3,11 @@
 
 import argparse
 from pathlib import Path
-from format import Format
 from math import inf
+
+# Custom modules.
+from format import Format
+from scan import listFilesIn
 
 # From [Codemia](https://codemia.io/knowledge-hub/path/parsing_boolean_values_with_argparse)
 class BooleanAction(argparse.Action):
@@ -31,6 +34,7 @@ class Crawlect:
         self.recur = recur
         self.depth = depth
 
+        # Files and extentions inclusion/exclusions parameters.
         self.excl_ext_li = excl_ext_li
         self.excl_dir_li = excl_dir_li
         self.excl_fil_li = excl_fil_li
@@ -44,43 +48,16 @@ class Crawlect:
         self.incl_dir_wr = incl_dir_wr
         self.incl_fil_wr = incl_fil_wr
 
+        # Advanced features parameters.
         self.xenv = xenv
         self.tree = tree
-        self.files = self.listFilesIn(paths = self.paths, recur = self.recur, excl_ext_li = self.excl_ext_li, excl_dir_li = self.excl_dir_li, excl_fil_li = self.excl_fil_li, incl_ext_li = self.incl_ext_li, incl_dir_li = self.incl_dir_li, incl_fil_li = self.incl_fil_li)
-        self.title = self.paths.name
-        self.digest = ""
 
-    def listFilesIn(self, paths = None, files = [], recur = False, excl_ext_li = [], excl_dir_li = [], excl_fil_li = [], incl_ext_li = [], incl_dir_li = [], incl_fil_li = []):
-        """Append all paths from specified path as Path object in a list and return it."""
-        if paths is None:
-            paths = self.paths
-        for path in paths.iterdir():
-            # Inclusions parameters overrule exclusion parameters, so if a file is in the exclusion list and in the inclusion list, it will be listed.
-            # If a file is in inclusion and its extension is in exclusion, the file will still be listed.
-            if path.is_file() and (
-                    # FIle and extension include/exclude combinations.
-                    (
-                        (path.name not in excl_fil_li and incl_fil_li == [] and incl_ext_li == [])
-                        or
-                        (path.suffix not in excl_ext_li and incl_ext_li == [])
-                        or
-                        (path.suffix in excl_ext_li and path.name in incl_fil_li)
-                        or
-                        path.name in incl_fil_li
-                        or
-                        path.suffix in incl_ext_li
-                    )
-                    # Future include/exclude rules such as the creator, Git or time related ones to be added here.
-                ):
-                files.append(path)
-            # Inclusions parameters overrule exclusion parameters, so if a file is in the exclusion list and in the inclusion list, it will be listed.
-            elif path.is_dir() and recur is True and (
-                (path.name not in excl_dir_li and incl_dir_li == [])
-                or
-                path.name in incl_dir_li
-                ):
-                self.listFilesIn(paths = path, files = files, recur = recur, excl_ext_li = excl_ext_li, excl_dir_li = excl_dir_li, excl_fil_li = excl_fil_li, incl_ext_li = incl_ext_li, incl_dir_li = incl_dir_li, incl_fil_li = incl_fil_li)
-        return files
+        # Build path list and attributes.
+        self.refresh()
+
+    def refresh(cls):
+        cls.files = listFilesIn(paths = cls.paths, recur = cls.recur, excl_ext_li = cls.excl_ext_li, excl_dir_li = cls.excl_dir_li, excl_fil_li = cls.excl_fil_li, incl_ext_li = cls.incl_ext_li, incl_dir_li = cls.incl_dir_li, incl_fil_li = cls.incl_fil_li)
+        cls.title = cls.paths.name
 
 if __name__ == "__main__":
     try:
@@ -209,13 +186,12 @@ if __name__ == "__main__":
 
         toto = Crawlect(path = args.path, output = args.output, recur = args.recur, depth = args.depth, excl_ext_li = args.excl_ext_li, excl_dir_li = args.excl_dir_li, excl_fil_li = args.excl_fil_li, excl_ext_wr = args.excl_ext_wr, excl_dir_wr = args.excl_dir_wr, excl_fil_wr = args.excl_fil_wr, incl_ext_li = args.incl_ext_li, incl_dir_li = args.incl_dir_li, incl_fil_li = args.incl_fil_li, incl_ext_wr = args.incl_ext_wr, incl_dir_wr = args.incl_dir_wr, incl_fil_wr = args.incl_fil_wr, xenv = args.xenv, tree = args.tree)
 
-        # for file in toto.files:
-        #     print(file)
-        #     print(file.suffix)
+        for file in toto.files:
+            print(file)
 
-        a = Format(toto)
-        print("pass")
-        a.typeCodeBox()
+        # a = Format(toto)
+        # print("pass")
+        # a.typeCodeBox()
 
     except KeyboardInterrupt:
         print("Interupted by user.")
