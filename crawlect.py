@@ -46,19 +46,40 @@ class Crawlect:
 
         self.xenv = xenv
         self.tree = tree
-        self.files = self.listFilesIn(paths = self.paths, recur = self.recur)
+        self.files = self.listFilesIn(paths = self.paths, recur = self.recur, excl_ext_li = self.excl_ext_li, excl_dir_li = self.excl_dir_li, excl_fil_li = self.excl_fil_li, incl_ext_li = self.incl_ext_li, incl_dir_li = self.incl_dir_li, incl_fil_li = self.incl_fil_li)
         self.title = self.paths.name
         self.digest = ""
 
-    def listFilesIn(self, paths = None, files = [], recur = False):
+    def listFilesIn(self, paths = None, files = [], recur = False, excl_ext_li = [], excl_dir_li = [], excl_fil_li = [], incl_ext_li = [], incl_dir_li = [], incl_fil_li = []):
         """Append all paths from specified path as Path object in a list and return it."""
         if paths is None:
             paths = self.paths
         for path in paths.iterdir():
-            if path.is_file():
+            # Inclusions parameters overrule exclusion parameters, so if a file is in the exclusion list and in the inclusion list, it will be listed.
+            # If a file is in inclusion and its extension is in exclusion, the file will still be listed.
+            if path.is_file() and (
+                    # FIle and extension include/exclude combinations.
+                    (
+                        (path.name not in excl_fil_li and incl_fil_li == [] and incl_ext_li == [])
+                        or
+                        (path.suffix not in excl_ext_li and incl_ext_li == [])
+                        or
+                        (path.suffix in excl_ext_li and path.name in incl_fil_li)
+                        or
+                        path.name in incl_fil_li
+                        or
+                        path.suffix in incl_ext_li
+                    )
+                    # Future include/exclude rules such as the creator, Git or time related ones to be added here.
+                ):
                 files.append(path)
-            elif path.is_dir() and recur is True:
-                self.listFilesIn(paths = path, files = files, recur = recur)
+            # Inclusions parameters overrule exclusion parameters, so if a file is in the exclusion list and in the inclusion list, it will be listed.
+            elif path.is_dir() and recur is True and (
+                (path.name not in excl_dir_li and incl_dir_li == [])
+                or
+                path.name in incl_dir_li
+                ):
+                self.listFilesIn(paths = path, files = files, recur = recur, excl_ext_li = excl_ext_li, excl_dir_li = excl_dir_li, excl_fil_li = excl_fil_li, incl_ext_li = incl_ext_li, incl_dir_li = incl_dir_li, incl_fil_li = incl_fil_li)
         return files
 
 if __name__ == "__main__":
@@ -85,9 +106,9 @@ if __name__ == "__main__":
         parser.add_argument(
             "-r", "--recur", "--recursive_crawling",
             type = str,
-            choices = ["yes", "no", "y", "n", "true", "false", "t", "f", "1", "0"],
+            choices = ["Yes", "yes", "No", "no", "Y", "y", "N", "n", "True", "true", "False", "false", "T", "t", "F", "f", "1", "0"],
             action = BooleanAction,
-            default = "True",
+            default = True,
             help = "Enable recursive crawling (default is True).")
 
         parser.add_argument(
@@ -171,17 +192,17 @@ if __name__ == "__main__":
         parser.add_argument(
             "-xen", "--xenv", "--randomize_env_variables",
             type = str,
-            choices = ["yes", "no", "y", "n", "true", "false", "t", "f", "1", "0"],
+            choices = ["Yes", "yes", "No", "no", "Y", "y", "N", "n", "True", "true", "False", "false", "T", "t", "F", "f", "1", "0"],
             action = BooleanAction,
-            default = "True",
+            default = True,
             help = "Randomize .env variables to mitigate sensitive info leak risk (default is True).")
 
         parser.add_argument(
             "-tre", "--tree", "--visualize_directory_tree",
             type = str,
-            choices = ["yes", "no", "y", "n", "true", "false", "t", "f", "1", "0"],
+            choices = ["Yes", "yes", "No", "no", "Y", "y", "N", "n", "True", "true", "False", "false", "T", "t", "F", "f", "1", "0"],
             action = BooleanAction,
-            default = "True",
+            default = True,
             help = "Visualize directory tree in the output file (default is True).")
 
         args = parser.parse_args()
@@ -190,6 +211,7 @@ if __name__ == "__main__":
 
         # for file in toto.files:
         #     print(file)
+        #     print(file.suffix)
 
         a = Format(toto)
         print("pass")
