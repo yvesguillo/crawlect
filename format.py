@@ -8,9 +8,7 @@ class Format:
 
     """
 
-    def __init__(self, filesToformat):
-
-        self.files = filesToformat
+    def __init__(self):
 
         try:
 
@@ -19,24 +17,27 @@ class Format:
         except:
             print("Tables de mapage introuvables")
 
-    def typeCodeBox(self):
-        '''
-        boucle qui simule le code 
-        '''
-        print(self.files)
-        for file in self.files.files:
-            extension = self.searchType(file)
-            if extension == None:
-                continue
-            self.insertCodebox(file, extension)
-            # fonction
+    # def typeCodeBox(self):
+    #     '''
+    #     boucle qui simule le code 
+    #     '''
+    #     print(self.files)
+    #     for file in self.files.files:
+    #         extension = self.searchType(file)
+    #         if extension == None:
+    #             continue
+    #         self.insertCodebox(file, extension)
+    #         # fonction
 
-    def insertCodebox(self, file, extention):
+    def insertCodebox(self, file):
         '''
         cette méthode prends en entrée un chemin de fichier avec son extention fourni par searchType()
         et retourne une variable string avec tous le code corespondant dans un codbox
         '''
 
+        extention = self.searchType(file)
+        if extention == None:
+            return None
         bloc = "`"
         with open(file, "rt") as f:
             code = f.read()
@@ -67,13 +68,13 @@ class Format:
             if maxrep >= 3:
                 maxrep += 1
                 res = f"{maxrep*bloc}{extention}\n{code}\n{maxrep*bloc}"
-                # print(res)
+                #print(res)
                 # print("")
                 return res
 
             else:
                 res = f"{3*bloc}{extention}\n{code}\n{3*bloc}"
-                # print(res)
+                #print(res)
                 # print("")
                 return res
 
@@ -84,13 +85,13 @@ class Format:
 
         # recherche sur le nom de fichier
         if file.name in self.languages:
-            print(f"voici le fichier trouvée : {self.languages[file.name]}")
+            #print(f"voici le fichier trouvée : {self.languages[file.name]}")
             return self.languages[file.name]
 
         elif file.suffix in self.languages:
-            print(f"voici l'extention trouvée : {self.languages[file.suffix]}")
+            #print(f"voici l'extention trouvée : {self.languages[file.suffix]}")
             return self.languages[file.suffix]
 
         else:
-            print(f"fichier introuvés pour {file}")
+            #print(f"fichier introuvés pour {file}")
             return None
