@@ -185,14 +185,15 @@ if __name__ == "__main__":
 
         args = parser.parse_args()
 
-        toto = Crawlect(path = args.path, output = args.output, recur = args.recur, depth = args.depth, excl_ext_li = args.excl_ext_li, excl_dir_li = args.excl_dir_li, excl_fil_li = args.excl_fil_li, excl_ext_wr = args.excl_ext_wr, excl_dir_wr = args.excl_dir_wr, excl_fil_wr = args.excl_fil_wr, incl_ext_li = args.incl_ext_li, incl_dir_li = args.incl_dir_li, incl_fil_li = args.incl_fil_li, incl_ext_wr = args.incl_ext_wr, incl_dir_wr = args.incl_dir_wr, incl_fil_wr = args.incl_fil_wr, xenv = args.xenv, tree = args.tree)
+        # from inspect import getmembers
+        # from pprint import pprint
+        # pprint(getmembers(args))
 
-        # for file in toto.files:
-        #     print(file)
+        toto = Crawlect(args.path)
 
-        a = Format(toto)
-        print("pass")
-        a.typeCodeBox()
+        for file in toto.files:
+            instance = Format().insertCodebox(file)
+            print(instance)
 
     except KeyboardInterrupt:
         print("Interupted by user.")
