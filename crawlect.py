@@ -139,11 +139,11 @@ if __name__ == "__main__":
     
         toto = Crawlect(args.path)
         
-
         
-        a = Format(toto)
-        print("pass")
-        a.typeCodeBox()
+        for file in toto.files:
+            instance = Format().insertCodebox(file)
+            print(instance)
+            
 
     except KeyboardInterrupt:
         print("Interupted by user.")
