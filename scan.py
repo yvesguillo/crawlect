@@ -29,6 +29,6 @@ def listFilesIn(paths = ".", recur = False, depth = 10, excl_ext_li = [], excl_d
             or
             path.name in incl_dir_li
             ):
-            depth -= 1
-            listFilesIn(paths = path, recur = recur, depth = depth, excl_ext_li = excl_ext_li, excl_dir_li = excl_dir_li, excl_fil_li = excl_fil_li, incl_ext_li = incl_ext_li, incl_dir_li = incl_dir_li, incl_fil_li = incl_fil_li, files = files)
+            files.append(path)
+            listFilesIn(paths = path, recur = recur, depth = depth -1, excl_ext_li = excl_ext_li, excl_dir_li = excl_dir_li, excl_fil_li = excl_fil_li, incl_ext_li = incl_ext_li, incl_dir_li = incl_dir_li, incl_fil_li = incl_fil_li, files = files)
     return files
