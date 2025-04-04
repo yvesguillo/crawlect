@@ -1,4 +1,7 @@
-"""Scan contains Crawlect directories tree scan utils"""
+#! /usr/bin/env python3
+"""scan.py contains Crawlect directories tree scan utils."""
+
+from pathlib import Path
 
 def listFilesIn(paths = ".", recur = False, depth = 10, excl_ext_li = [], excl_dir_li = [], excl_fil_li = [], incl_ext_li = [], incl_dir_li = [], incl_fil_li = [], files = []):
     """Append all paths from specified path as Path object in a list and return it."""
@@ -24,11 +27,11 @@ def listFilesIn(paths = ".", recur = False, depth = 10, excl_ext_li = [], excl_d
             ):
             files.append(path)
         # Inclusions parameters overrule exclusion parameters, so if a file is in the exclusion list and in the inclusion list, it will be listed.
-        elif path.is_dir() and recur is True and depth <= 1 and (
+        elif path.is_dir() and recur is True and depth >= 1 and (
             (path.name not in excl_dir_li and incl_dir_li == [])
             or
             path.name in incl_dir_li
             ):
-            depth -= 1
-            listFilesIn(paths = path, recur = recur, depth = depth, excl_ext_li = excl_ext_li, excl_dir_li = excl_dir_li, excl_fil_li = excl_fil_li, incl_ext_li = incl_ext_li, incl_dir_li = incl_dir_li, incl_fil_li = incl_fil_li, files = files)
+            files.append(path)
+            listFilesIn(paths = path, recur = recur, depth = depth -1, excl_ext_li = excl_ext_li, excl_dir_li = excl_dir_li, excl_fil_li = excl_fil_li, incl_ext_li = incl_ext_li, incl_dir_li = incl_dir_li, incl_fil_li = incl_fil_li, files = files)
     return files
