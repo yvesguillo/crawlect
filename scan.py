@@ -24,7 +24,7 @@ def listFilesIn(paths = ".", recur = False, depth = 10, excl_ext_li = [], excl_d
             ):
             files.append(path)
         # Inclusions parameters overrule exclusion parameters, so if a file is in the exclusion list and in the inclusion list, it will be listed.
-        elif path.is_dir() and recur is True and depth <= 1 and (
+        elif path.is_dir() and recur is True and depth >= 1 and (
             (path.name not in excl_dir_li and incl_dir_li == [])
             or
             path.name in incl_dir_li
