@@ -17,17 +17,6 @@ class Format:
         except:
             print("Tables de mapage introuvables")
 
-    # def typeCodeBox(self):
-    #     '''
-    #     boucle qui simule le code 
-    #     '''
-    #     print(self.files)
-    #     for file in self.files.files:
-    #         extension = self.searchType(file)
-    #         if extension == None:
-    #             continue
-    #         self.insertCodebox(file, extension)
-    #         # fonction
 
     def insertCodebox(self, file):
         '''
