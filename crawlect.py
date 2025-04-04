@@ -55,10 +55,10 @@ class Crawlect:
         # Build path list and attributes.
         self.refresh()
 
-    def refresh(cls):
+    def refresh(self):
         """Regenerate the files list, name, output etc., based on current parameters."""
-        cls.title = cls.paths.name
-        cls.files = listFilesIn(paths = cls.paths, recur = cls.recur, excl_ext_li = cls.excl_ext_li, excl_dir_li = cls.excl_dir_li, excl_fil_li = cls.excl_fil_li, incl_ext_li = cls.incl_ext_li, incl_dir_li = cls.incl_dir_li, incl_fil_li = cls.incl_fil_li)
+        self.title = self.paths.name
+        self.files = listFilesIn(paths = self.paths, recur = self.recur, depth = self.depth, excl_ext_li = self.excl_ext_li, excl_dir_li = self.excl_dir_li, excl_fil_li = self.excl_fil_li, incl_ext_li = self.incl_ext_li, incl_dir_li = self.incl_dir_li, incl_fil_li = self.incl_fil_li)
 
 if __name__ == "__main__":
     try:
@@ -184,10 +184,6 @@ if __name__ == "__main__":
             help = "Visualize directory tree in the output file (default is True).")
 
         args = parser.parse_args()
-
-        # from inspect import getmembers
-        # from pprint import pprint
-        # pprint(getmembers(args))
 
         toto = Crawlect(path = args.path, output = args.output, recur = args.recur, depth = args.depth, excl_ext_li = args.excl_ext_li, excl_dir_li = args.excl_dir_li, excl_fil_li = args.excl_fil_li, excl_ext_wr = args.excl_ext_wr, excl_dir_wr = args.excl_dir_wr, excl_fil_wr = args.excl_fil_wr, incl_ext_li = args.incl_ext_li, incl_dir_li = args.incl_dir_li, incl_fil_li = args.incl_fil_li, incl_ext_wr = args.incl_ext_wr, incl_dir_wr = args.incl_dir_wr, incl_fil_wr = args.incl_fil_wr, xenv = args.xenv, tree = args.tree)
 
