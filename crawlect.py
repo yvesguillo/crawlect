@@ -196,8 +196,6 @@ if __name__ == "__main__":
         #     instance = Format().insertCodebox(file)
         #     print(instance)
 
-        print(inf < inf)
-
     except KeyboardInterrupt:
         print("Interupted by user.")
 
