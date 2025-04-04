@@ -1,5 +1,5 @@
 #! /usr/bin/env python3
-"""scan.py contains Crawlect directories tree scan utils."""
+"""scan.py contains Crawlect directories tree scan utilities."""
 
 from pathlib import Path
 
