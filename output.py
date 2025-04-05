@@ -12,26 +12,36 @@ class Output:
         self.suffix = suffix
 
     def standardOutputName(cls):
+        """Return standard output file name if no filename specified."""
         if cls.name is None:
             now = datetime.now()
-            return cls.prefix + "-" + str(now.year) + str("{:02d}".format(now.month)) + str("{:02d}".format(now.day)) + str("{:02d}".format(now.hour)) + str("{:02d}".format(now.minute)) + str("{:02d}".format(now.second)) + cls.suffix
+            return cls.prefix + "-" + yearmodahs() + cls.suffix
         else:
             return cls.name
 
-    @classmethod
-    def compose(cls, path = None, composition = []):
+    def appendComposition(cls, path = None, *composition):
         """Append composition to output file."""
         if path == None:
-            path = cls.standardOutputName()
-        pass
+            path = Path(cls.standardOutputName())
+        elif isinstance(path, Path) is False:
+            path = Path(path)
+        for element in composition:
+            pass
+
+
+def yearmodahs(date = datetime.now()):
+    """Return givent date as yearmoda plus hours and seconds string."""
+    return str(date.year) + str("{:02d}".format(date.month)) + str("{:02d}".format(date.day)) + str("{:02d}".format(date.hour)) + str("{:02d}".format(date.minute)) + str("{:02d}".format(date.second))
 
 try:
+
+    print(yearmodahs())
 
     output = Output()
     print(output.standardOutputName())
 
-    # path = Path("test.md")
-    # print(path.exists())
+    path = Path("test.md")
+    print(isinstance(path, Path))
 
     # with path.open("a") as file:
     #     file.write(f"## {path.name}\n")

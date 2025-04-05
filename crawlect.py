@@ -27,7 +27,7 @@ class Crawlect:
     with open("languages.json","rt") as file:
         _languages = file.read()
 
-    def __init__(self, path = ".", output = "description.md", recur = True, depth = inf, excl_ext_li = [], excl_dir_li = [], excl_fil_li = [], excl_ext_wr = [], excl_dir_wr = [], excl_fil_wr = [], incl_ext_li = [], incl_dir_li = [], incl_fil_li = [], incl_ext_wr = [], incl_dir_wr = [], incl_fil_wr = [], xenv = True, tree = True):
+    def __init__(self, path = ".", output = "description.md", recur = True, depth = inf, excl_ext_li = (), excl_dir_li = (), excl_fil_li = (), excl_ext_wr = (), excl_dir_wr = (), excl_fil_wr = (), incl_ext_li = (), incl_dir_li = (), incl_fil_li = (), incl_ext_wr = (), incl_dir_wr = (), incl_fil_wr = (), xenv = True, tree = True):
         self.path = path
         self.paths = Path(path)
         self.output = output
@@ -98,73 +98,73 @@ if __name__ == "__main__":
         parser.add_argument(
             "-xel", "--excl_ext_li", "--excluded_extentions_from_listing",
             nargs = "*",
-            default = [],
+            default = (),
             help = "List of file extensions to exclude from listing (e.g.: .jpg, .png).")
 
         parser.add_argument(
             "-xdl", "--excl_dir_li", "--excluded_directories_from_listing",
             nargs = "*",
-            default = [],
+            default = (),
             help = "List of directories to exclude from listing (e.g.: bin, render).")
 
         parser.add_argument(
             "-xfl", "--excl_fil_li", "--excluded_files_from_listing",
             nargs = "*",
-            default = [],
+            default = (),
             help = "List of files to exclude from listing (e.g.: README.md, profile.png).")
 
         parser.add_argument(
             "-xew", "--excl_ext_wr", "--excluded_extentions_from_writing",
             nargs = "*",
-            default = [],
+            default = (),
             help = "List of file extensions to exclude from writing (e.g.: .jpg, .png).")
 
         parser.add_argument(
             "-xdw", "--excl_dir_wr", "--excluded_directories_from_writing",
             nargs = "*",
-            default = [],
+            default = (),
             help = "List of directories to exclude from writing (e.g.: bin, render).")
 
         parser.add_argument(
             "-xfw", "--excl_fil_wr", "--excluded_files_from_writing",
             nargs = "*",
-            default = [],
+            default = (),
             help = "List of files to exclude from writing (e.g.: README.md, profile.png).")
 
         parser.add_argument(
             "-iel", "--incl_ext_li", "--include_extentions_from_listing",
             nargs = "*",
-            default = [],
+            default = (),
             help = "List of file extensions to include in listing (e.g.: .jpg, .png).")
 
         parser.add_argument(
             "-idl", "--incl_dir_li", "--include_directories_from_listing",
             nargs = "*",
-            default = [],
+            default = (),
             help = "List of directories to include in listing (e.g.: bin, render).")
 
         parser.add_argument(
             "-ifl", "--incl_fil_li", "--include_files_from_listing",
             nargs = "*",
-            default = [],
+            default = (),
             help = "List of files to include in listing (e.g.: README.md, profile.png).")
 
         parser.add_argument(
             "-iew", "--incl_ext_wr", "--include_extentions_from_writing",
             nargs = "*",
-            default = [],
+            default = (),
             help = "List of file extensions to include for writing (e.g.: .jpg, .png).")
 
         parser.add_argument(
             "-idw", "--incl_dir_wr", "--include_directories_from_writing",
             nargs = "*",
-            default = [],
+            default = (),
             help = "List of directories to include for writing (e.g.: bin, render).")
 
         parser.add_argument(
             "-ifw", "--incl_fil_wr", "--include_files_from_writing",
             nargs = "*",
-            default = [],
+            default = (),
             help = "List of files to include for writing (e.g.: README.md, profile.png).")
 
         parser.add_argument(
