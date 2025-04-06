@@ -6,7 +6,9 @@ from datetime import datetime
 
 class Output:
     """Output class provide standard Crawlec output features."""
-    def __init__(self, name = None, prefix = "output", suffix = ".md"):
+    __name__ = "Output"
+
+    def __init__(self, name = None, prefix = None, suffix = None):
         self.name = name
         self.prefix = prefix
         self.suffix = suffix

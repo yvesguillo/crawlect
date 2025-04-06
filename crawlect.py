@@ -4,7 +4,7 @@
 import argparse
 from pathlib import Path
 from math import inf
-import traceback
+# import traceback
 
 # Custom modules.
 from format import Format
@@ -25,7 +25,7 @@ class Crawlect:
     """Client Crawlect class."""
     __name__ = "Crawlect"
 
-    def __init__(self, path = ".", output = "description.md", recur = True, depth = inf, excl_ext_li = (), excl_dir_li = (), excl_fil_li = (), excl_ext_wr = (), excl_dir_wr = (), excl_fil_wr = (), incl_ext_li = (), incl_dir_li = (), incl_fil_li = (), incl_ext_wr = (), incl_dir_wr = (), incl_fil_wr = (), xenv = True, tree = True):
+    def __init__(self, path = None, output = None, output_prefix = None, output_suffix = None, recur = True, depth = inf, excl_ext_li = (), excl_dir_li = (), excl_fil_li = (), excl_ext_wr = (), excl_dir_wr = (), excl_fil_wr = (), incl_ext_li = (), incl_dir_li = (), incl_fil_li = (), incl_ext_wr = (), incl_dir_wr = (), incl_fil_wr = (), xenv = True, tree = True):
 
         # Used to store the class arguments for __repr__.
         self.args = dict()
@@ -34,6 +34,10 @@ class Crawlect:
         self.args["path"] = path
         self.output = output
         self.args["output"] = output
+        self.output_prefix = output_prefix
+        self.args["output_prefix"] = output_prefix
+        self.output_suffix = output_suffix
+        self.args["output_suffix"] = output_suffix
         self.recur = recur
         self.args["recur"] = recur
         self.depth = depth
@@ -75,7 +79,20 @@ class Crawlect:
         self.refresh()
 
     def refresh(self):
-        """Regenerate the files list, name, output etc., based on current parameters."""
+        """Validate attributes and regenerate dynamic parameters."""
+
+        # Validate.
+        validationMessage = ""
+        if self.path is None:
+            validationMessage += "- A path to crawl, e.g.: path = '.'\n"
+        elif not Path(self.path).exists():
+            validationMessage += f"A valid path to crawl, {self.path} is not a valid path.\n"
+        if self.output is None and self.output_prefix is None:
+            validationMessage += "- An output file or prefix to save description, e.g.: output = 'description.md' or output_prefix = 'description'\n"
+        if validationMessage:
+            raise AttributeError(f"{self.__name__} requires:\n{validationMessage}Got: {self}")
+
+        # Refresh.
         try:
             self.title = Path(self.path).resolve().name
         except:
@@ -108,7 +125,7 @@ if __name__ == "__main__":
         # Parameters.
         parser = argparse.ArgumentParser(
             description = "Crawlect crawl a given path to list and describe all files on a single markdown file.",
-            epilog = "Inclusions parameters overrule exclusions parameters. Example usage: TBD"
+            epilog = "TBD"
         )
 
         parser.add_argument(
@@ -120,8 +137,20 @@ if __name__ == "__main__":
         parser.add_argument(
             "-o", "--output", "--output_file",
             type = str,
-            default = "description.md",
-            help = "Output markdown digest file (default is description.md).")
+            default = None,
+            help = "Output markdown digest file (default is None).")
+
+        parser.add_argument(
+            "-op", "--output_prefix", "--output_file_prefix",
+            type = str,
+            default = "description",
+            help = "Output markdown digest file prefix (default is 'description').")
+
+        parser.add_argument(
+            "-os", "--output_suffix", "--output_file_suffix",
+            type = str,
+            default = ".md",
+            help = "Output markdown digest file suffix (default is '.md').")
 
         parser.add_argument(
             "-r", "--recur", "--recursive_crawling",
@@ -227,14 +256,13 @@ if __name__ == "__main__":
 
         args = parser.parse_args()
 
-        crawlect = Crawlect(path = args.path, output = args.output, recur = args.recur, depth = args.depth, excl_ext_li = args.excl_ext_li, excl_dir_li = args.excl_dir_li, excl_fil_li = args.excl_fil_li, excl_ext_wr = args.excl_ext_wr, excl_dir_wr = args.excl_dir_wr, excl_fil_wr = args.excl_fil_wr, incl_ext_li = args.incl_ext_li, incl_dir_li = args.incl_dir_li, incl_fil_li = args.incl_fil_li, incl_ext_wr = args.incl_ext_wr, incl_dir_wr = args.incl_dir_wr, incl_fil_wr = args.incl_fil_wr, xenv = args.xenv, tree = args.tree)
+        crawlect = Crawlect(path = args.path, output = args.output, output_prefix = args.output_prefix, output_suffix = args.output_suffix, recur = args.recur, depth = args.depth, excl_ext_li = args.excl_ext_li, excl_dir_li = args.excl_dir_li, excl_fil_li = args.excl_fil_li, excl_ext_wr = args.excl_ext_wr, excl_dir_wr = args.excl_dir_wr, excl_fil_wr = args.excl_fil_wr, incl_ext_li = args.incl_ext_li, incl_dir_li = args.incl_dir_li, incl_fil_li = args.incl_fil_li, incl_ext_wr = args.incl_ext_wr, incl_dir_wr = args.incl_dir_wr, incl_fil_wr = args.incl_fil_wr, xenv = args.xenv, tree = args.tree)
 
-        print(crawlect.title)
-        for file in crawlect.files:
-            if file.is_dir():
-                print(file)
-            elif file.is_file():
-                print(file.name)
+        # for file in crawlect.files:
+        #     if file.is_dir():
+        #         print(file)
+        #     elif file.is_file():
+        #         print(file.name)
         #     print(f"# {file.name}\n")
         #     instance = Format().insertCodebox(file)
         #     print(instance)
@@ -244,6 +272,6 @@ if __name__ == "__main__":
 
     except Exception as error:
         print(f"\nUnexpected {type(error).__name__}:\n{error}\n")
-        lines = traceback.format_tb(error.__traceback__)
-        for line in lines:
-            print(line)
+        # lines = traceback.format_tb(error.__traceback__)
+        # for line in lines:
+        #     print(line)

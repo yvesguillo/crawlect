@@ -4,8 +4,14 @@ from pathlib import Path
 
 class Scan:
     """Scan class contains Crawlect directories tree scan utilities."""
+    __name__ = "Scan"
+
     def __init__(self, crawler):
+        # Used to store the class arguments for __repr__.
+        self.args = dict()
+
         self.crawler = crawler
+        self.args["crawler"] = crawler
 
     def listFilesIn(self, path = None, depth = None, files = None):
         """Append all eligible paths from `crawler.path` as Path object in a list and return it."""
@@ -85,4 +91,12 @@ class Scan:
         # If I forgot some case scenario, you may pass Mr Tuttle:
         return True
 
+    def __str__(self):
+        return self.__repr__()
 
+    def __repr__(self):
+        argsString = []
+        for arg, value in self.args.items():
+            argsString.append(f"{arg} = {repr(value)}")
+        parameters = ", ".join(argsString)
+        return f"{type(self).__name__}({parameters})"
