@@ -29,6 +29,8 @@ class Output:
 
     def compose(self):
         """Flowo composition to compose output file."""
+
+        # TBD. Stil test verssion.
         with open(self.standardOutputName(), self.crawler.writeRight) as outputFile:
             # Test.
             outputFile.write(f"# {self.crawler.getTitle()}\n{datetime.now()}  \n")
