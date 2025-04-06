@@ -105,8 +105,9 @@ class Format:
             return None
         
 
-    def makeTreeMd(self, chemin, chemin_ignorer= [], level=0, racine = True):
-        
+    def makeTreeMd(self, chemin,  chemin_ignorer= [], deep = 20, level=0, racine = True):
+        if level >= deep + 1 :
+            return ""
         #print(chemin_ignorer)
         if chemin.name in chemin_ignorer:
             return ""
@@ -123,7 +124,7 @@ class Format:
 
         #print(f"{indentation}|__ {chemin.name}{fin}")
         if level == 0 and racine:
-            tree += f"# {chemin.name}\n"
+            tree += f"# {chemin.absolute().name}\n"
         elif level>0:
             tree += f"{indentation}|__ {chemin.name}{fin}\n"
 
@@ -142,10 +143,10 @@ class Format:
             
             for fichier in fichiers:
                 #appel récursif 
-                tree += self.makeTreeMd(fichier, chemin_ignorer,level +1, False)
+                tree += self.makeTreeMd(fichier, chemin_ignorer,deep,level +1, False)
 
             for dossier in dossiers:
-                tree += self.makeTreeMd(dossier, chemin_ignorer, level +1, False)
+                tree += self.makeTreeMd(dossier, chemin_ignorer,deep, level +1, False)
         #print(tree)
         return tree
 
