@@ -187,11 +187,11 @@ if __name__ == "__main__":
 
         toto = Crawlect(path = args.path, output = args.output, recur = args.recur, depth = args.depth, excl_ext_li = args.excl_ext_li, excl_dir_li = args.excl_dir_li, excl_fil_li = args.excl_fil_li, excl_ext_wr = args.excl_ext_wr, excl_dir_wr = args.excl_dir_wr, excl_fil_wr = args.excl_fil_wr, incl_ext_li = args.incl_ext_li, incl_dir_li = args.incl_dir_li, incl_fil_li = args.incl_fil_li, incl_ext_wr = args.incl_ext_wr, incl_dir_wr = args.incl_dir_wr, incl_fil_wr = args.incl_fil_wr, xenv = args.xenv, tree = args.tree)
 
-        for file in toto.files:
-            if file.is_dir():
-                print(file)
-            elif file.is_file():
-                print(file.name)
+        a = Format().makeTreeMd(Path(args.path), [".git"])
+        print(a)
+        #Format().markdownGen(a)
+
+
         #     print(f"# {file.name}\n")
         #     instance = Format().insertCodebox(file)
         #     print(instance)
