@@ -73,15 +73,15 @@ class Scan:
         # Is forcibly included:
         if path.name in self.crawler.incl_dir_li:
             return True
-        
+
         # Is forcibly excluded:
         if path.name in self.crawler.excl_dir_li:
             return False
-        
+
         # Is neither forcibly included or excluded but a directory inclusion is overruling:
         if self.crawler.incl_dir_li != ():
             return False
-        
+
         # If I forgot some case scenario, you may pass Mr Tuttle:
         return True
 

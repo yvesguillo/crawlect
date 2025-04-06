@@ -1,9 +1,10 @@
 #! /usr/bin/env python3
-"""Crawlect is a module intended to describe files from a given path and transcribe these into a single markdown file."""
+"""Crawlect is a module intended to describe files from a given path and transcribe and save these into a single markdown file."""
 
 import argparse
 from pathlib import Path
 from math import inf
+import traceback
 
 # Custom modules.
 from format import Format
@@ -21,40 +22,85 @@ class BooleanAction(argparse.Action):
             raise argparse.ArgumentTypeError(f"Unsupported boolean value: {values}")
 
 class Crawlect:
-    """Crawl a given path to list and describe all files on a single markdown file."""
+    """Client Crawlect class."""
+    __name__ = "Crawlect"
 
     def __init__(self, path = ".", output = "description.md", recur = True, depth = inf, excl_ext_li = (), excl_dir_li = (), excl_fil_li = (), excl_ext_wr = (), excl_dir_wr = (), excl_fil_wr = (), incl_ext_li = (), incl_dir_li = (), incl_fil_li = (), incl_ext_wr = (), incl_dir_wr = (), incl_fil_wr = (), xenv = True, tree = True):
+
+        # Used to store the class arguments for __repr__.
+        self.args = dict()
+
         self.path = path
+        self.args["path"] = path
         self.output = output
+        self.args["output"] = output
         self.recur = recur
+        self.args["recur"] = recur
         self.depth = depth
+        self.args["depth"] = depth
 
         # Files and extentions inclusion/exclusions parameters.
         self.excl_ext_li = excl_ext_li
+        self.args["excl_ext_li"] = excl_ext_li
         self.excl_dir_li = excl_dir_li
+        self.args["excl_dir_li"] = excl_dir_li
         self.excl_fil_li = excl_fil_li
+        self.args["excl_fil_li"] = excl_fil_li
         self.excl_ext_wr = excl_ext_wr
+        self.args["excl_ext_wr"] = excl_ext_wr
         self.excl_dir_wr = excl_dir_wr
+        self.args["excl_dir_wr"] = excl_dir_wr
         self.excl_fil_wr = excl_fil_wr
+        self.args["excl_fil_wr"] = excl_fil_wr
         self.incl_ext_li = incl_ext_li
+        self.args["incl_ext_li"] = incl_ext_li
         self.incl_dir_li = incl_dir_li
+        self.args["incl_dir_li"] = incl_dir_li
         self.incl_fil_li = incl_fil_li
+        self.args["incl_fil_li"] = incl_fil_li
         self.incl_ext_wr = incl_ext_wr
+        self.args["incl_ext_wr"] = incl_ext_wr
         self.incl_dir_wr = incl_dir_wr
+        self.args["incl_dir_wr"] = incl_dir_wr
         self.incl_fil_wr = incl_fil_wr
+        self.args["incl_fil_wr"] = incl_fil_wr
 
         # Advanced features parameters.
         self.xenv = xenv
+        self.args["xenv"] = xenv
         self.tree = tree
+        self.args["tree"] = tree
 
         # Build path list and attributes.
         self.refresh()
 
     def refresh(self):
         """Regenerate the files list, name, output etc., based on current parameters."""
-        self.title = Path(self.path).name
-        self.scan = Scan(self)
-        self.files = self.scan.listFilesIn()
+        try:
+            self.title = Path(self.path).resolve().name
+        except:
+            print(f"Error: on {self}:\ncould not refresh and set its title.")
+            raise
+        try:
+            self.scan = Scan(self)
+        except:
+            print(f"Error: on {self}:\ncould not refresh and initiate its scan.")
+            raise
+        try:
+            self.files = self.scan.listFilesIn()
+        except:
+            print(f"Error: on {self}:\ncould not refresh and proceed to paths listing.")
+            raise
+
+    def __str__(self):
+        return self.__repr__()
+
+    def __repr__(self):
+        argsString = []
+        for arg, value in self.args.items():
+            argsString.append(f"{arg} = {repr(value)}")
+        parameters = ", ".join(argsString)
+        return f"{type(self).__name__}({parameters})"
 
 if __name__ == "__main__":
     try:
@@ -181,9 +227,10 @@ if __name__ == "__main__":
 
         args = parser.parse_args()
 
-        toto = Crawlect(path = args.path, output = args.output, recur = args.recur, depth = args.depth, excl_ext_li = args.excl_ext_li, excl_dir_li = args.excl_dir_li, excl_fil_li = args.excl_fil_li, excl_ext_wr = args.excl_ext_wr, excl_dir_wr = args.excl_dir_wr, excl_fil_wr = args.excl_fil_wr, incl_ext_li = args.incl_ext_li, incl_dir_li = args.incl_dir_li, incl_fil_li = args.incl_fil_li, incl_ext_wr = args.incl_ext_wr, incl_dir_wr = args.incl_dir_wr, incl_fil_wr = args.incl_fil_wr, xenv = args.xenv, tree = args.tree)
+        crawlect = Crawlect(path = args.path, output = args.output, recur = args.recur, depth = args.depth, excl_ext_li = args.excl_ext_li, excl_dir_li = args.excl_dir_li, excl_fil_li = args.excl_fil_li, excl_ext_wr = args.excl_ext_wr, excl_dir_wr = args.excl_dir_wr, excl_fil_wr = args.excl_fil_wr, incl_ext_li = args.incl_ext_li, incl_dir_li = args.incl_dir_li, incl_fil_li = args.incl_fil_li, incl_ext_wr = args.incl_ext_wr, incl_dir_wr = args.incl_dir_wr, incl_fil_wr = args.incl_fil_wr, xenv = args.xenv, tree = args.tree)
 
-        for file in toto.files:
+        print(crawlect.title)
+        for file in crawlect.files:
             if file.is_dir():
                 print(file)
             elif file.is_file():
@@ -196,4 +243,7 @@ if __name__ == "__main__":
         print("Interupted by user.")
 
     except Exception as error:
-        print(f"\nUnexpected {type(error)} error:\n{error.args}")
+        print(f"\nUnexpected {type(error).__name__}:\n{error}\n")
+        lines = traceback.format_tb(error.__traceback__)
+        for line in lines:
+            print(line)
