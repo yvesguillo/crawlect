@@ -7,7 +7,7 @@ from math import inf
 
 # Custom modules.
 from format import Format
-from scan import listFilesIn
+from scan import Scan
 
 # From [Codemia](https://codemia.io/knowledge-hub/path/parsing_boolean_values_with_argparse)
 class BooleanAction(argparse.Action):
@@ -23,13 +23,8 @@ class BooleanAction(argparse.Action):
 class Crawlect:
     """Crawl a given path to list and describe all files on a single markdown file."""
 
-    # From [jincheng9 on GitHub](https://github.com/jincheng9/markdown_supported_languages)
-    with open("languages.json","rt") as file:
-        _languages = file.read()
-
     def __init__(self, path = ".", output = "description.md", recur = True, depth = inf, excl_ext_li = (), excl_dir_li = (), excl_fil_li = (), excl_ext_wr = (), excl_dir_wr = (), excl_fil_wr = (), incl_ext_li = (), incl_dir_li = (), incl_fil_li = (), incl_ext_wr = (), incl_dir_wr = (), incl_fil_wr = (), xenv = True, tree = True):
         self.path = path
-        self.paths = Path(path)
         self.output = output
         self.recur = recur
         self.depth = depth
@@ -57,8 +52,9 @@ class Crawlect:
 
     def refresh(self):
         """Regenerate the files list, name, output etc., based on current parameters."""
-        self.title = self.paths.name
-        self.files = listFilesIn(paths = self.paths, recur = self.recur, depth = self.depth, excl_ext_li = self.excl_ext_li, excl_dir_li = self.excl_dir_li, excl_fil_li = self.excl_fil_li, incl_ext_li = self.incl_ext_li, incl_dir_li = self.incl_dir_li, incl_fil_li = self.incl_fil_li)
+        self.title = Path(self.path).name
+        self.scan = Scan(self)
+        self.files = self.scan.listFilesIn()
 
 if __name__ == "__main__":
     try:
