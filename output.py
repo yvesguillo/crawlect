@@ -31,7 +31,8 @@ class Output:
         """Flowo composition to compose output file."""
         with open(self.standardOutputName(), self.crawler.writeRight) as outputFile:
             # Test.
-            outputFile.write(f"# {self.crawler.getTitle()}\n{datetime.now()}\n\n")
+            outputFile.write(f"# {self.crawler.getTitle()}\n{datetime.now()}  \n")
+            outputFile.write(f"Generated with *{type(self.crawler).__name__}*:  \n```python\n{repr(self.crawler)}\n```\n")
             outputFile.write("## Content:\n\n")
             for file in self.crawler.files:
                 if file.is_file():
