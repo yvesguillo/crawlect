@@ -4,6 +4,7 @@ import argparse
 from pathlib import Path
 from math import inf
 
+# Debug.
 import traceback
 
 # Custom modules.
@@ -35,49 +36,52 @@ class Crawlect:
         self.args = dict()
 
         self.path = path
-        self.args["path"] = path
+        self.args["path"] = self.path
         self.output = output
-        self.args["output"] = output
+        self.args["output"] = self.output
         self.output_prefix = output_prefix
-        self.args["output_prefix"] = output_prefix
+        self.args["output_prefix"] = self.output_prefix
         self.output_suffix = output_suffix
-        self.args["output_suffix"] = output_suffix
+        self.args["output_suffix"] = self.output_suffix
         self.recur = recur
-        self.args["recur"] = recur
+        self.args["recur"] = self.recur
         self.depth = depth
-        self.args["depth"] = depth
+        self.args["depth"] = self.depth
 
         # Files and extentions inclusion/exclusions parameters.
         self.excl_ext_li = excl_ext_li
-        self.args["excl_ext_li"] = excl_ext_li
+        self.args["excl_ext_li"] = self.excl_ext_li
         self.excl_dir_li = excl_dir_li
-        self.args["excl_dir_li"] = excl_dir_li
+        self.args["excl_dir_li"] = self.excl_dir_li
         self.excl_fil_li = excl_fil_li
-        self.args["excl_fil_li"] = excl_fil_li
+        self.args["excl_fil_li"] = self.excl_fil_li
         self.excl_ext_wr = excl_ext_wr
-        self.args["excl_ext_wr"] = excl_ext_wr
+        self.args["excl_ext_wr"] = self.excl_ext_wr
         self.excl_dir_wr = excl_dir_wr
-        self.args["excl_dir_wr"] = excl_dir_wr
+        self.args["excl_dir_wr"] = self.excl_dir_wr
         self.excl_fil_wr = excl_fil_wr
-        self.args["excl_fil_wr"] = excl_fil_wr
+        self.args["excl_fil_wr"] = self.excl_fil_wr
         self.incl_ext_li = incl_ext_li
-        self.args["incl_ext_li"] = incl_ext_li
+        self.args["incl_ext_li"] = self.incl_ext_li
         self.incl_dir_li = incl_dir_li
-        self.args["incl_dir_li"] = incl_dir_li
+        self.args["incl_dir_li"] = self.incl_dir_li
         self.incl_fil_li = incl_fil_li
-        self.args["incl_fil_li"] = incl_fil_li
+        self.args["incl_fil_li"] = self.incl_fil_li
         self.incl_ext_wr = incl_ext_wr
-        self.args["incl_ext_wr"] = incl_ext_wr
+        self.args["incl_ext_wr"] = self.incl_ext_wr
         self.incl_dir_wr = incl_dir_wr
-        self.args["incl_dir_wr"] = incl_dir_wr
+        self.args["incl_dir_wr"] = self.incl_dir_wr
         self.incl_fil_wr = incl_fil_wr
-        self.args["incl_fil_wr"] = incl_fil_wr
+        self.args["incl_fil_wr"] = self.incl_fil_wr
 
         # Advanced features parameters.
         self.xenv = xenv
-        self.args["xenv"] = xenv
+        self.args["xenv"] = self.xenv
         self.tree = tree
-        self.args["tree"] = tree
+        self.args["tree"] = self.tree
+
+        # File overwrite denided by default.
+        self.writeRight = "x"
 
         # Validate attributes parameters.
         self.validate()
@@ -97,7 +101,7 @@ class Crawlect:
             while not Path(self.path).exists():
                 self.path = input(f"\n# Path error #\n{type(self).__name__} could not find {repr(self.path)}, please enter the path to crawl.\n")
 
-            if self.output is None and self.output_prefix is None:
+            while self.output is None and self.output_prefix is None:
                 print(f"\n# Missing argument #\n{type(self).__name__} require an output file-name for static output file-name (e.g.: './description.md')\nOR\nan output prefix and output suffix for unique output file-name (e.g.: './descript' as prefix, and '.md' as suffix), this will create a path similar to: './descript-202506041010-g5ef9h.md'")
                 while True:
                     _ = input("Please choose between 'static' and 'unique', or [Ctrl]+[C] then [Enter] to abbort.\n").lower()
@@ -114,8 +118,33 @@ class Crawlect:
                     else:
                         continue
 
+            if self.output is not None:
+                if Path(self.output).exists():
+                        print(f"\n# File overwrite #\n{type(self).__name__} is about to overwrite {repr(self.output)}. Its content will be lost!")
+                        while True:
+                            _ = input("Please choose between 'proceed' and 'change', or [Ctrl]+[C] then [Enter] to abbort.\n").lower()
+                            if _ == "proceed":
+                                # File overwrite permission granted upon request in CLI mode.
+                                self.writeRight = "w"
+                                break
+                            elif _ == "change":
+                                self.output = None
+                                self.output_prefix = None
+                                self.validate()
+                                break
+                            else:
+                                continue
+
         # Module mode.
         else:
+
+            # File overwrite denided in module mode.
+            self.writeRight = "x"
+
+            if self.output is not None:
+                if Path(self.output).exists():
+                    raise IOError(f"\n# Permission error #\n{type(self).__name__} do not allow file {repr(self.output)} to be overwrited in module mode. Please errase the file first if you want to keep this output path.")
+
             validationMessage = ""
             if self.path is None:
                 validationMessage += "- A path to crawl, e.g.: path = '.'\n"
@@ -134,11 +163,19 @@ class Crawlect:
         except:
             print(f"Error: on {self}:\ncould not refresh and set its title.")
             raise
+
         try:
             self.scan = Scan(self)
         except:
             print(f"Error: on {self}:\ncould not refresh and initiate its scan.")
             raise
+
+        try:
+            self.outputService = Output(self)
+        except:
+            print(f"Error: on {self}:\ncould not refresh and initiate its outputService.")
+            raise
+
         try:
             self.files = self.scan.listFilesIn()
         except:
@@ -182,7 +219,7 @@ if __name__ == "__main__":
         parser.add_argument(
             "-op", "--output_prefix", "--output_file_prefix",
             type = str,
-            default = "description",
+            default = "crawlect_description",
             help = "Output markdown digest file prefix ('description' by default) asociated with --output_suffix can be use as an alternative to '--output' argument to generate a unique file-name (e.g.: --output_prefix = './descript', output_suffix = '.md' will create './descript-202506041010-g5ef9h.md').")
 
         parser.add_argument(
@@ -298,25 +335,16 @@ if __name__ == "__main__":
 
         crawlect = Crawlect(path = args.path, output = args.output, output_prefix = args.output_prefix, output_suffix = args.output_suffix, recur = args.recur, depth = args.depth, excl_ext_li = args.excl_ext_li, excl_dir_li = args.excl_dir_li, excl_fil_li = args.excl_fil_li, excl_ext_wr = args.excl_ext_wr, excl_dir_wr = args.excl_dir_wr, excl_fil_wr = args.excl_fil_wr, incl_ext_li = args.incl_ext_li, incl_dir_li = args.incl_dir_li, incl_fil_li = args.incl_fil_li, incl_ext_wr = args.incl_ext_wr, incl_dir_wr = args.incl_dir_wr, incl_fil_wr = args.incl_fil_wr, xenv = args.xenv, tree = args.tree)
 
-        #########
-        # Tests #
-        #########
-        # for file in crawlect.files:
-        #     if file.is_dir():
-        #         print("• " + file.name)
-        #     elif file.is_file():
-        #         print("  " + file.name)
-        #     print(f"# {file.name}\n")
-        #     instance = Format().insertCodebox(file)
-        #     print(instance)
-
-        output = Output.appendComposition()
+        # Launch output file composition
+        crawlect.outputService.compose()
 
     except KeyboardInterrupt:
         print("Interupted by user.")
 
     except Exception as error:
         print(f"\nUnexpected {type(error).__name__}:\n{error}\n")
+
+        # Debug.
         lines = traceback.format_tb(error.__traceback__)
         for line in lines:
             print(line)

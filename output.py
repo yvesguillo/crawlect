@@ -23,19 +23,31 @@ class Output:
         self.args = dict()
 
         self.crawler = crawler
-        self.args["crawler"] = crawler
+        self.args["crawler"] = self.crawler = crawler
 
-    def appendComposition(self):
-        """Append composition to output file."""
-        print(crawler.getTitle())
-        pass
+        self.composition = ()
+
+    def compose(self):
+        """Flowo composition to compose output file."""
+        with open(self.standardOutputName(), self.crawler.writeRight) as outputFile:
+            # Test.
+            outputFile.write(f"# {self.crawler.getTitle()}\n{datetime.now()}\n\n")
+            outputFile.write("## Content:\n\n")
+            for file in self.crawler.files:
+                if file.is_file():
+                    outputFile.write(f"- **[{file.name}]({self.crawler.path}/{file})**  \n")
+                    outputFile.write(f"`{self.crawler.path}/{file}`\n")
+                    outputFile.write("\n")
+
+        # Confirm.
+        print(f"\n{type(self).__name__} processed {repr(self.crawler.getTitle())} and stored description in {repr(self.standardOutputName())}.\n")
 
     def standardOutputName(self):
         """Return standard output file name if no filename specified."""
 
         if self.crawler.output is None:
             now = datetime.now()
-            return f"{self.crawler.prefix}-{self.yearmodahs()}-{"".join(choices(self.__rand_filename_char_list, k = 6))}{self.crawler.suffix}"
+            return f"{self.crawler.output_prefix}-{self.yearmodahs()}-{"".join(choices(self.__rand_filename_char_list, k = 6))}{self.crawler.output_suffix}"
         else:
             return self.crawler.output
 

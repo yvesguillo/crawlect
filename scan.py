@@ -18,7 +18,7 @@ class Scan:
         self.args = dict()
 
         self.crawler = crawler
-        self.args["crawler"] = crawler
+        self.args["crawler"] = self.crawler
 
     def listFilesIn(self, path = None, depth = None, files = None):
         """Append all eligible paths from `crawler.path` as Path object in a list and return it."""
