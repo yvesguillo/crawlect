@@ -1,18 +1,20 @@
 #! /usr/bin/env python3
-"""Crawlect is a module intended to describe files from a given path and transcribe and save these into a single markdown file."""
 
 import argparse
 from pathlib import Path
 from math import inf
-# import traceback
+
+import traceback
 
 # Custom modules.
 from format import Format
 from scan import Scan
+from output import Output
 
 # From [Codemia](https://codemia.io/knowledge-hub/path/parsing_boolean_values_with_argparse)
 class BooleanAction(argparse.Action):
     """This method converts argpars argument string to a boolean (e.g.: "yes" => True)."""
+
     def __call__(self, parser, namespace, values, option_string = None):
         if values.lower() in ("yes", "y", "true", "t", "1"):
             setattr(namespace, self.dest, True)
@@ -22,12 +24,14 @@ class BooleanAction(argparse.Action):
             raise argparse.ArgumentTypeError(f"Unsupported boolean value: {values}")
 
 class Crawlect:
-    """Client Crawlect class."""
-    __name__ = "Crawlect"
+    """
+    Client Crawlect class.
+    Crawlect is a module intended to describe files from a given path and transcribe and save these into a single markdown file.
+    """
 
     def __init__(self, path = None, output = None, output_prefix = None, output_suffix = None, recur = True, depth = inf, excl_ext_li = (), excl_dir_li = (), excl_fil_li = (), excl_ext_wr = (), excl_dir_wr = (), excl_fil_wr = (), incl_ext_li = (), incl_dir_li = (), incl_fil_li = (), incl_ext_wr = (), incl_dir_wr = (), incl_fil_wr = (), xenv = True, tree = True):
 
-        # Used to store the class arguments for __repr__.
+        # Store the class arguments for __repr__.
         self.args = dict()
 
         self.path = path
@@ -75,24 +79,56 @@ class Crawlect:
         self.tree = tree
         self.args["tree"] = tree
 
-        # Build path list and attributes.
+        # Validate attributes parameters.
+        self.validate()
+
+        # Build dynamic attributes.
         self.refresh()
 
+    def validate(self):
+        """Validate attributes and regenerate dynamic attributes."""
+
+        # Interactive mode.
+        if __name__ == "__main__":
+
+            while self.path is None:
+                self.path = input(f"\n# Missing argument #\n{type(self).__name__} require a path to crawl. Please enter the desired path (e.g.: '.') or [Ctrl]+[C] then [Enter] to abbort.\n")
+
+            while not Path(self.path).exists():
+                self.path = input(f"\n# Path error #\n{type(self).__name__} could not find {repr(self.path)}, please enter the path to crawl.\n")
+
+            if self.output is None and self.output_prefix is None:
+                print(f"\n# Missing argument #\n{type(self).__name__} require an output file-name for static output file-name (e.g.: './description.md')\nOR\nan output prefix and output suffix for unique output file-name (e.g.: './descript' as prefix, and '.md' as suffix), this will create a path similar to: './descript-202506041010-g5ef9h.md'")
+                while True:
+                    _ = input("Please choose between 'static' and 'unique', or [Ctrl]+[C] then [Enter] to abbort.\n").lower()
+                    if _ == "static":
+                        while self.output is None or not self.output:
+                            self.output = input("Please enter a static output file-name, e.g.: './output.md' or [Ctrl]+[C] then [Enter] to abbort.\n")
+                        break
+                    elif _ == "unique":
+                        while self.output_prefix is None or not self.output_prefix:
+                            self.output_prefix = input("Please enter a prefix, e.g.: './output' or [Ctrl]+[C] then [Enter] to abbort.\n")
+                        while self.output_suffix is None:
+                            self.output_suffix = input("Please enter a suffix, e.g.: '.md' (suffix can be empty) or [Ctrl]+[C] then [Enter] to abbort.\n")
+                        break
+                    else:
+                        continue
+
+        # Module mode.
+        else:
+            validationMessage = ""
+            if self.path is None:
+                validationMessage += "- A path to crawl, e.g.: path = '.'\n"
+            elif not Path(self.path).exists():
+                validationMessage += f"A valid path to crawl, {self.path} cannot be found.\n"
+            if self.output is None and self.output_prefix is None:
+                validationMessage += "- An output file-name for static output file-name (e.g.: --output = './description.md')\nOR\nan output prefix and output suffix for unique output file-name (e.g.: --output_prefix = './descript', --output_suffix = '.md' as suffix), this will create a path similar to: './descript-202506041010-g5ef9h.md'\n"
+            if validationMessage:
+                raise AttributeError(f"\n# Argument error #\n{type(self).__name__} requires:\n{validationMessage}Got: {self}")
+
     def refresh(self):
-        """Validate attributes and regenerate dynamic parameters."""
+        """Regenerate dynamic attributes."""
 
-        # Validate.
-        validationMessage = ""
-        if self.path is None:
-            validationMessage += "- A path to crawl, e.g.: path = '.'\n"
-        elif not Path(self.path).exists():
-            validationMessage += f"A valid path to crawl, {self.path} is not a valid path.\n"
-        if self.output is None and self.output_prefix is None:
-            validationMessage += "- An output file or prefix to save description, e.g.: output = 'description.md' or output_prefix = 'description'\n"
-        if validationMessage:
-            raise AttributeError(f"{self.__name__} requires:\n{validationMessage}Got: {self}")
-
-        # Refresh.
         try:
             self.title = Path(self.path).resolve().name
         except:
@@ -108,6 +144,9 @@ class Crawlect:
         except:
             print(f"Error: on {self}:\ncould not refresh and proceed to paths listing.")
             raise
+
+    def getTitle(self):
+        return self.title
 
     def __str__(self):
         return self.__repr__()
@@ -125,7 +164,7 @@ if __name__ == "__main__":
         # Parameters.
         parser = argparse.ArgumentParser(
             description = "Crawlect crawl a given path to list and describe all files on a single markdown file.",
-            epilog = "TBD"
+            epilog = "Filtering rules allow you to forcibly include or exclude certain directories, files names or file extensions. All files will be listed if there are no rules. Inclusion overrules exclusion on same caracteristics and file-name rules takes precedence against extension rules."
         )
 
         parser.add_argument(
@@ -144,13 +183,14 @@ if __name__ == "__main__":
             "-op", "--output_prefix", "--output_file_prefix",
             type = str,
             default = "description",
-            help = "Output markdown digest file prefix (default is 'description').")
+            help = "Output markdown digest file prefix ('description' by default) asociated with --output_suffix can be use as an alternative to '--output' argument to generate a unique file-name (e.g.: --output_prefix = './descript', output_suffix = '.md' will create './descript-202506041010-g5ef9h.md').")
 
         parser.add_argument(
             "-os", "--output_suffix", "--output_file_suffix",
             type = str,
             default = ".md",
-            help = "Output markdown digest file suffix (default is '.md').")
+            
+            help = "Output markdown digest file prefix ('.md' by default) asociated with --output_prefix can be use as an alternative to '--output' argument to generate a unique file-name (e.g.: --output_prefix = './descript', output_suffix = '.md' will create './descript-202506041010-g5ef9h.md').")
 
         parser.add_argument(
             "-r", "--recur", "--recursive_crawling",
@@ -258,20 +298,25 @@ if __name__ == "__main__":
 
         crawlect = Crawlect(path = args.path, output = args.output, output_prefix = args.output_prefix, output_suffix = args.output_suffix, recur = args.recur, depth = args.depth, excl_ext_li = args.excl_ext_li, excl_dir_li = args.excl_dir_li, excl_fil_li = args.excl_fil_li, excl_ext_wr = args.excl_ext_wr, excl_dir_wr = args.excl_dir_wr, excl_fil_wr = args.excl_fil_wr, incl_ext_li = args.incl_ext_li, incl_dir_li = args.incl_dir_li, incl_fil_li = args.incl_fil_li, incl_ext_wr = args.incl_ext_wr, incl_dir_wr = args.incl_dir_wr, incl_fil_wr = args.incl_fil_wr, xenv = args.xenv, tree = args.tree)
 
+        #########
+        # Tests #
+        #########
         # for file in crawlect.files:
         #     if file.is_dir():
-        #         print(file)
+        #         print("• " + file.name)
         #     elif file.is_file():
-        #         print(file.name)
+        #         print("  " + file.name)
         #     print(f"# {file.name}\n")
         #     instance = Format().insertCodebox(file)
         #     print(instance)
+
+        output = Output.appendComposition()
 
     except KeyboardInterrupt:
         print("Interupted by user.")
 
     except Exception as error:
         print(f"\nUnexpected {type(error).__name__}:\n{error}\n")
-        # lines = traceback.format_tb(error.__traceback__)
-        # for line in lines:
-        #     print(line)
+        lines = traceback.format_tb(error.__traceback__)
+        for line in lines:
+            print(line)

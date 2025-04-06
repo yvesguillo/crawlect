@@ -3,11 +3,18 @@
 from pathlib import Path
 
 class Scan:
-    """Scan class contains Crawlect directories tree scan utilities."""
-    __name__ = "Scan"
+    """
+    Scan class contains Crawlect directories tree scan utilities.
+    It require and only accept one instance of Crawlect as argument.
+    """
 
-    def __init__(self, crawler):
-        # Used to store the class arguments for __repr__.
+    def __init__(self, crawler = None):
+
+        # Validate.
+        if type(crawler).__name__ != "Crawlect":
+            raise TypeError(f"{type(self).__name__} class require and only accept one instance of Crawlect as argument.")
+
+        # Store the class arguments for __repr__.
         self.args = dict()
 
         self.crawler = crawler

@@ -1,59 +1,55 @@
 #! /usr/bin/env python3
-"""outpu.py contains Crawlect output utilities."""
 
 from pathlib import Path
 from datetime import datetime
+from random import choices
+import string
 
 class Output:
-    """Output class provide standard Crawlec output features."""
-    __name__ = "Output"
+    """
+    Output class provide standard Crawlec output features.
+    It require and only accept one instance of Crawlect as argument.
+    """
 
-    def __init__(self, name = None, prefix = None, suffix = None):
-        self.name = name
-        self.prefix = prefix
-        self.suffix = suffix
+    __rand_filename_char_list = string.ascii_lowercase + string.digits
 
-    def standardOutputName(cls):
-        """Return standard output file name if no filename specified."""
-        if cls.name is None:
-            now = datetime.now()
-            return cls.prefix + "-" + yearmodahs() + cls.suffix
-        else:
-            return cls.name
+    def __init__(self, crawler):
 
-    def appendComposition(cls, path = None, *composition):
+        # Validate.
+        if type(crawler).__name__ != "Crawlect":
+            raise TypeError(f"{type(self).__name__} class require and only accept one instance of Crawlect as argument.")
+
+        # Store the class arguments for __repr__.
+        self.args = dict()
+
+        self.crawler = crawler
+        self.args["crawler"] = crawler
+
+    def appendComposition(self):
         """Append composition to output file."""
-        if path == None:
-            path = Path(cls.standardOutputName())
-        elif isinstance(path, Path) is False:
-            path = Path(path)
-        for element in composition:
-            pass
+        print(crawler.getTitle())
+        pass
 
+    def standardOutputName(self):
+        """Return standard output file name if no filename specified."""
 
-def yearmodahs(date = datetime.now()):
-    """Return givent date as yearmoda plus hours and seconds string."""
-    return str(date.year) + str("{:02d}".format(date.month)) + str("{:02d}".format(date.day)) + str("{:02d}".format(date.hour)) + str("{:02d}".format(date.minute)) + str("{:02d}".format(date.second))
+        if self.crawler.output is None:
+            now = datetime.now()
+            return f"{self.crawler.prefix}-{self.yearmodahs()}-{"".join(choices(self.__rand_filename_char_list, k = 6))}{self.crawler.suffix}"
+        else:
+            return self.crawler.output
 
-try:
+    def yearmodahs(self, date = datetime.now()):
+        """Return givent date as yearmoda plus hours and seconds string."""
 
-    print(yearmodahs())
+        return str(date.year) + str("{:02d}".format(date.month)) + str("{:02d}".format(date.day)) + str("{:02d}".format(date.hour)) + str("{:02d}".format(date.minute)) + str("{:02d}".format(date.second))
 
-    output = Output()
-    print(output.standardOutputName())
+    def __str__(self):
+        return self.__repr__()
 
-    path = Path("test.md")
-    print(isinstance(path, Path))
-
-    # with path.open("a") as file:
-    #     file.write(f"## {path.name}\n")
-    #     file.write(f"{path}\n")
-    #     file.write("last line so far.\n")
-
-    # print(path.exists())
-
-except KeyboardInterrupt:
-    print("Interupted by user.")
-
-except Exception as error:
-    print(f"\nUnexpected {type(error)} error:\n{error.args}")
+    def __repr__(self):
+        argsString = []
+        for arg, value in self.args.items():
+            argsString.append(f"{arg} = {repr(value)}")
+        parameters = ", ".join(argsString)
+        return f"{type(self).__name__}({parameters})"
