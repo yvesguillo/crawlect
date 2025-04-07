@@ -28,22 +28,32 @@ class Output:
         self.composition = ()
 
     def compose(self):
-        """Flowo composition to compose output file."""
+        """Compose output file."""
 
-        # TBD. Stil test verssion.
-        with open(self.standardOutputName(), self.crawler.writeRight) as outputFile:
-            # Test.
-            outputFile.write(f"# {self.crawler.getTitle()}\n{datetime.now()}  \n")
-            outputFile.write(f"Generated with *{type(self.crawler).__name__}*:  \n```python\n{repr(self.crawler)}\n```\n")
+        date = datetime.now()
+        self.currentOutputName = self.standardOutputName()
+
+        # Early verssion.
+        with open(self.currentOutputName, self.crawler.writeRight) as outputFile:
+
+            # Title
+            outputFile.write(f"# {self.crawler.getTitle()}\n" + str(date.year) + "." + str("{:02d}".format(date.month)) + "." + str("{:02d}".format(date.day)) + " " + str("{:02d}".format(date.hour)) + ":" + str("{:02d}".format(date.minute)) + "  \n")
+            outputFile.write(f"Generated with *{type(self.crawler).__name__}*:  \n```python\n{repr(self.crawler)}\n```\n\n")
+
+            # File Structure
+            outputFile.write("```text\n" + self.crawler.formatService.makeTreeMd(self.crawler.pathObj, chemin_ignorer = self.crawler.excl_dir_li) + "\n```\n\n")
+
+            # Files list
             outputFile.write("## Content:\n\n")
             for file in self.crawler.files:
                 if file.is_file():
                     outputFile.write(f"- **[{file.name}]({self.crawler.path}/{file})**  \n")
-                    outputFile.write(f"`{self.crawler.path}/{file}`\n")
+                    outputFile.write(f"`{file}`\n")
+                    if self.isFileToInclude(file):
+                        content = self.crawler.formatService.insertCodebox(file)
+                        if not content is None:
+                            outputFile.write(self.crawler.formatService.insertCodebox(file))
                     outputFile.write("\n")
-
-        # Confirm.
-        print(f"\n{type(self).__name__} processed {repr(self.crawler.getTitle())} and stored description in {repr(self.standardOutputName())}.\n")
 
     def standardOutputName(self):
         """Return standard output file name if no filename specified."""
@@ -58,6 +68,41 @@ class Output:
         """Return givent date as yearmoda plus hours and seconds string."""
 
         return str(date.year) + str("{:02d}".format(date.month)) + str("{:02d}".format(date.day)) + str("{:02d}".format(date.hour)) + str("{:02d}".format(date.minute)) + str("{:02d}".format(date.second))
+
+    # Almost identical methode in Scan and Output classes. Assess if this should be sent to a common class ("Filter" class ?).
+    def isFileToInclude(self, path):
+        """
+        Filter file `path` according to filtering rules.
+        All files pass if there are no rules.
+        Inclusion overrules exclusion.
+        File-name rules takes precedence against extension rules.
+        """
+        # No rules at all, everything pass. This is Anarchy!:
+        if self.crawler.excl_ext_wr == () and self.crawler.excl_fil_wr == () and self.crawler.incl_ext_wr == () and self.crawler.incl_fil_wr == ():
+            return True
+
+        # Forcibly included by file-name always wins:
+        if path.name in self.crawler.incl_fil_wr:
+            return True
+
+        # Forcibly included by extension and not excluded by file-name wins:
+        if path.suffix in self.crawler.incl_ext_wr and path.name not in self.crawler.excl_fil_wr:
+            return True
+
+        # Forcibly excluded by extension looses if not saved by file-name inclusion:
+        if path.suffix in self.crawler.excl_ext_wr and path.name not in self.crawler.incl_fil_wr:
+            return False
+
+        # Forcibly excluded by file-name always looses:
+        if path.name in self.crawler.excl_fil_wr:
+            return False
+
+        # Is neither forcibly included or excluded but an extension or file inclusion is overruling:
+        if self.crawler.incl_ext_wr != () or self.crawler.incl_fil_wr != ():
+            return False
+
+        # If I forgot some case scenario, you may pass Mr Tuttle:
+        return True
 
     def __str__(self):
         return self.__repr__()

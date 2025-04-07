@@ -29,7 +29,7 @@ class Scan:
             depth = self.crawler.depth
 
         if path is None:
-            path = Path(self.crawler.path)
+            path = self.crawler.pathObj
 
         for pathCandidate in path.iterdir():
             if pathCandidate.is_file() and self.isFileToInclude(pathCandidate):
@@ -39,6 +39,7 @@ class Scan:
                 self.listFilesIn(path = pathCandidate, depth = depth-1, files = files)
         return files
 
+    # Almost identical methode in Scan and Output classes. Assess if this should be sent to a common class ("Filter" class ?).
     def isFileToInclude(self, path):
         """
         Filter file `path` according to filtering rules.

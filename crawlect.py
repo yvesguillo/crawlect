@@ -1,28 +1,12 @@
 #! /usr/bin/env python3
 
-import argparse
 from pathlib import Path
 from math import inf
 
-# Debug.
-import traceback
-
 # Custom modules.
-from format import Format
 from scan import Scan
+from format import Format
 from output import Output
-
-# From [Codemia](https://codemia.io/knowledge-hub/path/parsing_boolean_values_with_argparse)
-class BooleanAction(argparse.Action):
-    """This method converts argpars argument string to a boolean (e.g.: "yes" => True)."""
-
-    def __call__(self, parser, namespace, values, option_string = None):
-        if values.lower() in ("yes", "y", "true", "t", "1"):
-            setattr(namespace, self.dest, True)
-        elif values.lower() in ("no", "n", "false", "f", "0"):
-            setattr(namespace, self.dest, False)
-        else:
-            raise argparse.ArgumentTypeError(f"Unsupported boolean value: {values}")
 
 class Crawlect:
     """
@@ -86,9 +70,43 @@ class Crawlect:
         # Validate attributes parameters.
         self.validate()
 
-        # Build dynamic attributes.
-        self.refresh()
+        try:
+            self.pathObj = Path(self.path)
+        except:
+            print(f"Error: on {type(self).__name__}:\ncould not set its paths from path attribute.")
+            raise
 
+        try:
+            self.title = self.pathObj.resolve().name
+        except:
+            print(f"Error: on {type(self).__name__}:\ncould not set its title.")
+            raise
+
+        try:
+            self.scanService = Scan(self)
+        except:
+            print(f"Error: on {type(self).__name__}:\ncould not refresh and initiate its Scan service.")
+            raise
+
+        try:
+            self.formatService = Format() # Format does not take Crawlect instance as parameter.
+        except:
+            print(f"Error: on {type(self).__name__}:\ncould not refresh and initiate its Format service.")
+            raise
+
+        try:
+            self.outputService = Output(self)
+        except:
+            print(f"Error: on {type(self).__name__}:\ncould not refresh and initiate its Output service.")
+            raise
+
+        try:
+            self.files = self.scanService.listFilesIn()
+        except:
+            print(f"Error: on {type(self).__name__}:\ncould not refresh and proceed to paths listing.")
+            raise
+
+    # To be enhanced. State patern?
     def validate(self):
         """Validate attributes and regenerate dynamic attributes."""
 
@@ -155,33 +173,6 @@ class Crawlect:
             if validationMessage:
                 raise AttributeError(f"\n# Argument error #\n{type(self).__name__} requires:\n{validationMessage}Got: {self}")
 
-    def refresh(self):
-        """Regenerate dynamic attributes."""
-
-        try:
-            self.title = Path(self.path).resolve().name
-        except:
-            print(f"Error: on {self}:\ncould not refresh and set its title.")
-            raise
-
-        try:
-            self.scan = Scan(self)
-        except:
-            print(f"Error: on {self}:\ncould not refresh and initiate its scan.")
-            raise
-
-        try:
-            self.outputService = Output(self)
-        except:
-            print(f"Error: on {self}:\ncould not refresh and initiate its outputService.")
-            raise
-
-        try:
-            self.files = self.scan.listFilesIn()
-        except:
-            print(f"Error: on {self}:\ncould not refresh and proceed to paths listing.")
-            raise
-
     def getTitle(self):
         return self.title
 
@@ -195,9 +186,31 @@ class Crawlect:
         parameters = ", ".join(argsString)
         return f"{type(self).__name__}({parameters})"
 
-if __name__ == "__main__":
-    try:
 
+####################
+# INTERACTIVE MODE #
+####################
+
+if __name__ == "__main__":
+
+    import argparse
+    import traceback
+
+    class BooleanAction(argparse.Action):
+        """
+        This method converts argpars argument string to a boolean (e.g.: "yes" => True).
+        From [Codemia](https://codemia.io/knowledge-hub/path/parsing_boolean_values_with_argparse)
+        """
+
+        def __call__(self, parser, namespace, values, option_string = None):
+            if values.lower() in ("yes", "y", "true", "t", "1"):
+                setattr(namespace, self.dest, True)
+            elif values.lower() in ("no", "n", "false", "f", "0"):
+                setattr(namespace, self.dest, False)
+            else:
+                raise argparse.ArgumentTypeError(f"Unsupported boolean value: {values}")
+
+    try:
         # Parameters.
         parser = argparse.ArgumentParser(
             description = "Crawlect crawl a given path to list and describe all files on a single markdown file.",
@@ -219,7 +232,7 @@ if __name__ == "__main__":
         parser.add_argument(
             "-op", "--output_prefix", "--output_file_prefix",
             type = str,
-            default = "crawlect_description",
+            default = "description",
             help = "Output markdown digest file prefix ('description' by default) asociated with --output_suffix can be use as an alternative to '--output' argument to generate a unique file-name (e.g.: --output_prefix = './descript', output_suffix = '.md' will create './descript-202506041010-g5ef9h.md').")
 
         parser.add_argument(
@@ -337,6 +350,9 @@ if __name__ == "__main__":
 
         # Launch output file composition
         crawlect.outputService.compose()
+
+        # Confirm.
+        print(f"\n{type(crawlect.outputService).__name__} processed {repr(crawlect.getTitle())} and stored description in {repr(crawlect.outputService.currentOutputName)}.\n")
 
     except KeyboardInterrupt:
         print("Interupted by user.")
