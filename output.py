@@ -37,14 +37,10 @@ class Output:
         with open(self.currentOutputName, self.crawler.writeRight) as outputFile:
 
             # Title
-            outputFile.write(f"# {self.crawler.getTitle()}\n" + str(date.year) + "." + str("{:02d}".format(date.month)) + "." + str("{:02d}".format(date.day)) + " " + str("{:02d}".format(date.hour)) + ":" + str("{:02d}".format(date.minute)) + "  \n")
-            outputFile.write(f"Generated with *{type(self.crawler).__name__}*:  \n```python\n{repr(self.crawler)}\n```\n\n")
-
-            # File Structure
-            outputFile.write("```text\n" + self.crawler.formatService.makeTreeMd(self.crawler.pathObj, chemin_ignorer = self.crawler.excl_dir_li) + "\n```\n\n")
+            outputFile.write(f"# {self.crawler.getTitle()}\n\n")
 
             # Files list
-            outputFile.write("## Content:\n\n")
+            outputFile.write("## Structure:\n\n")
             for file in self.crawler.files:
                 if file.is_file():
                     outputFile.write(f"- **[{file.name}]({self.crawler.path}/{file})**  \n")
