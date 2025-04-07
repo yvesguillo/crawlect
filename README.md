@@ -17,14 +17,14 @@ When starting with a new project — whether you're reviewing, refactoring, or c
 ## 🚀 Use cases
 
 - 🔍 Quickly understand an unfamiliar codebase
-- 📄 Auto-document your own projects
-- 💬 Share code context with collaborators (or ChatGPT!)
+- 📄 Auto-document your projects
+- 💬 Share code context with collaborators (or *LLM*!)
 - 🔐 Safely include `.env` files without leaking sensitive values
 
 ✨ ***Think of Crawlect as your markdown-minion — obedient, efficient, and allergic to messy folders.***
 
 ## 📘 Crawlect – User Guide
-Welcome to **Crawlect**, the tool that turns your project folder into a beautifully structured Markdown digest — effortlessly.
+**Crawlect**, the tool that turns your project folder into a beautifully structured Markdown digest — effortlessly.
 
 ## 🔧 Installation
 Crawlect currently runs as a standalone module. To use it, simply clone the repo or copy the files:
@@ -78,7 +78,7 @@ python3 crawlect.py \
   --output_prefix ./docs/snapshot \
   --output_suffix .md \
   --excl_ext_li .log .png .jpg \
-  --incl_ext_wr .py .md \
+  --incl_ext_wr .py .json \
   --tree yes \
   --xenv yes
 ➡️ Creates a structured markdown file (with a unique name), ignoring noisy files and including `.py` and `.md` contents.
@@ -88,8 +88,6 @@ python3 crawlect.py \
 - `.env` files are *auto-sanitized* — values are replaced by `YourValueFor_<varname>`
 - Inclusion rules overrule exclusion
 - File name rules take precedence over extension rules
-
----
 
 ### 🤖 Module Mode
 
@@ -105,7 +103,6 @@ myCrawler.outputService.compose()
 ## 🛠️ Planned Features (ideas welcome!)
 - *Git* related filtering.
 - *HTML* output
-- GitHub-flavored *MD* with preview links
 - *LLM* API integration.
 - Optional syntax highlighting themes
 - GUI launcher (👀 who knows?)
@@ -113,27 +110,27 @@ myCrawler.outputService.compose()
 ## Architecture:
 
 ```text
-                          +-------------------+
-                          |    User (CLI)     |
-                          +--------+----------+
-                                   |
-                                   v
-                       +-----------------------+
-                       |      Crawlect()       |  <== Main class
-                       +----------+------------+
-                                  |
-         +------------------------+--------------------------+
-         |                        |                          |
-         v                        v                          v
-  +--------------+       +----------------+         +------------------+
-  |  Scan        |       |   Format       |         |     Output       |
-  | (List files) |       | (Detect type & |         | (Compose final   |
-  |              |       | insert codebox)|         |  Markdown file)  |
-  +------+-------+       +--------+-------+         +--------+---------+
-         |                        |                          |
-         v                        v                          v
-   Files to list         Codebox strings            Markdown composition
-      (Path)                  (MD)                         (MD)
+                           +-----------------+
+                           | User CLI        |
+                           +--------+--------+
+                                    |
+                                    v
+                           +-----------------+
+                           | Crawlect        |  <== Main class
+                           +--------+--------+
+                                    |
+          +-------------------------+-------------------------+
+          |                         |                         |
+          v                         v                         v
+  +----------------+       +--------------- -+       +-----------------+
+  |  Scan          |       | Format          |       | Output          |
+  |  (List files)  |       | (Detect type &  |       | (Compose final  |
+  |                |       | insert codebox) |       |  Markdown file) |
+  +-------+--------+       +--------+------- +       +--------+--------+
+          |                         |                         |
+          v                         v                         v
+    Files to list            Codebox strings         Markdown composition
+       (Path)                      (MD)                     (MD)
 ```
 
 - **Scan**: Crawls the directories based on inclusion/exclusion rules
@@ -141,10 +138,10 @@ myCrawler.outputService.compose()
 - **Output**: Writes everything to a nicely structured `.md` file
 
 ***"Documentation is like a love letter you write to your future self."***  
-*— Damian Conway, I believe. Or some other wise code-wizard.*
+*— Damian Conway, we believe. Or some other wise code-wizard.*
 
-## References:
-## Markdown code syntax table - From [jincheng9 on GitHub](https://github.com/jincheng9/markdown_supported_languages)
+## References and thanks
+### Markdown code syntax table - From [jincheng9 on GitHub](https://github.com/jincheng9/markdown_supported_languages)
 | language | ext1 | ext2 | ext3 | ext4 | ext5 | ext6 | ext7 | ext8 | ext9 |
 |---|---|---|---|---|---|---|---|---|---|
 | cucumber | .feature |  |  |  |  |  |  |  |  |
@@ -274,3 +271,5 @@ myCrawler.outputService.compose()
 | xquery | .xqy | .xquery |  |  |  |  |  |  |  |
 | xslt | .xsl | .xslt |  |  |  |  |  |  |  |
 | yaml | .yaml | .yml |  |  |  |  |  |  |  |
+
+### Arpars boolean argument treatment - From [Codemia](https://codemia.io/knowledge-hub/path/parsing_boolean_values_with_argparse)
