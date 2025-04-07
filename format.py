@@ -1,5 +1,6 @@
 import json
 
+from pathlib import Path
 
 class Format:
     """
@@ -102,3 +103,54 @@ class Format:
         else:
             # print(f"fichier introuvés pour {file}")
             return None
+        
+
+    def makeTreeMd(self, chemin,  chemin_ignorer= [], deep = 20, level=0, racine = True):
+        if level >= deep + 1 :
+            return ""
+        #print(chemin_ignorer)
+        if chemin.name in chemin_ignorer:
+            return ""
+        
+        if chemin.is_file in chemin_ignorer:
+            return ""
+        
+        tree = ""
+        indentation = "   "*level
+        if chemin.is_dir():
+            fin = "/"
+        else:
+            fin = ""
+
+        #print(f"{indentation}|__ {chemin.name}{fin}")
+        if level == 0 and racine:
+            tree += f"# {chemin.absolute().name}\n"
+        elif level>0:
+            tree += f"{indentation}|__ {chemin.name}{fin}\n"
+
+        if chemin.is_dir():
+            fichier_iterables = chemin.iterdir()
+            fichier_liste = []
+            dossier_liste = []
+            for item in fichier_iterables:
+                if item.is_file():
+                    fichier_liste.append(item)
+                if item.is_dir():
+                    dossier_liste.append(item)
+            
+            dossiers = sorted(dossier_liste)
+            fichiers = sorted(fichier_liste)
+            
+            for fichier in fichiers:
+                #appel récursif 
+                tree += self.makeTreeMd(fichier, chemin_ignorer,deep,level +1, False)
+
+            for dossier in dossiers:
+                tree += self.makeTreeMd(dossier, chemin_ignorer,deep, level +1, False)
+        #print(tree)
+        return tree
+
+        
+
+
+
