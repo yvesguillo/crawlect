@@ -42,7 +42,7 @@ class Output:
 
             # Directory tree
             if self.crawler.tree:
-                outputFile.write(f"## File structure\n\nDirectory tree.\n```text\n{self.crawler.formatService.makeTreeMd(self.crawler.pathObj, chemin_ignorer= self.crawler.excl_dir_li, deep = self.crawler.depth, level = 0, racine = True)}\n```\n\n")
+                outputFile.write(f"## File structure\n\nDirectory tree.\n\n{self.crawler.formatService.makeTreeMd(self.crawler.pathObj, chemin_ignorer = self.crawler.excl_dir_li, deep = self.crawler.depth)}\n\n")
 
             # Files list
             outputFile.write("## Files:\n\n")
@@ -51,7 +51,10 @@ class Output:
                 fileDepth = len(file.parents) -1
 
                 if file.is_file() and str(file) != self.currentOutputName:
-                    outputFile.write(f"### **[{file.name}]({file})**  \n")
+                    if not self.crawler.formatService.searchType(file) is None:
+                        outputFile.write(f"### **[{file.name}]({file})**  \n")
+                    else:
+                        outputFile.write(f"### **{file.name}**  \n")
                     outputFile.write(f"`{file}`\n")
                     if self.isFileToInclude(file):
                         try:

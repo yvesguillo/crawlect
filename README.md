@@ -105,7 +105,7 @@ myCrawler.outputService.compose()
 - *HTML* output
 - *LLM* API integration.
 - Optional syntax highlighting themes
-- GUI launcher (👀 who knows?)
+- GUI launcher (who knows?)
 
 ## Architecture:
 

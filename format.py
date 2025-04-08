@@ -116,17 +116,16 @@ class Format:
             return ""
         
         tree = ""
-        indentation = "   "*level
-        if chemin.is_dir():
-            fin = "/"
-        else:
-            fin = ""
+        indentation = "    "*level
 
         #print(f"{indentation}|__ {chemin.name}{fin}")
         if level == 0 and racine:
-            tree += f"# {chemin.absolute().name}\n"
+            tree += f"- **{chemin.resolve().name}/**  \n"
         elif level>0:
-            tree += f"{indentation}|__ {chemin.name}{fin}\n"
+            if chemin.is_file():
+                tree += f"{indentation}- [{chemin.name}](#{chemin.name})  \n"
+            if chemin.is_dir():
+                tree += f"{indentation}- `{chemin.name}/`  \n"
 
         if chemin.is_dir():
             fichier_iterables = chemin.iterdir()
