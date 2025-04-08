@@ -32,11 +32,14 @@ class Scan:
             path = self.crawler.pathObj
 
         for candidatePath in path.iterdir():
-            if candidatePath.is_file() and self.isFileToInclude(candidatePath):
-                files.append(candidatePath)
-            elif candidatePath.is_dir() and self.crawler.recur and depth >= 1 and self.isDirToInclude(candidatePath):
-                files.append(candidatePath)
-                self.listFilesIn(path = candidatePath, depth = depth-1, files = files)
+            try:
+                if candidatePath.is_file() and self.isFileToInclude(candidatePath):
+                    files.append(candidatePath)
+                elif candidatePath.is_dir() and self.crawler.recur and depth >= 1 and self.isDirToInclude(candidatePath):
+                    files.append(candidatePath)
+                    self.listFilesIn(path = candidatePath, depth = depth-1, files = files)
+            except PermissionError as err:
+                print(f"\n!! {type(err) .__name__} :\n{type(self) .__name__} Could not list path {repr(candidatePath)}: {err} ")
         return files
 
     # Almost identical methode in Scan and Output classes. Assess if this should be sent to a common class ("Filter" class ?).
