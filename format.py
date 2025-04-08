@@ -109,6 +109,7 @@ class Format:
         if level >= deep + 1 :
             return ""
         #print(chemin_ignorer)
+        
         if chemin.name in chemin_ignorer:
             return ""
         
@@ -141,11 +142,17 @@ class Format:
             fichiers = sorted(fichier_liste)
             
             for fichier in fichiers:
+                try:
                 #appel récursif 
-                tree += self.makeTreeMd(fichier, chemin_ignorer,deep,level +1, False)
-
+                    tree += self.makeTreeMd(fichier, chemin_ignorer,deep,level +1, False)
+                except PermissionError:
+                    tree += ""
             for dossier in dossiers:
-                tree += self.makeTreeMd(dossier, chemin_ignorer,deep, level +1, False)
+                try:
+                    tree += self.makeTreeMd(dossier, chemin_ignorer,deep, level +1, False)
+
+                except PermissionError:
+                    tree += ""
         #print(tree)
         return tree
 
