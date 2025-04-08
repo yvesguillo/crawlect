@@ -31,12 +31,12 @@ class Scan:
         if path is None:
             path = self.crawler.pathObj
 
-        for pathCandidate in path.iterdir():
-            if pathCandidate.is_file() and self.isFileToInclude(pathCandidate):
-                files.append(pathCandidate)
-            elif pathCandidate.is_dir() and self.crawler.recur and depth >= 1 and self.isDirToInclude(pathCandidate):
-                files.append(pathCandidate)
-                self.listFilesIn(path = pathCandidate, depth = depth-1, files = files)
+        for candidatePath in path.iterdir():
+            if candidatePath.is_file() and self.isFileToInclude(candidatePath):
+                files.append(candidatePath)
+            elif candidatePath.is_dir() and self.crawler.recur and depth >= 1 and self.isDirToInclude(candidatePath):
+                files.append(candidatePath)
+                self.listFilesIn(path = candidatePath, depth = depth-1, files = files)
         return files
 
     # Almost identical methode in Scan and Output classes. Assess if this should be sent to a common class ("Filter" class ?).
@@ -47,6 +47,11 @@ class Scan:
         Inclusion overrules exclusion.
         File-name rules takes precedence against extension rules.
         """
+
+        # Always exclude output file.
+        if str(path) == self.crawler.output:
+            return False
+
         # No rules at all, everything pass. This is Anarchy!:
         if self.crawler.excl_ext_li == () and self.crawler.excl_fil_li == () and self.crawler.incl_ext_li == () and self.crawler.incl_fil_li == ():
             return True
@@ -74,6 +79,7 @@ class Scan:
         # If I forgot some case scenario, you may pass Mr Tuttle:
         return True
 
+    # Almost identical methode in Scan and Output classes. Assess if this should be sent to a common class ("Filter" class ?).
     def isDirToInclude(self, path):
         """
         Filter directory `path` according to filtering rules.

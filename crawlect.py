@@ -32,7 +32,7 @@ class Crawlect:
         self.depth = depth
         self.args["depth"] = self.depth
 
-        # Files and extentions inclusion/exclusions parameters.
+        # Files and xtensions inclusion/exclusions parameters.
         self.excl_ext_li = excl_ext_li
         self.args["excl_ext_li"] = self.excl_ext_li
         self.excl_dir_li = excl_dir_li
@@ -64,7 +64,7 @@ class Crawlect:
         self.tree = tree
         self.args["tree"] = self.tree
 
-        # File overwrite denided by default.
+        # File overwrite denied by default.
         self.writeRight = "x"
 
         # Validate attributes parameters.
@@ -110,11 +110,15 @@ class Crawlect:
     def validate(self):
         """Validate attributes and regenerate dynamic attributes."""
 
+        # Max depth adaptation if recur is False.
+        if not self.recur:
+            self.depth = 1
+
         # Interactive mode.
         if __name__ == "__main__":
 
             while self.path is None:
-                self.path = input(f"\n# Missing argument #\n{type(self).__name__} require a path to crawl. Please enter the desired path (e.g.: '.') or [Ctrl]+[C] then [Enter] to abbort.\n")
+                self.path = input(f"\n# Missing argument #\n{type(self).__name__} require a path to crawl. Please enter the desired path (e.g.: '.') or [Ctrl]+[C] then [Enter] to abort.\n")
 
             while not Path(self.path).exists():
                 self.path = input(f"\n# Path error #\n{type(self).__name__} could not find {repr(self.path)}, please enter the path to crawl.\n")
@@ -122,16 +126,16 @@ class Crawlect:
             while self.output is None and self.output_prefix is None:
                 print(f"\n# Missing argument #\n{type(self).__name__} require an output file-name for static output file-name (e.g.: './description.md')\nOR\nan output prefix and output suffix for unique output file-name (e.g.: './descript' as prefix, and '.md' as suffix), this will create a path similar to: './descript-202506041010-g5ef9h.md'")
                 while True:
-                    _ = input("Please choose between 'static' and 'unique', or [Ctrl]+[C] then [Enter] to abbort.\n").lower()
+                    _ = input("Please choose between 'static' and 'unique', or [Ctrl]+[C] then [Enter] to abort.\n").lower()
                     if _ == "static":
                         while self.output is None or not self.output:
-                            self.output = input("Please enter a static output file-name, e.g.: './output.md' or [Ctrl]+[C] then [Enter] to abbort.\n")
+                            self.output = input("Please enter a static output file-name, e.g.: './output.md' or [Ctrl]+[C] then [Enter] to abort.\n")
                         break
                     elif _ == "unique":
                         while self.output_prefix is None or not self.output_prefix:
-                            self.output_prefix = input("Please enter a prefix, e.g.: './output' or [Ctrl]+[C] then [Enter] to abbort.\n")
+                            self.output_prefix = input("Please enter a prefix, e.g.: './output' or [Ctrl]+[C] then [Enter] to abort.\n")
                         while self.output_suffix is None:
-                            self.output_suffix = input("Please enter a suffix, e.g.: '.md' (suffix can be empty) or [Ctrl]+[C] then [Enter] to abbort.\n")
+                            self.output_suffix = input("Please enter a suffix, e.g.: '.md' (suffix can be empty) or [Ctrl]+[C] then [Enter] to abort.\n")
                         break
                     else:
                         continue
@@ -140,7 +144,7 @@ class Crawlect:
                 if Path(self.output).exists():
                         print(f"\n# File overwrite #\n{type(self).__name__} is about to overwrite {repr(self.output)}. Its content will be lost!")
                         while True:
-                            _ = input("Please choose between 'proceed' and 'change', or [Ctrl]+[C] then [Enter] to abbort.\n").lower()
+                            _ = input("Please choose between 'proceed' and 'change', or [Ctrl]+[C] then [Enter] to abort.\n").lower()
                             if _ == "proceed":
                                 # File overwrite permission granted upon request in CLI mode.
                                 self.writeRight = "w"
@@ -156,7 +160,7 @@ class Crawlect:
         # Module mode.
         else:
 
-            # File overwrite denided in module mode.
+            # File overwrite denied in module mode.
             self.writeRight = "x"
 
             if self.output is not None:
@@ -233,14 +237,14 @@ if __name__ == "__main__":
             "-op", "--output_prefix", "--output_file_prefix",
             type = str,
             default = "description",
-            help = "Output markdown digest file prefix ('description' by default) asociated with --output_suffix can be use as an alternative to '--output' argument to generate a unique file-name (e.g.: --output_prefix = './descript', output_suffix = '.md' will create './descript-202506041010-g5ef9h.md').")
+            help = "Output markdown digest file prefix ('description' by default) associated with --output_suffix can be use as an alternative to '--output' argument to generate a unique file-name (e.g.: --output_prefix = './descript', output_suffix = '.md' will create './descript-202506041010-g5ef9h.md').")
 
         parser.add_argument(
             "-os", "--output_suffix", "--output_file_suffix",
             type = str,
             default = ".md",
             
-            help = "Output markdown digest file prefix ('.md' by default) asociated with --output_prefix can be use as an alternative to '--output' argument to generate a unique file-name (e.g.: --output_prefix = './descript', output_suffix = '.md' will create './descript-202506041010-g5ef9h.md').")
+            help = "Output markdown digest file prefix ('.md' by default) associated with --output_prefix can be use as an alternative to '--output' argument to generate a unique file-name (e.g.: --output_prefix = './descript', output_suffix = '.md' will create './descript-202506041010-g5ef9h.md').")
 
         parser.add_argument(
             "-r", "--recur", "--recursive_crawling",
@@ -257,7 +261,7 @@ if __name__ == "__main__":
             help = "Scan depth limit (default is infinite).")
 
         parser.add_argument(
-            "-xel", "--excl_ext_li", "--excluded_extentions_from_listing",
+            "-xel", "--excl_ext_li", "--excluded_xtensions_from_listing",
             nargs = "*",
             default = (),
             help = "List of file extensions to exclude from listing (e.g.: .jpg, .png).")
@@ -275,7 +279,7 @@ if __name__ == "__main__":
             help = "List of files to exclude from listing (e.g.: README.md, profile.png).")
 
         parser.add_argument(
-            "-xew", "--excl_ext_wr", "--excluded_extentions_from_writing",
+            "-xew", "--excl_ext_wr", "--excluded_xtensions_from_writing",
             nargs = "*",
             default = (),
             help = "List of file extensions to exclude from writing (e.g.: .jpg, .png).")
@@ -293,7 +297,7 @@ if __name__ == "__main__":
             help = "List of files to exclude from writing (e.g.: README.md, profile.png).")
 
         parser.add_argument(
-            "-iel", "--incl_ext_li", "--include_extentions_from_listing",
+            "-iel", "--incl_ext_li", "--include_xtensions_from_listing",
             nargs = "*",
             default = (),
             help = "List of file extensions to include in listing (e.g.: .jpg, .png).")
@@ -311,7 +315,7 @@ if __name__ == "__main__":
             help = "List of files to include in listing (e.g.: README.md, profile.png).")
 
         parser.add_argument(
-            "-iew", "--incl_ext_wr", "--include_extentions_from_writing",
+            "-iew", "--incl_ext_wr", "--include_xtensions_from_writing",
             nargs = "*",
             default = (),
             help = "List of file extensions to include for writing (e.g.: .jpg, .png).")
@@ -352,7 +356,7 @@ if __name__ == "__main__":
         crawlect.outputService.compose()
 
         # Confirm.
-        print(f"\n{type(crawlect.outputService).__name__} processed {repr(crawlect.getTitle())} and stored description in {repr(crawlect.outputService.currentOutputName)}.\n")
+        print(f"\n{type(crawlect.outputService).__name__} processed {repr(crawlect.getTitle())} and stored description in {repr(crawlect.outputService.currentOutputName)}.")
 
     except KeyboardInterrupt:
         print("Interupted by user.")

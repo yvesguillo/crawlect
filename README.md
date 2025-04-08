@@ -1,10 +1,10 @@
-# 🕷️ Crawlect – Crawl, Collect & Document Your Codebase in Markdown
+# Crawlect – Crawl, Collect & Document Your Codebase in Markdown
 
 **Crawlect** is a Python module designed to *crawl* a given directory, *collect* relevant files and contents, and *document* the entire structure in a clean, readable Markdown file.
 
 Whether you're analyzing someone else's code or sharing your own, Crawlect makes it effortless to generate a comprehensive project snapshot — complete with syntax-highlighted code blocks, a tree-like structure overview, and fine-tuned filtering rules.
 
-## 🧠 Why Crawlect?
+## Why Crawlect?
 
 When starting with a new project — whether you're reviewing, refactoring, or collaborating — understanding its structure and key files is essential. Crawlect does the heavy lifting by:
 
@@ -14,19 +14,19 @@ When starting with a new project — whether you're reviewing, refactoring, or c
 - Embedding file contents in Markdown-formatted code blocks,
 - Automatically generating a well-organized, shareable `.md` file.
 
-## 🚀 Use cases
+## Use cases
 
-- 🔍 Quickly understand an unfamiliar codebase
-- 📄 Auto-document your projects
-- 💬 Share code context with collaborators (or *LLM*!)
-- 🔐 Safely include `.env` files without leaking sensitive values
+- Quickly understand an unfamiliar codebase
+- Auto-document your projects
+- Share code context with collaborators (or *LLM*!)
+- Safely include `.env` files without leaking sensitive values
 
-✨ ***Think of Crawlect as your markdown-minion — obedient, efficient, and allergic to messy folders.***
+***Think of Crawlect as your markdown-minion — obedient, efficient, and allergic to messy folders.***
 
-## 📘 Crawlect – User Guide
+## Crawlect – User Guide
 **Crawlect**, the tool that turns your project folder into a beautifully structured Markdown digest — effortlessly.
 
-## 🔧 Installation
+## Installation
 Crawlect currently runs as a standalone module. To use it, simply clone the repo or copy the files:
 
 ```bash
@@ -36,15 +36,15 @@ python3 crawlect.py
 ```
 *(Packaging for pip? Let us know. We'll help you make it pip-installable!)*
 
-## 🚀 Quick Start
+## Quick Start
 Generate a Markdown description of the current directory:
 
 ```bash
 python3 crawlect.py -p . -o ./description.md
 ```
-➡️ This will scan the current folder recursively and write a structured `description.md` including the contents of most files.
+This will scan the current folder recursively and write a structured `description.md` including the contents of most files.
 
-## 🎯 Usage Overview
+## Usage Overview
 You can run Crawlect via the CLI with plenty of flexible options:
 
 ```bash
@@ -71,7 +71,7 @@ You can also:
 - Enable the directory tree overview (`--tree yes`)
 - Sanitize .env files (`--xenv yes`)
 
-### 🧪 Example Command
+### Example Command
 ```bash
 python3 crawlect.py \
   --path ./awesome-project \
@@ -81,15 +81,15 @@ python3 crawlect.py \
   --incl_ext_wr .py .json \
   --tree yes \
   --xenv yes
-➡️ Creates a structured markdown file (with a unique name), ignoring noisy files and including `.py` and `.md` contents.
+Creates a structured markdown file (with a unique name), ignoring noisy files and including `.py` and `.md` contents.
 ```
-### 🧠 Tips
+### Tips
 
 - `.env` files are *auto-sanitized* — values are replaced by `YourValueFor_<varname>`
 - Inclusion rules overrule exclusion
 - File name rules take precedence over extension rules
 
-### 🤖 Module Mode
+### Module Mode
 
 You can use Crawlect as a **Python module** too:
 
@@ -100,7 +100,7 @@ myCrawler = Crawlect(path=".", output="./project_overview.md")
 myCrawler.outputService.compose()
 ```
 
-## 🛠️ Planned Features (ideas welcome!)
+## Planned Features (ideas welcome!)
 - *Git* related filtering.
 - *HTML* output
 - *LLM* API integration.

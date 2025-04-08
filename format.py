@@ -21,7 +21,7 @@ class Format:
     def insertCodebox(self, file):
         """
         cette méthode prends en entrée un chemin de fichier avec son extention fourni par searchType()
-        et retourne une variable string avec tous le code corespondant dans un codbox
+        et retourne une variable string avec tous le code corresponding dans un codbox
         """
 
         extention = self.searchType(file)

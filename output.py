@@ -25,6 +25,7 @@ class Output:
         self.crawler = crawler
         self.args["crawler"] = self.crawler = crawler
 
+        self.currentOutputName = ""
         self.composition = ()
 
     def compose(self):
@@ -33,22 +34,32 @@ class Output:
         date = datetime.now()
         self.currentOutputName = self.standardOutputName()
 
-        # Early verssion.
+        # Early version.
         with open(self.currentOutputName, self.crawler.writeRight) as outputFile:
 
             # Title
-            outputFile.write(f"# {self.crawler.getTitle()}\n\n")
+            outputFile.write(f"# {self.crawler.getTitle()}\n{str(date.year)}.{str("{:02d}".format(date.month))}.{str("{:02d}".format(date.day))} {str("{:02d}".format(date.hour))}:{str("{:02d}".format(date.minute))}\n\nGenerated with {type(self.crawler).__name__}.\n\n")
+
+            # Directory tree
+            if self.crawler.tree:
+                outputFile.write(f"## File structure\n\nDirectory tree.\n```text\n{self.crawler.formatService.makeTreeMd(self.crawler.pathObj, chemin_ignorer= self.crawler.excl_dir_li, deep = self.crawler.depth, level = 0, racine = True)}\n```\n\n")
 
             # Files list
-            outputFile.write("## Structure:\n\n")
+            outputFile.write("## Files:\n\n")
             for file in self.crawler.files:
-                if file.is_file():
-                    outputFile.write(f"- **[{file.name}]({self.crawler.path}/{file})**  \n")
+
+                fileDepth = len(file.parents) -1
+
+                if file.is_file() and str(file) != self.currentOutputName:
+                    outputFile.write(f"### **[{file.name}]({file})**  \n")
                     outputFile.write(f"`{file}`\n")
                     if self.isFileToInclude(file):
-                        content = self.crawler.formatService.insertCodebox(file)
-                        if not content is None:
-                            outputFile.write(self.crawler.formatService.insertCodebox(file))
+                        try:
+                            content = self.crawler.formatService.insertCodebox(file)
+                            if not content is None:
+                                outputFile.write(self.crawler.formatService.insertCodebox(file))
+                        except Exception as error:
+                            print(f"\n!! - {type(error).__name__}:\n{type(self).__name__} could not create codebox from {repr(file)}: {error}")
                     outputFile.write("\n")
 
     def standardOutputName(self):
