@@ -1,5 +1,5 @@
 # crawlect
-2025.04.09 17:54
+2025.04.09 18:15
 
 Generated with Crawlect.
 
@@ -8,30 +8,30 @@ Generated with Crawlect.
 Directory tree.
 
 - **crawlect/**  
-    - [output.py](#{1})  
-    - [description.md](#{2})  
-    - [crawlect.py](#{3})  
-    - [essai1.md](#{4})  
-    - [README.md](#{5})  
-    - [format.py](#{6})  
-    - [.gitignore](#{7})  
-    - [note.md](#{8})  
-    - [languages.json](#{9})  
-    - [scan.py](#{10})  
-    - [.env](#{11})  
+    - [.env](#{1})  
+    - [.gitignore](#{2})  
+    - [README.md](#{3})  
+    - [crawlect.py](#{4})  
+    - [description.md](#{5})  
+    - [essai1.md](#{6})  
+    - [format.py](#{7})  
+    - [languages.json](#{8})  
+    - [note.md](#{9})  
+    - [output.py](#{10})  
+    - [scan.py](#{11})  
     - `.idea/`  
-        - [misc.xml](#{12})  
+        - [.gitignore](#{12})  
         - [crawlect.iml](#{13})  
-        - [modules.xml](#{14})  
-        - [workspace.xml](#{15})  
-        - [.gitignore](#{16})  
-        - [vcs.xml](#{17})  
+        - [misc.xml](#{14})  
+        - [modules.xml](#{15})  
+        - [vcs.xml](#{16})  
+        - [workspace.xml](#{17})  
         - `inspectionProfiles/`  
             - [profiles_settings.xml](#{18})  
     - `__pycache__/`  
-        - [scan.cpython-312.pyc](#{19})  
+        - [format.cpython-312.pyc](#{19})  
         - [output.cpython-312.pyc](#{20})  
-        - [format.cpython-312.pyc](#{21})  
+        - [scan.cpython-312.pyc](#{21})  
     - `tata/`  
         - `toto1/`  
     - `toto/`  
@@ -49,7 +49,7 @@ Directory tree.
 ### **format.cpython-312.pyc**{3}   
 `__pycache__/format.cpython-312.pyc`
 
-### **[output.py](output.py)**{4}  
+<h3 id="4">output.py](output.py)</h3> 
 `output.py`
 ```python
 #! /usr/bin/env python3
@@ -108,7 +108,7 @@ class Output:
                 idmd = "{" + str(counter) + "}"
                 if file.is_file() and str(file) != self.currentOutputName:
                     if not self.crawler.formatService.searchType(file) is None:
-                        outputFile.write(f"### **[{file.name}]({file})**{idmd}  \n")
+                        outputFile.write(f"<h3 id=\"{counter}\">{file.name}]({file})</h3> \n")
                     else:
                         outputFile.write(f"### **{file.name}**{idmd}   \n")
                     outputFile.write(f"`{file}`\n")
@@ -181,7 +181,7 @@ class Output:
         parameters = ", ".join(argsString)
         return f"{type(self).__name__}({parameters})"
 ```
-### **[description.md](description.md)**{5}  
+<h3 id="5">description.md](description.md)</h3> 
 `description.md`
 ``````````````````````markdown
 # crawlect
@@ -1905,7 +1905,7 @@ MYSQL_DATABASE=YourValueFor_mysql_database
 ```
 
 ``````````````````````
-### **[crawlect.py](crawlect.py)**{6}  
+<h3 id="6">crawlect.py](crawlect.py)</h3> 
 `crawlect.py`
 ```python
 #! /usr/bin/env python3
@@ -2279,7 +2279,7 @@ if __name__ == "__main__":
         for line in lines:
             print(line)
 ```
-### **[README.md](README.md)**{7}  
+<h3 id="7">README.md](README.md)</h3> 
 `README.md`
 ````````````markdown
 # Crawlect – Crawl, Collect & Document Your Codebase in Markdown
@@ -2558,7 +2558,7 @@ myCrawler.outputService.compose()
 
 ### Arpars boolean argument treatment - From [Codemia](https://codemia.io/knowledge-hub/path/parsing_boolean_values_with_argparse)
 ````````````
-### **[format.py](format.py)**{8}  
+<h3 id="8">format.py](format.py)</h3> 
 `format.py`
 ```python
 import json
@@ -2710,7 +2710,7 @@ class Format:
                     dossier_liste.append(item)
             
             dossiers = sorted(dossier_liste)
-            fichiers = fichier_liste
+            fichiers = sorted(fichier_liste)
              
             for fichier in fichiers:
                 try:
@@ -2734,7 +2734,7 @@ class Format:
 
 
 ```
-### **[misc.xml](.idea/misc.xml)**{10}  
+<h3 id="10">misc.xml](.idea/misc.xml)</h3> 
 `.idea/misc.xml`
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -2748,7 +2748,7 @@ class Format:
 ### **crawlect.iml**{11}   
 `.idea/crawlect.iml`
 
-### **[profiles_settings.xml](.idea/inspectionProfiles/profiles_settings.xml)**{13}  
+<h3 id="13">profiles_settings.xml](.idea/inspectionProfiles/profiles_settings.xml)</h3> 
 `.idea/inspectionProfiles/profiles_settings.xml`
 ```xml
 <component name="InspectionProjectProfileManager">
@@ -2758,7 +2758,7 @@ class Format:
   </settings>
 </component>
 ```
-### **[modules.xml](.idea/modules.xml)**{14}  
+<h3 id="14">modules.xml](.idea/modules.xml)</h3> 
 `.idea/modules.xml`
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -2770,7 +2770,7 @@ class Format:
   </component>
 </project>
 ```
-### **[workspace.xml](.idea/workspace.xml)**{15}  
+<h3 id="15">workspace.xml](.idea/workspace.xml)</h3> 
 `.idea/workspace.xml`
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -2869,7 +2869,7 @@ class Format:
   </component>
 </project>
 ```
-### **[.gitignore](.idea/.gitignore)**{16}  
+<h3 id="16">.gitignore](.idea/.gitignore)</h3> 
 `.idea/.gitignore`
 ```gitignore
 # Default ignored files
@@ -2877,7 +2877,7 @@ class Format:
 /workspace.xml
 
 ```
-### **[vcs.xml](.idea/vcs.xml)**{17}  
+<h3 id="17">vcs.xml](.idea/vcs.xml)</h3> 
 `.idea/vcs.xml`
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -2887,7 +2887,7 @@ class Format:
   </component>
 </project>
 ```
-### **[.gitignore](.gitignore)**{18}  
+<h3 id="18">.gitignore](.gitignore)</h3> 
 `.gitignore`
 ```gitignore
 # Byte-compiled / optimized / DLL files
@@ -3066,7 +3066,7 @@ cython_debug/
 .pypirc
 
 ```
-### **[note.md](note.md)**{19}  
+<h3 id="19">note.md](note.md)</h3> 
 `note.md`
 ```markdown
 lancer crawlect sans etre dans dans le dossier ou le script se situe 
@@ -3074,7 +3074,7 @@ lancer crawlect sans etre dans dans le dossier ou le script se situe
 uv add --script 
 
 ```
-### **[languages.json](languages.json)**{20}  
+<h3 id="20">languages.json](languages.json)</h3> 
 `languages.json`
 ```json
 
@@ -3321,7 +3321,7 @@ uv add --script
   ".yml": "yaml"
 }
 ```
-### **[scan.py](scan.py)**{21}  
+<h3 id="21">scan.py](scan.py)</h3> 
 `scan.py`
 ```python
 #! /usr/bin/env python3
@@ -3444,7 +3444,7 @@ class Scan:
         parameters = ", ".join(argsString)
         return f"{type(self).__name__}({parameters})"
 ```
-### **[.env](.env)**{24}  
+<h3 id="24">.env](.env)</h3> 
 `.env`
 ```bash
 # variables d'environnement mysql
