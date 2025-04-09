@@ -1,3 +1,5 @@
+#! /usr/bin/env python3
+
 import json
 import hashlib
 from pathlib import Path
@@ -8,7 +10,6 @@ class Format:
     Va identifier le type de fichier et le placer dans un codbox
 
     """
-    # attribut de classe
     
     def __init__(self):
 
