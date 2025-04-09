@@ -108,17 +108,15 @@ class Format:
             return None
         
 
-    def makeTreeMd(self, chemin,  chemin_ignorer= [], deep = 20, level=0, racine = True, chemin_rel=[]):
+    def makeTreeMd(self, chemin,  chemin_ignorer= [], deep = 20, level=0, racine = True):
         if level >= deep + 1 :
             return ""
         
         
         if chemin.name in chemin_ignorer:
-            self.counter_idmd -= 1
             return ""
         
         if chemin.is_file in chemin_ignorer:
-            self.counter_idmd -= 1
             return ""
         
         
@@ -127,7 +125,6 @@ class Format:
 
         #print(f"{indentation}|__ {chemin.name}{fin}")
         if level == 0 and racine:
-            self.counter_idmd = -1
             tree += f"- **{chemin.resolve().name}/**  \n"
         
         idmd = str(self.counter_idmd) 
@@ -136,6 +133,7 @@ class Format:
             if chemin.is_file():
                 chemin_id = hashlib.md5(str(chemin.resolve()).encode()).hexdigest()
                 tree += f"{indentation}- [{chemin.name}](#{chemin_id})  \n"
+
             if chemin.is_dir():
                 tree += f"{indentation}- `{chemin.name}/`  \n"
 
@@ -143,6 +141,7 @@ class Format:
             fichier_iterables = chemin.iterdir()
             fichier_liste = []
             dossier_liste = []
+
             for item in fichier_iterables:
                 if item.is_file():
                     fichier_liste.append(item)
@@ -156,13 +155,13 @@ class Format:
                 try:
                 #appel récursif 
                    
-                    tree += self.makeTreeMd(fichier, chemin_ignorer,deep,level +1, False,chemin_rel)
+                    tree += self.makeTreeMd(fichier, chemin_ignorer,deep,level +1, False)
                 except PermissionError:
                     tree += ""
             for dossier in dossiers:
                 try:
                     
-                    tree += self.makeTreeMd(dossier, chemin_ignorer,deep, level +1, False,chemin_rel)
+                    tree += self.makeTreeMd(dossier, chemin_ignorer,deep, level +1, False)
 
                 except PermissionError:
                     
