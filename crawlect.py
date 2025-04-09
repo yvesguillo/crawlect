@@ -333,12 +333,20 @@ if __name__ == "__main__":
             help = "List of files to include for writing (e.g.: README.md, profile.png).")
 
         parser.add_argument(
-            "-xen", "--xenv", "--randomize_env_variables",
+            "-giti", "--gitignore", "--gitignore",
             type = str,
             choices = ["Yes", "yes", "No", "no", "Y", "y", "N", "n", "True", "true", "False", "false", "T", "t", "F", "f", "1", "0"],
             action = BooleanAction,
             default = True,
             help = "Randomize .env variables to mitigate sensitive info leak risk (default is True).")
+
+        parser.add_argument(
+            "-xen", "--xenv", "--sanitize_env_variables",
+            type = str,
+            choices = ["Yes", "yes", "No", "no", "Y", "y", "N", "n", "True", "true", "False", "false", "T", "t", "F", "f", "1", "0"],
+            action = BooleanAction,
+            default = True,
+            help = "Sanitize .env variables to mitigate sensitive info leak risk (default is True).")
 
         parser.add_argument(
             "-tre", "--tree", "--visualize_directory_tree",
@@ -350,7 +358,7 @@ if __name__ == "__main__":
 
         args = parser.parse_args()
 
-        crawlect = Crawlect(path = args.path, output = args.output, output_prefix = args.output_prefix, output_suffix = args.output_suffix, recur = args.recur, depth = args.depth, excl_ext_li = args.excl_ext_li, excl_dir_li = args.excl_dir_li, excl_fil_li = args.excl_fil_li, excl_ext_wr = args.excl_ext_wr, excl_dir_wr = args.excl_dir_wr, excl_fil_wr = args.excl_fil_wr, incl_ext_li = args.incl_ext_li, incl_dir_li = args.incl_dir_li, incl_fil_li = args.incl_fil_li, incl_ext_wr = args.incl_ext_wr, incl_dir_wr = args.incl_dir_wr, incl_fil_wr = args.incl_fil_wr, xenv = args.xenv, tree = args.tree)
+        crawlect = Crawlect(path = args.path, output = args.output, output_prefix = args.output_prefix, output_suffix = args.output_suffix, recur = args.recur, depth = args.depth, excl_ext_li = args.excl_ext_li, excl_dir_li = args.excl_dir_li, excl_fil_li = args.excl_fil_li, excl_ext_wr = args.excl_ext_wr, excl_dir_wr = args.excl_dir_wr, excl_fil_wr = args.excl_fil_wr, incl_ext_li = args.incl_ext_li, incl_dir_li = args.incl_dir_li, incl_fil_li = args.incl_fil_li, incl_ext_wr = args.incl_ext_wr, incl_dir_wr = args.incl_dir_wr, incl_fil_wr = args.incl_fil_wr, gitignore = args.git ignore ,xenv = args.xenv, tree = args.tree)
 
         # Launch output file composition
         crawlect.outputService.compose()
