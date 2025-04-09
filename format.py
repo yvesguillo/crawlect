@@ -124,7 +124,7 @@ class Format:
             tree += f"- **{chemin.resolve().name}/**  \n"
         elif level>0:
             if chemin.is_file():
-                tree += f"{indentation}- [{chemin.name}](#{chemin.name})  \n"
+                tree += f"{indentation}- [{chemin.name}](#{chemin.stem.replace(".","") + chemin.suffix[1:]})  \n"
             if chemin.is_dir():
                 tree += f"{indentation}- `{chemin.name}/`  \n"
 
