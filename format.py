@@ -64,6 +64,7 @@ class Format:
             maxrep = 1
 
             for l in range(1, len(code) - 1):
+                #compte le nombre de fois que le caractère "`" est présent à la suite 
                 if code[l] == code[l + 1] == "`":
                     counter += 1
 
@@ -75,6 +76,7 @@ class Format:
             if counter > maxrep:
                 maxrep = counter
 
+            # le nombre minimal pour une codebox est de 3 si on en compte 3 --> ajouter occurances afin d'englober la totalité
             if maxrep >= 3:
                 maxrep += 1
                 res = f"{maxrep*bloc}{extention}\n{code}\n{maxrep*bloc}"
@@ -109,6 +111,11 @@ class Format:
         
 
     def makeTreeMd(self, chemin,  chemin_ignorer= [], deep = 20, level=0, racine = True):
+        """
+        prend un Path en entrée, des nom de fichier à ignorer, une profondeur de recherche
+        retourne une arboressance des fichiers 
+        ajoute un hashage afin de crée des liens dans le fichier markdown
+        """
         if level >= deep + 1 :
             return ""
         
@@ -123,12 +130,12 @@ class Format:
         tree = ""
         indentation = "    "*level
 
-        #print(f"{indentation}|__ {chemin.name}{fin}")
+        # Récupération du nom du dossier parent du dossier racine 
         if level == 0 and racine:
             tree += f"- **{chemin.resolve().name}/**  \n"
         
         idmd = str(self.counter_idmd) 
-        
+        # On vérifie que nous ne somme pas dans la première occurence de récursivité
         if level>0:
             if chemin.is_file():
                 chemin_id = hashlib.md5(str(chemin.resolve()).encode()).hexdigest()
@@ -142,6 +149,8 @@ class Format:
             fichier_liste = []
             dossier_liste = []
 
+            # séparation des dossier et des fichiers afin de les trier. 
+            # le but est d'afficher les fichiers avant les dossier dans un répertoire 
             for item in fichier_iterables:
                 if item.is_file():
                     fichier_liste.append(item)
@@ -153,16 +162,18 @@ class Format:
               
             for fichier in fichiers:
                 try:
-                #appel récursif 
-                   
+                #appel récursif pour chaque fichier de la liste 
                     tree += self.makeTreeMd(fichier, chemin_ignorer,deep,level +1, False)
+
+                #gestion en cas de fichier inaccessible pour cause de manque de privilège 
                 except PermissionError:
                     tree += ""
             for dossier in dossiers:
                 try:
-                    
+                #appel récursif pour chaque dossier de la liste 
                     tree += self.makeTreeMd(dossier, chemin_ignorer,deep, level +1, False)
 
+                # gestion en cas de dossier inacessible cause de manque de privilège 
                 except PermissionError:
                     
                     tree += ""
