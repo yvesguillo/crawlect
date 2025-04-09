@@ -14,7 +14,7 @@ class Crawlect:
     Crawlect is a module intended to describe files from a given path and transcribe and save these into a single markdown file.
     """
 
-    def __init__(self, path = None, output = None, output_prefix = None, output_suffix = None, recur = True, depth = inf, excl_ext_li = (), excl_dir_li = (), excl_fil_li = (), excl_ext_wr = (), excl_dir_wr = (), excl_fil_wr = (), incl_ext_li = (), incl_dir_li = (), incl_fil_li = (), incl_ext_wr = (), incl_dir_wr = (), incl_fil_wr = (), xenv = True, tree = True):
+    def __init__(self, path = None, output = None, output_prefix = None, output_suffix = None, recur = True, depth = inf, excl_pat_li = [], excl_fil_li = [], excl_ext_li = [], excl_dir_li = [], excl_fil_wr = [], excl_ext_wr = [], excl_dir_wr = [], incl_fil_li = [], incl_ext_li = [], incl_dir_li = [], incl_fil_wr = [], incl_ext_wr = [], incl_dir_wr = [], crawlectignore = True, gitignore = True, dockerignore = True, xenv = True, tree = True):
 
         # Store the class arguments for __repr__.
         self.args = dict()
@@ -33,30 +33,40 @@ class Crawlect:
         self.args["depth"] = self.depth
 
         # Files and xtensions inclusion/exclusions parameters.
+        self.excl_pat_li = excl_pat_li
+        self.args["excl_pat_li"] = self.excl_pat_li
+        self.excl_fil_li = excl_fil_li
+        self.args["excl_fil_li"] = self.excl_fil_li
         self.excl_ext_li = excl_ext_li
         self.args["excl_ext_li"] = self.excl_ext_li
         self.excl_dir_li = excl_dir_li
         self.args["excl_dir_li"] = self.excl_dir_li
-        self.excl_fil_li = excl_fil_li
-        self.args["excl_fil_li"] = self.excl_fil_li
-        self.excl_ext_wr = excl_ext_wr
-        self.args["excl_ext_wr"] = self.excl_ext_wr
-        self.excl_dir_wr = excl_dir_wr
-        self.args["excl_dir_wr"] = self.excl_dir_wr
-        self.excl_fil_wr = excl_fil_wr
-        self.args["excl_fil_wr"] = self.excl_fil_wr
+        self.incl_fil_li = incl_fil_li
+        self.args["incl_fil_li"] = self.incl_fil_li
         self.incl_ext_li = incl_ext_li
         self.args["incl_ext_li"] = self.incl_ext_li
         self.incl_dir_li = incl_dir_li
         self.args["incl_dir_li"] = self.incl_dir_li
-        self.incl_fil_li = incl_fil_li
-        self.args["incl_fil_li"] = self.incl_fil_li
+        self.excl_fil_wr = excl_fil_wr
+        self.args["excl_fil_wr"] = self.excl_fil_wr
+        self.excl_ext_wr = excl_ext_wr
+        self.args["excl_ext_wr"] = self.excl_ext_wr
+        self.excl_dir_wr = excl_dir_wr
+        self.args["excl_dir_wr"] = self.excl_dir_wr
+        self.incl_fil_wr = incl_fil_wr
+        self.args["incl_fil_wr"] = self.incl_fil_wr
         self.incl_ext_wr = incl_ext_wr
         self.args["incl_ext_wr"] = self.incl_ext_wr
         self.incl_dir_wr = incl_dir_wr
         self.args["incl_dir_wr"] = self.incl_dir_wr
-        self.incl_fil_wr = incl_fil_wr
-        self.args["incl_fil_wr"] = self.incl_fil_wr
+
+        # Ignore files handling.
+        self.crawlectignore = crawlectignore
+        self.args["crawlectignore"] = self.crawlectignore
+        self.gitignore = gitignore
+        self.args["gitignore"] = self.gitignore
+        self.dockerignore = dockerignore
+        self.args["dockerignore"] = self.dockerignore
 
         # Advanced features parameters.
         self.xenv = xenv
@@ -67,47 +77,16 @@ class Crawlect:
         # File overwrite denied by default.
         self.writeRight = "x"
 
-        # Validate attributes parameters.
-        self.validate()
+        self.validateParam()
 
-        try:
-            self.pathObj = Path(self.path)
-        except:
-            print(f"Error: on {type(self).__name__}:\ncould not set its paths from path attribute.")
-            raise
+        self.initServices()
 
-        try:
-            self.title = self.pathObj.resolve().name
-        except:
-            print(f"Error: on {type(self).__name__}:\ncould not set its title.")
-            raise
+        self.processIgnoreFiles()
 
-        try:
-            self.scanService = Scan(self)
-        except:
-            print(f"Error: on {type(self).__name__}:\ncould not refresh and initiate its Scan service.")
-            raise
+        self.generatePathList()
 
-        try:
-            self.formatService = Format() # Format does not take Crawlect instance as parameter.
-        except:
-            print(f"Error: on {type(self).__name__}:\ncould not refresh and initiate its Format service.")
-            raise
-
-        try:
-            self.outputService = Output(self)
-        except:
-            print(f"Error: on {type(self).__name__}:\ncould not refresh and initiate its Output service.")
-            raise
-
-        try:
-            self.files = self.scanService.listFilesIn()
-        except:
-            print(f"Error: on {type(self).__name__}:\ncould not refresh and proceed to paths listing.")
-            raise
-
-    # To be enhanced. State patern?
-    def validate(self):
+    # To be enhanced. State patern for interactive/module mode?
+    def validateParam(self):
         """Validate attributes and regenerate dynamic attributes."""
 
         # Max depth adaptation if recur is False.
@@ -176,6 +155,48 @@ class Crawlect:
                 validationMessage += "- An output file-name for static output file-name (e.g.: --output = './description.md')\nOR\nan output prefix and output suffix for unique output file-name (e.g.: --output_prefix = './descript', --output_suffix = '.md' as suffix), this will create a path similar to: './descript-202506041010-g5ef9h.md'\n"
             if validationMessage:
                 raise AttributeError(f"\n# Argument error #\n{type(self).__name__} requires:\n{validationMessage}Got: {self}")
+
+    def initServices(self):
+        try:
+            self.pathObj = Path(self.path)
+        except:
+            print(f"Error: on {type(self).__name__}:\ncould not set its paths from path attribute.")
+            raise
+
+        try:
+            self.title = self.pathObj.resolve().name
+        except:
+            print(f"Error: on {type(self).__name__}:\ncould not set its title.")
+            raise
+
+        try:
+            self.scanService = Scan(self)
+        except:
+            print(f"Error: on {type(self).__name__}:\ncould not refresh and initiate its Scan service.")
+            raise
+
+        try:
+            self.formatService = Format() # Format does not take Crawlect instance as parameter.
+        except:
+            print(f"Error: on {type(self).__name__}:\ncould not refresh and initiate its Format service.")
+            raise
+
+        try:
+            self.outputService = Output(self)
+        except:
+            print(f"Error: on {type(self).__name__}:\ncould not refresh and initiate its Output service.")
+            raise
+
+    def processIgnoreFiles(self):
+        pass
+
+    def generatePathList(self):
+        try:
+            self.files = self.scanService.listPathIn()
+            print(self.files)
+        except:
+            print(f"Error: on {type(self).__name__}:\ncould not refresh and proceed to paths listing.")
+            raise
 
     def getTitle(self):
         return self.title
@@ -261,84 +282,106 @@ if __name__ == "__main__":
             help = "Scan depth limit (default is infinite).")
 
         parser.add_argument(
+            "-xpl", "--excl_pat_li", "--excluded_paths_from_listing",
+            nargs = "*",
+            default = [],
+            help = "List of paths to exclude from listing (e.g.: ./messy_folder/, ./album/vacation_56.png).")
+
+        parser.add_argument(
+            "-xfl", "--excl_fil_li", "--excluded_files_from_listing",
+            nargs = "*",
+            default = [],
+            help = "List of files to exclude from listing (e.g.: README.md, profile.png).")
+
+        parser.add_argument(
             "-xel", "--excl_ext_li", "--excluded_xtensions_from_listing",
             nargs = "*",
-            default = (),
+            default = [],
             help = "List of file extensions to exclude from listing (e.g.: .jpg, .png).")
 
         parser.add_argument(
             "-xdl", "--excl_dir_li", "--excluded_directories_from_listing",
             nargs = "*",
-            default = (),
+            default = [],
             help = "List of directories to exclude from listing (e.g.: bin, render).")
 
         parser.add_argument(
-            "-xfl", "--excl_fil_li", "--excluded_files_from_listing",
+            "-ifl", "--incl_fil_li", "--include_files_from_listing",
             nargs = "*",
-            default = (),
-            help = "List of files to exclude from listing (e.g.: README.md, profile.png).")
-
-        parser.add_argument(
-            "-xew", "--excl_ext_wr", "--excluded_xtensions_from_writing",
-            nargs = "*",
-            default = (),
-            help = "List of file extensions to exclude from writing (e.g.: .jpg, .png).")
-
-        parser.add_argument(
-            "-xdw", "--excl_dir_wr", "--excluded_directories_from_writing",
-            nargs = "*",
-            default = (),
-            help = "List of directories to exclude from writing (e.g.: bin, render).")
-
-        parser.add_argument(
-            "-xfw", "--excl_fil_wr", "--excluded_files_from_writing",
-            nargs = "*",
-            default = (),
-            help = "List of files to exclude from writing (e.g.: README.md, profile.png).")
+            default = [],
+            help = "List of files to include in listing (e.g.: README.md, profile.png).")
 
         parser.add_argument(
             "-iel", "--incl_ext_li", "--include_xtensions_from_listing",
             nargs = "*",
-            default = (),
+            default = [],
             help = "List of file extensions to include in listing (e.g.: .jpg, .png).")
 
         parser.add_argument(
             "-idl", "--incl_dir_li", "--include_directories_from_listing",
             nargs = "*",
-            default = (),
+            default = [],
             help = "List of directories to include in listing (e.g.: bin, render).")
 
         parser.add_argument(
-            "-ifl", "--incl_fil_li", "--include_files_from_listing",
+            "-xfw", "--excl_fil_wr", "--excluded_files_from_writing",
             nargs = "*",
-            default = (),
-            help = "List of files to include in listing (e.g.: README.md, profile.png).")
+            default = [],
+            help = "List of files to exclude from writing (e.g.: README.md, profile.png).")
 
         parser.add_argument(
-            "-iew", "--incl_ext_wr", "--include_xtensions_from_writing",
+            "-xew", "--excl_ext_wr", "--excluded_xtensions_from_writing",
             nargs = "*",
-            default = (),
-            help = "List of file extensions to include for writing (e.g.: .jpg, .png).")
+            default = [],
+            help = "List of file extensions to exclude from writing (e.g.: .jpg, .png).")
 
         parser.add_argument(
-            "-idw", "--incl_dir_wr", "--include_directories_from_writing",
+            "-xdw", "--excl_dir_wr", "--excluded_directories_from_writing",
             nargs = "*",
-            default = (),
-            help = "List of directories to include for writing (e.g.: bin, render).")
+            default = [],
+            help = "List of directories to exclude from writing (e.g.: bin, render).")
 
         parser.add_argument(
             "-ifw", "--incl_fil_wr", "--include_files_from_writing",
             nargs = "*",
-            default = (),
-            help = "List of files to include for writing (e.g.: README.md, profile.png).")
+            default = [],
+            help = "List of files to include in writing (e.g.: README.md, profile.png).")
 
         parser.add_argument(
-            "-giti", "--gitignore", "--gitignore",
+            "-iew", "--incl_ext_wr", "--include_xtensions_from_writing",
+            nargs = "*",
+            default = [],
+            help = "List of file extensions to include in writing (e.g.: .jpg, .png).")
+
+        parser.add_argument(
+            "-idw", "--incl_dir_wr", "--include_directories_from_writing",
+            nargs = "*",
+            default = [],
+            help = "List of directories to include in writing (e.g.: bin, render).")
+
+        parser.add_argument(
+            "-crawlig", "--crawlectignore", "--crawlectignore_use",
             type = str,
             choices = ["Yes", "yes", "No", "no", "Y", "y", "N", "n", "True", "true", "False", "false", "T", "t", "F", "f", "1", "0"],
             action = BooleanAction,
             default = True,
-            help = "Randomize .env variables to mitigate sensitive info leak risk (default is True).")
+            help = "Use .crawlectignore exclusion rules if exist (default is True).")
+
+        parser.add_argument(
+            "-gitig", "--gitignore", "--gitignore_use",
+            type = str,
+            choices = ["Yes", "yes", "No", "no", "Y", "y", "N", "n", "True", "true", "False", "false", "T", "t", "F", "f", "1", "0"],
+            action = BooleanAction,
+            default = True,
+            help = "Use .gitignore exclusion rules if exist (default is True).")
+
+        parser.add_argument(
+            "-dokig", "--dockerignore", "--dockerignore_use",
+            type = str,
+            choices = ["Yes", "yes", "No", "no", "Y", "y", "N", "n", "True", "true", "False", "false", "T", "t", "F", "f", "1", "0"],
+            action = BooleanAction,
+            default = True,
+            help = "Use .dockerignore exclusion rules if exist (default is True).")
 
         parser.add_argument(
             "-xen", "--xenv", "--sanitize_env_variables",
@@ -358,7 +401,7 @@ if __name__ == "__main__":
 
         args = parser.parse_args()
 
-        crawlect = Crawlect(path = args.path, output = args.output, output_prefix = args.output_prefix, output_suffix = args.output_suffix, recur = args.recur, depth = args.depth, excl_ext_li = args.excl_ext_li, excl_dir_li = args.excl_dir_li, excl_fil_li = args.excl_fil_li, excl_ext_wr = args.excl_ext_wr, excl_dir_wr = args.excl_dir_wr, excl_fil_wr = args.excl_fil_wr, incl_ext_li = args.incl_ext_li, incl_dir_li = args.incl_dir_li, incl_fil_li = args.incl_fil_li, incl_ext_wr = args.incl_ext_wr, incl_dir_wr = args.incl_dir_wr, incl_fil_wr = args.incl_fil_wr, gitignore = args.git ignore ,xenv = args.xenv, tree = args.tree)
+        crawlect = Crawlect(path = args.path, output = args.output, output_prefix = args.output_prefix, output_suffix = args.output_suffix, recur = args.recur, depth = args.depth, excl_pat_li = args.excl_pat_li, excl_fil_li = args.excl_fil_li, excl_ext_li = args.excl_ext_li, excl_dir_li = args.excl_dir_li, excl_fil_wr = args.excl_fil_wr, excl_ext_wr = args.excl_ext_wr, excl_dir_wr = args.excl_dir_wr, incl_fil_li = args.incl_fil_li, incl_ext_li = args.incl_ext_li, incl_dir_li = args.incl_dir_li, incl_fil_wr = args.incl_fil_wr, incl_ext_wr = args.incl_ext_wr, incl_dir_wr = args.incl_dir_wr, crawlectignore = args.crawlectignore, gitignore = args.gitignore, dockerignore = args.dockerignore,xenv = args.xenv, tree = args.tree)
 
         # Launch output file composition
         crawlect.outputService.compose()

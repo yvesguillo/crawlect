@@ -47,22 +47,17 @@ class Output:
                 exclude.append(self.currentOutputName)
                 outputFile.write(f"## File structure\n\nDirectory tree.\n\n{self.crawler.formatService.makeTreeMd(self.crawler.pathObj, chemin_ignorer = exclude, deep = self.crawler.depth)}\n\n")
 
-            
             # Files list
-            
-            
+
             # sort file
             sorted_files = self.crawler.files
-            sorted_files.sort(key=lambda p: (p.parent, p.name))
-
-
+            sorted_files.sort(key = lambda p: (p.parent, p.name))
 
             outputFile.write("## Files:\n\n")
             for file in sorted_files:
-                
-                fileDepth = len(file.parents) -1
+
                 chemin_id = hashlib.md5(str(file.resolve()).encode()).hexdigest()
-                
+
                 if file.is_file() and str(file) != self.currentOutputName:
                     if not self.crawler.formatService.searchType(file) is None:
                         outputFile.write(f"<h3 id=\"{chemin_id}\">{file.name}</h3>  \n")
@@ -74,11 +69,10 @@ class Output:
                             content = self.crawler.formatService.insertCodebox(file)
                             if not content is None:
                                 outputFile.write(self.crawler.formatService.insertCodebox(file))
-                            
+
                         except Exception as error:
                             print(f"\n!! - {type(error).__name__}:\n{type(self).__name__} could not create codebox from {repr(file)}: {error}")
                     outputFile.write("\n")
-                
 
     def standardOutputName(self):
         """Return standard output file name if no filename specified."""
