@@ -1,6 +1,7 @@
 #! /usr/bin/env python3
 
 from pathlib import Path
+from fnmatch import fnmatch
 
 class Scan:
     """
@@ -55,8 +56,12 @@ class Scan:
         if str(path) == self.crawler.output:
             return False
 
+        # Ignore files such as `.gitignore` rules above all.
+        if self.isIgnored(path):
+            return False
+
         # No rules at all, everything pass. This is Anarchy!:
-        if self.crawler.excl_ext_li == () and self.crawler.excl_fil_li == () and self.crawler.incl_ext_li == () and self.crawler.incl_fil_li == ():
+        if self.crawler.excl_ext_li == [] and self.crawler.excl_fil_li == [] and self.crawler.incl_ext_li == [] and self.crawler.incl_fil_li == []:
             return True
 
         # Forcibly included by file-name always wins:
@@ -76,7 +81,7 @@ class Scan:
             return False
 
         # Is neither forcibly included or excluded but an extension or file inclusion is overruling:
-        if self.crawler.incl_ext_li != () or self.crawler.incl_fil_li != ():
+        if self.crawler.incl_ext_li != [] or self.crawler.incl_fil_li != []:
             return False
 
         # If I forgot some case scenario, you may pass Mr Tuttle:
@@ -89,8 +94,13 @@ class Scan:
         All directories pass if there are no rules.
         Inclusion overrules exclusion.
         """
+
+        # Ignore files such as `.gitignore` rules above all.
+        if self.isIgnored(path):
+            return False
+
         # No rules at all, everything pass. This is Anarchy!:
-        if self.crawler.excl_dir_li == () and self.crawler.incl_dir_li == ():
+        if self.crawler.excl_dir_li == [] and self.crawler.incl_dir_li == []:
             return True
 
         # Is forcibly included:
@@ -102,11 +112,28 @@ class Scan:
             return False
 
         # Is neither forcibly included or excluded but a directory inclusion is overruling:
-        if self.crawler.incl_dir_li != ():
+        if self.crawler.incl_dir_li != []:
             return False
 
         # If I forgot some case scenario, you may pass Mr Tuttle:
         return True
+
+    # Almost identical methode in Scan and Output classes. Assess if this should be sent to a common class ("Filter" class ?).
+    def isIgnored(self, path):
+        """Check if path match any .gitignore pattern or path include/exclude list parameter item."""
+
+        # Does not support advanced .gitignore syntax such as the "!" for not ignoring at the moment.
+
+        for ignored in self.crawler.mergedIgnore:
+            if fnmatch(path, ignored):
+                return True
+
+        # Check if path is in path ignore list parameter.
+        for excludedPath in self.crawler.excl_pat_li:
+            if path == Path(excludedPath):
+                return True
+
+        return False
 
     def __str__(self):
         return self.__repr__()

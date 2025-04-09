@@ -1,6 +1,7 @@
 #! /usr/bin/env python3
 
 from pathlib import Path
+from fnmatch import fnmatch
 from datetime import datetime
 from random import choices
 import string
@@ -59,10 +60,7 @@ class Output:
                 chemin_id = hashlib.md5(str(file.resolve()).encode()).hexdigest()
 
                 if file.is_file() and str(file) != self.currentOutputName:
-                    if not self.crawler.formatService.searchType(file) is None:
-                        outputFile.write(f"<h3 id=\"{chemin_id}\">{file.name}</h3>  \n")
-                    else:
-                        outputFile.write(f"<h3 id=\"{chemin_id}\">{file.name}</h3>  \n") 
+                    outputFile.write(f"<h3 id=\"{chemin_id}\">{file.name}</h3>  \n")
                     outputFile.write(f"`{file}`\n\n")
                     if self.isFileToInclude(file):
                         try:
@@ -96,8 +94,13 @@ class Output:
         Inclusion overrules exclusion.
         File-name rules takes precedence against extension rules.
         """
+
+        # Ignore files such as `.gitignore` rules above all.
+        if self.isIgnored(path):
+            return False
+
         # No rules at all, everything pass. This is Anarchy!:
-        if self.crawler.excl_ext_wr == () and self.crawler.excl_fil_wr == () and self.crawler.incl_ext_wr == () and self.crawler.incl_fil_wr == ():
+        if self.crawler.excl_ext_wr == [] and self.crawler.excl_fil_wr == [] and self.crawler.incl_ext_wr == [] and self.crawler.incl_fil_wr == []:
             return True
 
         # Forcibly included by file-name always wins:
@@ -117,11 +120,28 @@ class Output:
             return False
 
         # Is neither forcibly included or excluded but an extension or file inclusion is overruling:
-        if self.crawler.incl_ext_wr != () or self.crawler.incl_fil_wr != ():
+        if self.crawler.incl_ext_wr != [] or self.crawler.incl_fil_wr != []:
             return False
 
         # If I forgot some case scenario, you may pass Mr Tuttle:
         return True
+
+    # Almost identical methode in Scan and Output classes. Assess if this should be sent to a common class ("Filter" class ?).
+    def isIgnored(self, path):
+        """Check if path match any .gitignore pattern or path include/exclude list parameter item."""
+
+        # Does not support advanced .gitignore syntax such as the "!" for not ignoring at the moment.
+
+        for ignored in self.crawler.mergedIgnore:
+            if fnmatch(path, ignored):
+                return True
+
+        # Check if path is in path ignore list parameter.
+        for excludedPath in self.crawler.excl_pat_li:
+            if path == Path(excludedPath):
+                return True
+
+        return False
 
     def __str__(self):
         return self.__repr__()
