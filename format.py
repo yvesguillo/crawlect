@@ -9,7 +9,7 @@ class Format:
 
     """
     # attribut de classe
-    counter_idmd = -1
+    
     def __init__(self):
 
         try:
@@ -108,7 +108,7 @@ class Format:
             return None
         
 
-    def makeTreeMd(self, chemin,  chemin_ignorer= [], deep = 20, level=0, racine = True):
+    def makeTreeMd(self, chemin,  chemin_ignorer= [], deep = 20, level=0, racine = True, chemin_rel=[]):
         if level >= deep + 1 :
             return ""
         
@@ -155,14 +155,14 @@ class Format:
             for fichier in fichiers:
                 try:
                 #appel récursif 
-                    self.counter_idmd += 1
-                    tree += self.makeTreeMd(fichier, chemin_ignorer,deep,level +1, False)
+                   
+                    tree += self.makeTreeMd(fichier, chemin_ignorer,deep,level +1, False,chemin_rel)
                 except PermissionError:
                     tree += ""
             for dossier in dossiers:
                 try:
-                    self.counter_idmd += 1
-                    tree += self.makeTreeMd(dossier, chemin_ignorer,deep, level +1, False)
+                    
+                    tree += self.makeTreeMd(dossier, chemin_ignorer,deep, level +1, False,chemin_rel)
 
                 except PermissionError:
                     
