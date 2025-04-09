@@ -1,6 +1,7 @@
 #! /usr/bin/env python3
 
 from pathlib import Path
+from fnmatch import fnmatch
 from math import inf
 
 # Custom modules.
@@ -234,6 +235,23 @@ class Crawlect:
         except Exception as error:
             print(f"\n!! - {type(error).__name__}:\n{type(self).__name__} could not process getIgnoreListFromFile({repr(file)}): {error}")
         return ignoreList
+
+    # Assess if this should be sent to a common class ("Filter" class ?).
+    def isPathIgnored(self, path):
+        """Check if path match any .gitignore pattern or path include/exclude list parameter item."""
+
+        # Does not support advanced .gitignore syntax such as the "!" for not ignoring at the moment.
+
+        for ignored in self.mergedIgnore:
+            if fnmatch(path, ignored):
+                return True
+
+        # Check if path is in path ignore list parameter.
+        for excludedPath in self.excl_pat_li:
+            if path == Path(excludedPath):
+                return True
+
+        return False
 
     def __str__(self):
         return self.__repr__()

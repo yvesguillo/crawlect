@@ -1,5 +1,5 @@
 # crawlect
-2025.04.10 01:27
+2025.04.10 01:38
 
 Generated with Crawlect.
 
@@ -180,6 +180,10 @@ Directory tree.
                 - [f0068fa14dedd17351a71cc988f6ef660d897e](#449a8c1a67f4109a587277cfff37f300)  
             - `57/`  
                 - [3351d56e9fe4fdaf521652d26cfbfc12ed9503](#ced287a226ca26f38f534721bdd57c89)  
+            - `58/`  
+                - [992d53a44d020ded1ee1652e425b9debd719e3](#b66c71c7df0601d7cd417628c0a9f9d9)  
+            - `5c/`  
+                - [2626cf1e7cf00df11854955914e006ff53afca](#5dcf37f93285afcffb8c93b25703c3c9)  
             - `5d/`  
                 - [98b00c47d683c783beccbf7640975f84d52b95](#f62af8a3a649c0a2da5b87b360f11a07)  
             - `5f/`  
@@ -262,6 +266,8 @@ Directory tree.
                 - [5a1ade779f0427af052d4a4b09c609598a18c3](#6948b47a14a281787d36e5fd118b7f8b)  
             - `98/`  
                 - [c1f39b3f60b995e38bae647e397311a55c02a8](#c74410749548dad223a37ce69dd8c86d)  
+            - `99/`  
+                - [558d3f74ff673beb2512a10747e059e824d998](#d0cf6b5ad4d8be915a143391b1594253)  
             - `9d/`  
                 - [dcb73c3a470f16297b6cd5c9c117cbd23b3b0a](#a29f39baaeeb24a366c0d0f13fab0697)  
             - `9f/`  
@@ -343,9 +349,11 @@ Directory tree.
                 - [33a248a8b952cb37dc71f30082437d5c8c423f](#f45adb21d4915209422b798cc452b7d5)  
             - `dc/`  
                 - [199a2595ccf030883cdebd225ca6b70d776d3e](#5a91c9bce2c3fc4d0b777f967d8a7187)  
+                - [b77f9bec75373db0049bbb9521bc7a806ef8ea](#afe7b690233d7a35d097ed64ed2853d5)  
             - `df/`  
                 - [191f653201924ffeebfe77e4775c229b4c247a](#612865fa2ca9ad0ad567f49d56fd5347)  
             - `e0/`  
+                - [1d84ea54104f2d60f8acbf3b3afa3a75f02a2e](#159caac958f4bd2ef12e1a8329608b08)  
                 - [213cf7bae592e3202438282d5357c0272eeb53](#9dbdc5b981048ec5db201516bb8c83e1)  
                 - [8f9d82201b8076a2305971cebdfeb45883df6a](#3147fba0dc1bba1b88900a990f9a2a34)  
             - `e2/`  
@@ -901,6 +909,7 @@ myCrawler.outputService.compose()
 #! /usr/bin/env python3
 
 from pathlib import Path
+from fnmatch import fnmatch
 from math import inf
 
 # Custom modules.
@@ -1134,6 +1143,23 @@ class Crawlect:
         except Exception as error:
             print(f"\n!! - {type(error).__name__}:\n{type(self).__name__} could not process getIgnoreListFromFile({repr(file)}): {error}")
         return ignoreList
+
+    # Assess if this should be sent to a common class ("Filter" class ?).
+    def isPathIgnored(self, path):
+        """Check if path match any .gitignore pattern or path include/exclude list parameter item."""
+
+        # Does not support advanced .gitignore syntax such as the "!" for not ignoring at the moment.
+
+        for ignored in self.mergedIgnore:
+            if fnmatch(path, ignored):
+                return True
+
+        # Check if path is in path ignore list parameter.
+        for excludedPath in self.excl_pat_li:
+            if path == Path(excludedPath):
+                return True
+
+        return False
 
     def __str__(self):
         return self.__repr__()
@@ -1792,7 +1818,6 @@ class Format:
 #! /usr/bin/env python3
 
 from pathlib import Path
-from fnmatch import fnmatch
 from datetime import datetime
 from random import choices
 import string
@@ -1887,7 +1912,7 @@ class Output:
         """
 
         # Ignore files such as `.gitignore` rules above all.
-        if self.isIgnored(path):
+        if self.crawler.isPathIgnored(path):
             return False
 
         # No rules at all, everything pass. This is Anarchy!:
@@ -1917,22 +1942,6 @@ class Output:
         # If I forgot some case scenario, you may pass Mr Tuttle:
         return True
 
-    # Almost identical methode in Scan and Output classes. Assess if this should be sent to a common class ("Filter" class ?).
-    def isIgnored(self, path):
-        """Check if path match any .gitignore pattern or path include/exclude list parameter item."""
-
-        # Does not support advanced .gitignore syntax such as the "!" for not ignoring at the moment.
-
-        for ignored in self.crawler.mergedIgnore:
-            if fnmatch(path, ignored):
-                return True
-
-        # Check if path is in path ignore list parameter.
-        if str(path) in self.crawler.excl_pat_li:
-            return True
-
-        return False
-
     def __str__(self):
         return self.__repr__()
 
@@ -1950,7 +1959,6 @@ class Output:
 #! /usr/bin/env python3
 
 from pathlib import Path
-from fnmatch import fnmatch
 
 class Scan:
     """
@@ -2006,7 +2014,7 @@ class Scan:
             return False
 
         # Ignore files such as `.gitignore` rules above all.
-        if self.isIgnored(path):
+        if self.crawler.isPathIgnored(path):
             return False
 
         # No rules at all, everything pass. This is Anarchy!:
@@ -2045,7 +2053,7 @@ class Scan:
         """
 
         # Ignore files such as `.gitignore` rules above all.
-        if self.isIgnored(path):
+        if self.crawler.isPathIgnored(path):
             return False
 
         # No rules at all, everything pass. This is Anarchy!:
@@ -2066,23 +2074,6 @@ class Scan:
 
         # If I forgot some case scenario, you may pass Mr Tuttle:
         return True
-
-    # Almost identical methode in Scan and Output classes. Assess if this should be sent to a common class ("Filter" class ?).
-    def isIgnored(self, path):
-        """Check if path match any .gitignore pattern or path include/exclude list parameter item."""
-
-        # Does not support advanced .gitignore syntax such as the "!" for not ignoring at the moment.
-
-        for ignored in self.crawler.mergedIgnore:
-            if fnmatch(path, ignored):
-                return True
-
-        # Check if path is in path ignore list parameter.
-        for excludedPath in self.crawler.excl_pat_li:
-            if path == Path(excludedPath):
-                return True
-
-        return False
 
     def __str__(self):
         return self.__repr__()

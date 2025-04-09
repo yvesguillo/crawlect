@@ -1,7 +1,6 @@
 #! /usr/bin/env python3
 
 from pathlib import Path
-from fnmatch import fnmatch
 
 class Scan:
     """
@@ -57,7 +56,7 @@ class Scan:
             return False
 
         # Ignore files such as `.gitignore` rules above all.
-        if self.isIgnored(path):
+        if self.crawler.isPathIgnored(path):
             return False
 
         # No rules at all, everything pass. This is Anarchy!:
@@ -96,7 +95,7 @@ class Scan:
         """
 
         # Ignore files such as `.gitignore` rules above all.
-        if self.isIgnored(path):
+        if self.crawler.isPathIgnored(path):
             return False
 
         # No rules at all, everything pass. This is Anarchy!:
@@ -117,23 +116,6 @@ class Scan:
 
         # If I forgot some case scenario, you may pass Mr Tuttle:
         return True
-
-    # Almost identical methode in Scan and Output classes. Assess if this should be sent to a common class ("Filter" class ?).
-    def isIgnored(self, path):
-        """Check if path match any .gitignore pattern or path include/exclude list parameter item."""
-
-        # Does not support advanced .gitignore syntax such as the "!" for not ignoring at the moment.
-
-        for ignored in self.crawler.mergedIgnore:
-            if fnmatch(path, ignored):
-                return True
-
-        # Check if path is in path ignore list parameter.
-        for excludedPath in self.crawler.excl_pat_li:
-            if path == Path(excludedPath):
-                return True
-
-        return False
 
     def __str__(self):
         return self.__repr__()
