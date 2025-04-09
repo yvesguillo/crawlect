@@ -1,5 +1,5 @@
 import json
-
+import hashlib
 from pathlib import Path
 
 class Format:
@@ -8,7 +8,8 @@ class Format:
     Va identifier le type de fichier et le placer dans un codbox
 
     """
-
+    # attribut de classe
+    counter_idmd = -1
     def __init__(self):
 
         try:
@@ -17,6 +18,8 @@ class Format:
                 self.languages = json.load(f)
         except:
             print("Tables de mapage introuvables")
+        
+        
 
     def insertCodebox(self, file):
         """
@@ -108,23 +111,31 @@ class Format:
     def makeTreeMd(self, chemin,  chemin_ignorer= [], deep = 20, level=0, racine = True):
         if level >= deep + 1 :
             return ""
-        #print(chemin_ignorer)
+        
         
         if chemin.name in chemin_ignorer:
+            self.counter_idmd -= 1
             return ""
         
         if chemin.is_file in chemin_ignorer:
+            self.counter_idmd -= 1
             return ""
+        
         
         tree = ""
         indentation = "    "*level
 
         #print(f"{indentation}|__ {chemin.name}{fin}")
         if level == 0 and racine:
+            self.counter_idmd = -1
             tree += f"- **{chemin.resolve().name}/**  \n"
-        elif level>0:
+        
+        idmd = str(self.counter_idmd) 
+        
+        if level>0:
             if chemin.is_file():
-                tree += f"{indentation}- [{chemin.name}](#{chemin.stem.replace(".","") + chemin.suffix[1:]})  \n"
+                chemin_id = hashlib.md5(str(chemin.resolve()).encode()).hexdigest()
+                tree += f"{indentation}- [{chemin.name}](#{chemin_id})  \n"
             if chemin.is_dir():
                 tree += f"{indentation}- `{chemin.name}/`  \n"
 
@@ -140,18 +151,21 @@ class Format:
             
             dossiers = sorted(dossier_liste)
             fichiers = sorted(fichier_liste)
-            
+              
             for fichier in fichiers:
                 try:
                 #appel récursif 
+                    self.counter_idmd += 1
                     tree += self.makeTreeMd(fichier, chemin_ignorer,deep,level +1, False)
                 except PermissionError:
                     tree += ""
             for dossier in dossiers:
                 try:
+                    self.counter_idmd += 1
                     tree += self.makeTreeMd(dossier, chemin_ignorer,deep, level +1, False)
 
                 except PermissionError:
+                    
                     tree += ""
         #print(tree)
         return tree
