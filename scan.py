@@ -20,7 +20,7 @@ class Scan:
         self.crawler = crawler
         self.args["crawler"] = self.crawler
 
-    def listFilesIn(self, path = None, depth = None, files = None):
+    def listPathIn(self, path = None, depth = None, files = None):
         """Append all eligible paths from `crawler.path` as Path object in a list and return it."""
         if files is None:
             files = []
@@ -37,9 +37,9 @@ class Scan:
                     files.append(candidatePath)
                 elif candidatePath.is_dir() and self.crawler.recur and depth >= 1 and self.isDirToInclude(candidatePath):
                     files.append(candidatePath)
-                    self.listFilesIn(path = candidatePath, depth = depth-1, files = files)
+                    self.listPathIn(path = candidatePath, depth = depth-1, files = files)
             except PermissionError as err:
-                print(f"\n!! {type(err) .__name__} :\n{type(self) .__name__} Could not list path {repr(candidatePath)}: {err} ")
+                print(f"\n!! - {type(err).__name__} :\n{type(self) .__name__} Could not list path {repr(candidatePath)}: {err} ")
         return files
 
     # Almost identical methode in Scan and Output classes. Assess if this should be sent to a common class ("Filter" class ?).
@@ -55,8 +55,12 @@ class Scan:
         if str(path) == self.crawler.output:
             return False
 
+        # Ignore files such as `.gitignore` rules above all.
+        if self.crawler.isPathIgnored(path):
+            return False
+
         # No rules at all, everything pass. This is Anarchy!:
-        if self.crawler.excl_ext_li == () and self.crawler.excl_fil_li == () and self.crawler.incl_ext_li == () and self.crawler.incl_fil_li == ():
+        if self.crawler.excl_ext_li == [] and self.crawler.excl_fil_li == [] and self.crawler.incl_ext_li == [] and self.crawler.incl_fil_li == []:
             return True
 
         # Forcibly included by file-name always wins:
@@ -76,7 +80,7 @@ class Scan:
             return False
 
         # Is neither forcibly included or excluded but an extension or file inclusion is overruling:
-        if self.crawler.incl_ext_li != () or self.crawler.incl_fil_li != ():
+        if self.crawler.incl_ext_li != [] or self.crawler.incl_fil_li != []:
             return False
 
         # If I forgot some case scenario, you may pass Mr Tuttle:
@@ -89,8 +93,13 @@ class Scan:
         All directories pass if there are no rules.
         Inclusion overrules exclusion.
         """
+
+        # Ignore files such as `.gitignore` rules above all.
+        if self.crawler.isPathIgnored(path):
+            return False
+
         # No rules at all, everything pass. This is Anarchy!:
-        if self.crawler.excl_dir_li == () and self.crawler.incl_dir_li == ():
+        if self.crawler.excl_dir_li == [] and self.crawler.incl_dir_li == []:
             return True
 
         # Is forcibly included:
@@ -102,7 +111,7 @@ class Scan:
             return False
 
         # Is neither forcibly included or excluded but a directory inclusion is overruling:
-        if self.crawler.incl_dir_li != ():
+        if self.crawler.incl_dir_li != []:
             return False
 
         # If I forgot some case scenario, you may pass Mr Tuttle:

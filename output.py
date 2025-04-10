@@ -47,38 +47,29 @@ class Output:
                 exclude.append(self.currentOutputName)
                 outputFile.write(f"## File structure\n\nDirectory tree.\n\n{self.crawler.formatService.makeTreeMd(self.crawler.pathObj, chemin_ignorer = exclude, deep = self.crawler.depth)}\n\n")
 
-            
             # Files list
-            
-            
+
             # sort file
             sorted_files = self.crawler.files
-            sorted_files.sort(key=lambda p: (p.parent, p.name))
-
-
+            sorted_files.sort(key = lambda p: (p.parent, p.name))
 
             outputFile.write("## Files:\n\n")
             for file in sorted_files:
-                
-                fileDepth = len(file.parents) -1
+
                 chemin_id = hashlib.md5(str(file.resolve()).encode()).hexdigest()
-                
+
                 if file.is_file() and str(file) != self.currentOutputName:
-                    if not self.crawler.formatService.searchType(file) is None:
-                        outputFile.write(f"<h3 id=\"{chemin_id}\">{file.name}</h3>  \n")
-                    else:
-                        outputFile.write(f"<h3 id=\"{chemin_id}\">{file.name}</h3>  \n") 
+                    outputFile.write(f"<h3 id=\"{chemin_id}\">{file.name}</h3>  \n")
                     outputFile.write(f"`{file}`\n\n")
                     if self.isFileToInclude(file):
                         try:
                             content = self.crawler.formatService.insertCodebox(file)
                             if not content is None:
                                 outputFile.write(self.crawler.formatService.insertCodebox(file))
-                            
+
                         except Exception as error:
                             print(f"\n!! - {type(error).__name__}:\n{type(self).__name__} could not create codebox from {repr(file)}: {error}")
                     outputFile.write("\n")
-                
 
     def standardOutputName(self):
         """Return standard output file name if no filename specified."""
@@ -102,8 +93,13 @@ class Output:
         Inclusion overrules exclusion.
         File-name rules takes precedence against extension rules.
         """
+
+        # Ignore files such as `.gitignore` rules above all.
+        if self.crawler.isPathIgnored(path):
+            return False
+
         # No rules at all, everything pass. This is Anarchy!:
-        if self.crawler.excl_ext_wr == () and self.crawler.excl_fil_wr == () and self.crawler.incl_ext_wr == () and self.crawler.incl_fil_wr == ():
+        if self.crawler.excl_ext_wr == [] and self.crawler.excl_fil_wr == [] and self.crawler.incl_ext_wr == [] and self.crawler.incl_fil_wr == []:
             return True
 
         # Forcibly included by file-name always wins:
@@ -123,7 +119,7 @@ class Output:
             return False
 
         # Is neither forcibly included or excluded but an extension or file inclusion is overruling:
-        if self.crawler.incl_ext_wr != () or self.crawler.incl_fil_wr != ():
+        if self.crawler.incl_ext_wr != [] or self.crawler.incl_fil_wr != []:
             return False
 
         # If I forgot some case scenario, you may pass Mr Tuttle:
