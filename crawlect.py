@@ -183,7 +183,7 @@ class Crawlect:
             raise
 
         try:
-            self.formatService = Format() # Format does not take Crawlect instance as parameter.
+            self.formatService = Format(self) # Format does not take Crawlect instance as parameter.
         except:
             print(f"Error: on {type(self).__name__}:\ncould not refresh and initiate its Format service.")
             raise

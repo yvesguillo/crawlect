@@ -1,17 +1,23 @@
 #! /usr/bin/env python3
 
+
 import json
 import hashlib
 from pathlib import Path
 
-class Format:
+class Format():
     """
     La classe prend en entrée un chemin de fichier path fourni par la classe scan.
     Va identifier le type de fichier et le placer dans un codbox
 
     """
+
     
-    def __init__(self):
+    def __init__(self, crawler):
+        self.args = dict()
+        self.crawler = crawler
+        self.args["crawler"] = self.crawler = crawler
+
         # récupérer l'emplacement du script (pour les fichiers de config )
         sciptPath = Path(__file__).resolve().parent
 
@@ -123,6 +129,11 @@ class Format:
         """
         if level >= deep + 1 :
             return ""
+        
+        
+        if self.crawler.isPathIgnored(chemin):
+            return ""
+        
         
         
         if chemin.name in chemin_ignorer:
