@@ -131,9 +131,6 @@ class Format():
             return ""
         
         
-        if self.crawler.isPathIgnored(chemin):
-            return ""
-        
         
         
         if chemin.name in chemin_ignorer:
@@ -150,7 +147,8 @@ class Format():
         if level == 0 and racine:
             tree += f"- **{chemin.resolve().name}/**  \n"
         
-        
+
+
         # On vérifie que nous ne somme pas dans la première occurence de récursivité
         if level>0:
             if chemin.is_file():
@@ -158,6 +156,8 @@ class Format():
                 tree += f"{indentation}- [{chemin.name}](#{chemin_id})  \n"
 
             if chemin.is_dir():
+                if self.crawler.isPathIgnored(chemin):
+                    return ""
                 tree += f"{indentation}- `{chemin.name}/`  \n"
 
         if chemin.is_dir():
