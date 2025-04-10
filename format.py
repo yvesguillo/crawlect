@@ -135,7 +135,7 @@ class Format:
         if level == 0 and racine:
             tree += f"- **{chemin.resolve().name}/**  \n"
         
-        idmd = str(self.counter_idmd) 
+        
         # On vérifie que nous ne somme pas dans la première occurence de récursivité
         if level>0:
             if chemin.is_file():
