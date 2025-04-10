@@ -12,10 +12,14 @@ class Format:
     """
     
     def __init__(self):
+        # récupérer l'emplacement du script (pour les fichiers de config )
+        sciptPath = Path(__file__).resolve().parent
 
+        #création du lien 
+        langPath = sciptPath /"languages.json"
         try:
 
-            with open("languages.json", "rt") as f:
+            with langPath.open("rt") as f:
                 self.languages = json.load(f)
         except:
             print("Tables de mapage introuvables")
