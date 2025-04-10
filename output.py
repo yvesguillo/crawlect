@@ -24,7 +24,7 @@ class Output:
         self.args = dict()
 
         self.crawler = crawler
-        self.args["crawler"] = self.crawler = crawler
+        self.args["crawler"] = self.crawler
 
         self.currentOutputName = ""
         self.composition = ()

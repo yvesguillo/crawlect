@@ -16,7 +16,7 @@ class Format():
     def __init__(self, crawler):
         self.args = dict()
         self.crawler = crawler
-        self.args["crawler"] = self.crawler = crawler
+        self.args["crawler"] = self.crawler
 
         # récupérer l'emplacement du script (pour les fichiers de config )
         sciptPath = Path(__file__).resolve().parent
