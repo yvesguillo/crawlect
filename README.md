@@ -12,6 +12,7 @@ When starting with a new project — whether you're reviewing, refactoring, or c
 - Filtering files and directories with powerful inclusion/exclusion rules,
 - Masking sensitive data (like `.env` values),
 - Embedding file contents in Markdown-formatted code blocks,
+- Parsing `.gitignore`/`.dockerignore`/`.crawlectignore` rules to mimic your dev setup,
 - Automatically generating a well-organized, shareable `.md` file.
 
 ## Use cases
@@ -21,7 +22,51 @@ When starting with a new project — whether you're reviewing, refactoring, or c
 - Share code context with collaborators (or *LLM*!)
 - Safely include `.env` files without leaking sensitive values
 
-***Think of Crawlect as your markdown-minion — obedient, efficient, and allergic to messy folders.***
+***Think of Crawlect as your markdown-minion; obedient, efficient, and allergic to messy folders.***
+
+## Architecture:
+
+```text
+                         +-------------------+
+                         | CLI OR  py Script |
+                         +---------+---------+
+                                   |
+                     Filters rules |
+                      Path Objects |
+                                   v
+                          +-----------------+
+                          | Crawlect        |
+                          +--------+--------+
+                                   |
+                     Filters rules |
+                      Path Objects |
+                                   |
+         +-------------------------+-------------------------+
+         |                         |                         |
+         v                         v                         v
++-----------------+       +--------------- -+       +-----------------+
+| Scan            |       | Format          |       | Output          |
+|(List files)     |------>|(Detect type &   |------>|(Compose final   |
+|                 |   |   | insert codebox) |   |   | Markdown file)  |
++-----------------+   |   +-----------------+   |   +--------+--------+
+                      |                         |            |
+                Files to list            Codebox strings     |
+                 (Obj Paths)              (string (MD))      |
+                                                             |
+                                   +-------------------------+
+                                   |
+                                   v
+                          +-----------------+
+                          | Markdown file   |
+                          | --------        |
+                          | ---             |
+                          +-----------------+
+```
+
+- **Crawlect**: Manager class, handles options, sequence, client parameters, and service classes.
+- **Scan**: Crawls the directories and applies filtering logic.
+- **Format**: Detects file type, builds Markdown-friendly code blocks.
+- **Output**: Generates the final `.md` file.
 
 ## Crawlect – User Guide
 **Crawlect**, the tool that turns your project folder into a beautifully structured Markdown digest — effortlessly.
@@ -70,6 +115,7 @@ You can also:
 - Disable recursive crawling (`--recur no`)
 - Enable the directory tree overview (`--tree yes`)
 - Sanitize .env files (`--xenv yes`)
+- Apply `.gitignore`, `.dockerignore`, and `.crawlectignore` files automatically
 
 ### Example Command
 ```bash
@@ -81,13 +127,15 @@ python3 crawlect.py \
   --incl_ext_wr .py .json \
   --tree yes \
   --xenv yes
-Creates a structured markdown file (with a unique name), ignoring noisy files and including `.py` and `.md` contents.
 ```
+Creates a structured markdown file (with a unique name), ignoring noisy files and including `.py` and `.json` contents.
+
 ### Tips
 
-- `.env` files are *auto-sanitized* — values are replaced by `YourValueFor_<varname>`
+- `.env` files are *auto-sanitized*; values are replaced by `YourValueFor_<varname>`
 - Inclusion rules overrule exclusion
 - File name rules take precedence over extension rules
+- `.gitignore`, `.dockerignore`, and `.crawlectignore` are respected if available
 
 ### Module Mode
 
@@ -100,176 +148,80 @@ myCrawler = Crawlect(path=".", output="./project_overview.md")
 myCrawler.outputService.compose()
 ```
 
-## Planned Features (ideas welcome!)
-- *Git* related filtering.
-- *HTML* output
-- *LLM* API integration.
-- Optional syntax highlighting themes
-- GUI launcher (who knows?)
+## Advanced Filtering Features
 
-## Architecture:
+Crawlect doesn’t just crawl. It **obeys your rules like a good little spider**; deciding which files and folders to list and which to write based on powerful filtering logic.
 
-```text
-                           +-----------------+
-                           | User CLI        |
-                           +--------+--------+
-                                    |
-                                    v
-                           +-----------------+
-                           | Crawlect        |  <== Main class
-                           +--------+--------+
-                                    |
-          +-------------------------+-------------------------+
-          |                         |                         |
-          v                         v                         v
-  +----------------+       +--------------- -+       +-----------------+
-  |  Scan          |       | Format          |       | Output          |
-  |  (List files)  |       | (Detect type &  |       | (Compose final  |
-  |                |       | insert codebox) |       |  Markdown file) |
-  +-------+--------+       +--------+------- +       +--------+--------+
-          |                         |                         |
-          v                         v                         v
-    Files to list            Codebox strings         Markdown composition
-       (Path)                      (MD)                     (MD)
+### How Filtering Works
+
+There are **two phases** of filtering:  
+1. **Listing phase** (`_li` suffix): decides which files and folders are shown in the output structure.  
+2. **Writing phase** (`_wr` suffix): decides which files have their content embedded in the Markdown output.
+
+You can filter by:
+- **File names** (`incl_fil_*`, `excl_fil_*`)
+- **File extensions** (`incl_ext_*`, `excl_ext_*`)
+- **Directories** (`incl_dir_*`, `excl_dir_*`)
+
+### Rule Hierarchy (Who wins?)
+Here’s how Crawlect resolves conflicts:
+
+**FILE NAME RULES** > **EXTENSION RULES** > **DIRECTORY RULES**
+
+For both listing and writing:
+- Inclusion always overrules exclusion at the same level
+- File name rules take precedence over extension rules
+- If no rules? Crawlect lets everything in = anarchy mode!
+
+### Ignore Files
+Crawlect parses `.gitignore`, `.dockerignore`, and `.crawlectignore` files:
+- Any matching path will be excluded from both listing and writing
+- `.git` folder is also auto-excluded if `.gitignore` is active
+- Lines starting with `#` or empty lines are ignored
+
+> **Note:** Advanced `.gitignore` syntax like `!pattern` is currently not supported (yet!)
+
+### Examples
+
+List all files except `.jpg` and `.png`:
+```bash
+--excl_ext_li .jpg .png
 ```
 
-- **Scan**: Crawls the directories based on inclusion/exclusion rules
-- **Format**: Detects file type & builds Markdown-friendly code blocks
-- **Output**: Writes everything to a nicely structured `.md` file
+Only list `.py` and `.md` files:
+```bash
+--incl_ext_li .py .md
+```
 
-***"Documentation is like a love letter you write to your future self."***  
-*— Damian Conway, we believe. Or some other wise code-wizard.*
+List everything except `node_modules` directory:
+```bash
+--excl_dir_li node_modules
+```
+
+Write only `.py` and `README.md` contents:
+```bash
+--incl_ext_wr .py --incl_fil_wr README.md
+```
+
+### Pro tip
+You can combine filters creatively. Want to list all `.py` files **except** one specific script?
+
+```bash
+--incl_ext_li .py --excl_fil_li evil_script.py
+```
+
+Voilà; precise, elegant, and slightly obsessive. Just like your code should be.
+
+## Planned Features (ideas welcome!)
+- *Git* related filtering
+- *HTML* output
+- *LLM* API integration
+- Optional syntax highlighting themes
+- GUI launcher (maybe...)
 
 ## References and thanks
 ### Markdown code syntax table - From [jincheng9 on GitHub](https://github.com/jincheng9/markdown_supported_languages)
-| language | ext1 | ext2 | ext3 | ext4 | ext5 | ext6 | ext7 | ext8 | ext9 |
-|---|---|---|---|---|---|---|---|---|---|
-| cucumber | .feature |  |  |  |  |  |  |  |  |
-| abap | .abap |  |  |  |  |  |  |  |  |
-| ada | .adb | .ads | .ada |  |  |  |  |  |  |
-| ahk | .ahk | .ahkl |  |  |  |  |  |  |  |
-| apacheconf | .htaccess | apache.conf | apache2.conf |  |  |  |  |  |  |
-| applescript | .applescript |  |  |  |  |  |  |  |  |
-| as | .as |  |  |  |  |  |  |  |  |
-| as3 | .as |  |  |  |  |  |  |  |  |
-| asy | .asy |  |  |  |  |  |  |  |  |
-| bash | .sh | .ksh | .bash | .ebuild | .eclass |  |  |  |  |
-| bat | .bat | .cmd |  |  |  |  |  |  |  |
-| befunge | .befunge |  |  |  |  |  |  |  |  |
-| blitzmax | .bmx |  |  |  |  |  |  |  |  |
-| boo | .boo |  |  |  |  |  |  |  |  |
-| brainfuck | .bf | .b |  |  |  |  |  |  |  |
-| c | .c | .h |  |  |  |  |  |  |  |
-| cfm | .cfm | .cfml | .cfc |  |  |  |  |  |  |
-| cheetah | .tmpl | .spt |  |  |  |  |  |  |  |
-| cl | .cl | .lisp | .el |  |  |  |  |  |  |
-| clojure | .clj | .cljs |  |  |  |  |  |  |  |
-| cmake | .cmake | CMakeLists.txt |  |  |  |  |  |  |  |
-| coffeescript | .coffee |  |  |  |  |  |  |  |  |
-| console | .sh-session |  |  |  |  |  |  |  |  |
-| control | control |  |  |  |  |  |  |  |  |
-| cpp | .cpp | .hpp | .c++ | .h++ | .cc | .hh | .cxx | .hxx | .pde |
-| csharp | .cs |  |  |  |  |  |  |  |  |
-| css | .css |  |  |  |  |  |  |  |  |
-| cython | .pyx | .pxd | .pxi |  |  |  |  |  |  |
-| d | .d | .di |  |  |  |  |  |  |  |
-| delphi | .pas |  |  |  |  |  |  |  |  |
-| diff | .diff | .patch |  |  |  |  |  |  |  |
-| dpatch | .dpatch | .darcspatch |  |  |  |  |  |  |  |
-| duel | .duel | .jbst |  |  |  |  |  |  |  |
-| dylan | .dylan | .dyl |  |  |  |  |  |  |  |
-| erb | .erb |  |  |  |  |  |  |  |  |
-| erl | .erl-sh |  |  |  |  |  |  |  |  |
-| erlang | .erl | .hrl |  |  |  |  |  |  |  |
-| evoque | .evoque |  |  |  |  |  |  |  |  |
-| factor | .factor |  |  |  |  |  |  |  |  |
-| felix | .flx | .flxh |  |  |  |  |  |  |  |
-| fortran | .f | .f90 |  |  |  |  |  |  |  |
-| gas | .s | .S |  |  |  |  |  |  |  |
-| genshi | .kid |  |  |  |  |  |  |  |  |
-| gitignore | .gitignore |  |  |  |  |  |  |  |  |
-| glsl | .vert | .frag | .geo |  |  |  |  |  |  |
-| gnuplot | .plot | .plt |  |  |  |  |  |  |  |
-| go | .go |  |  |  |  |  |  |  |  |
-| groff | .(1234567) | .man |  |  |  |  |  |  |  |
-| haml | .haml |  |  |  |  |  |  |  |  |
-| haskell | .hs |  |  |  |  |  |  |  |  |
-| html | .html | .htm | .xhtml | .xslt |  |  |  |  |  |
-| hx | .hx |  |  |  |  |  |  |  |  |
-| hybris | .hy | .hyb |  |  |  |  |  |  |  |
-| ini | .ini | .cfg |  |  |  |  |  |  |  |
-| io | .io |  |  |  |  |  |  |  |  |
-| ioke | .ik |  |  |  |  |  |  |  |  |
-| irc | .weechatlog |  |  |  |  |  |  |  |  |
-| jade | .jade |  |  |  |  |  |  |  |  |
-| java | .java |  |  |  |  |  |  |  |  |
-| js | .js |  |  |  |  |  |  |  |  |
-| jsp | .jsp |  |  |  |  |  |  |  |  |
-| lhs | .lhs |  |  |  |  |  |  |  |  |
-| llvm | .ll |  |  |  |  |  |  |  |  |
-| logtalk | .lgt |  |  |  |  |  |  |  |  |
-| lua | .lua | .wlua |  |  |  |  |  |  |  |
-| make | .mak | Makefile | makefile | Makefile. | GNUmakefile |  |  |  |  |
-| mako | .mao |  |  |  |  |  |  |  |  |
-| maql | .maql |  |  |  |  |  |  |  |  |
-| mason | .mhtml | .mc | .mi | autohandler | dhandler |  |  |  |  |
-| markdown | .md |  |  |  |  |  |  |  |  |
-| modelica | .mo |  |  |  |  |  |  |  |  |
-| modula2 | .def | .mod |  |  |  |  |  |  |  |
-| moocode | .moo |  |  |  |  |  |  |  |  |
-| mupad | .mu |  |  |  |  |  |  |  |  |
-| mxml | .mxml |  |  |  |  |  |  |  |  |
-| myghty | .myt | autodelegate |  |  |  |  |  |  |  |
-| nasm | .asm | .ASM |  |  |  |  |  |  |  |
-| newspeak | .ns2 |  |  |  |  |  |  |  |  |
-| objdump | .objdump |  |  |  |  |  |  |  |  |
-| objectivec | .m |  |  |  |  |  |  |  |  |
-| objectivej | .j |  |  |  |  |  |  |  |  |
-| ocaml | .ml | .mli | .mll | .mly |  |  |  |  |  |
-| ooc | .ooc |  |  |  |  |  |  |  |  |
-| perl | .pl | .pm |  |  |  |  |  |  |  |
-| php | .php | .php(345) |  |  |  |  |  |  |  |
-| postscript | .ps | .eps |  |  |  |  |  |  |  |
-| pot | .pot | .po |  |  |  |  |  |  |  |
-| pov | .pov | .inc |  |  |  |  |  |  |  |
-| prolog | .prolog | .pro | .pl |  |  |  |  |  |  |
-| properties | .properties |  |  |  |  |  |  |  |  |
-| protobuf | .proto |  |  |  |  |  |  |  |  |
-| py3tb | .py3tb |  |  |  |  |  |  |  |  |
-| pytb | .pytb |  |  |  |  |  |  |  |  |
-| python | .py | .pyw | .sc | SConstruct | SConscript | .tac |  |  |  |
-| r | .R |  |  |  |  |  |  |  |  |
-| rb | .rb | .rbw | Rakefile | .rake | .gemspec | .rbx | .duby |  |  |
-| rconsole | .Rout |  |  |  |  |  |  |  |  |
-| rebol | .r | .r3 |  |  |  |  |  |  |  |
-| redcode | .cw |  |  |  |  |  |  |  |  |
-| rhtml | .rhtml |  |  |  |  |  |  |  |  |
-| rst | .rst | .rest |  |  |  |  |  |  |  |
-| sass | .sass |  |  |  |  |  |  |  |  |
-| scala | .scala |  |  |  |  |  |  |  |  |
-| scaml | .scaml |  |  |  |  |  |  |  |  |
-| scheme | .scm |  |  |  |  |  |  |  |  |
-| scss | .scss |  |  |  |  |  |  |  |  |
-| smalltalk | .st |  |  |  |  |  |  |  |  |
-| smarty | .tpl |  |  |  |  |  |  |  |  |
-| sourceslist | sources.list |  |  |  |  |  |  |  |  |
-| splus | .S | .R |  |  |  |  |  |  |  |
-| sql | .sql |  |  |  |  |  |  |  |  |
-| sqlite3 | .sqlite3-console |  |  |  |  |  |  |  |  |
-| squidconf | squid.conf |  |  |  |  |  |  |  |  |
-| ssp | .ssp |  |  |  |  |  |  |  |  |
-| tcl | .tcl |  |  |  |  |  |  |  |  |
-| tcsh | .tcsh | .csh |  |  |  |  |  |  |  |
-| tex | .tex | .aux | .toc |  |  |  |  |  |  |
-| text | .txt |  |  |  |  |  |  |  |  |
-| v | .v | .sv |  |  |  |  |  |  |  |
-| vala | .vala | .vapi |  |  |  |  |  |  |  |
-| vbnet | .vb | .bas |  |  |  |  |  |  |  |
-| velocity | .vm | .fhtml |  |  |  |  |  |  |  |
-| vim | .vim | .vimrc |  |  |  |  |  |  |  |
-| xml | .xml | .xsl | .rss | .xslt | .xsd | .wsdl |  |  |  |
-| xquery | .xqy | .xquery |  |  |  |  |  |  |  |
-| xslt | .xsl | .xslt |  |  |  |  |  |  |  |
-| yaml | .yaml | .yml |  |  |  |  |  |  |  |
 
-### Arpars boolean argument treatment - From [Codemia](https://codemia.io/knowledge-hub/path/parsing_boolean_values_with_argparse)
+... *(table remains unchanged)* ...
+
+### Argpars boolean argument treatment - From [Codemia](https://codemia.io/knowledge-hub/path/parsing_boolean_values_with_argparse)
