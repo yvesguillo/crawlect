@@ -172,3 +172,12 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+# Ignore real environment files
+llm-docker/.env
+
+# Ignore Ollama models
+llm-docker/ollama_models/
+
+# Ignore Docker volumes
+llm-docker/openwebui_data/
