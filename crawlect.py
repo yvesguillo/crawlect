@@ -279,6 +279,8 @@ if __name__ == "__main__":
         From [Codemia](https://codemia.io/knowledge-hub/path/parsing_boolean_values_with_argparse)
         """
 
+        choices = ["yes", "no", "y", "n", "true", "false", "1", "0"]
+
         def __call__(self, parser, namespace, values, option_string = None):
             if values.lower() in ("yes", "y", "true", "t", "1"):
                 setattr(namespace, self.dest, True)
@@ -322,7 +324,7 @@ if __name__ == "__main__":
         parser.add_argument(
             "-r", "--recur", "--recursive_crawling",
             type = str,
-            choices = ["Yes", "yes", "No", "no", "Y", "y", "N", "n", "True", "true", "False", "false", "T", "t", "F", "f", "1", "0"],
+            choices = BooleanAction.choices,
             action = BooleanAction,
             default = True,
             help = "Enable recursive crawling (default is True).")
@@ -343,7 +345,7 @@ if __name__ == "__main__":
         parser.add_argument(
             "-gitig", "--gitignore", "--gitignore_use",
             type = str,
-            choices = ["Yes", "yes", "No", "no", "Y", "y", "N", "n", "True", "true", "False", "false", "T", "t", "F", "f", "1", "0"],
+            choices = BooleanAction.choices,
             action = BooleanAction,
             default = True,
             help = "Use .gitignore exclusion rules if exist (default is True).")
@@ -351,7 +353,7 @@ if __name__ == "__main__":
         parser.add_argument(
             "-dokig", "--dockerignore", "--dockerignore_use",
             type = str,
-            choices = ["Yes", "yes", "No", "no", "Y", "y", "N", "n", "True", "true", "False", "false", "T", "t", "F", "f", "1", "0"],
+            choices = BooleanAction.choices,
             action = BooleanAction,
             default = True,
             help = "Use .dockerignore exclusion rules if exist (default is True).")
@@ -439,7 +441,7 @@ if __name__ == "__main__":
         parser.add_argument(
             "-xen", "--xenv", "--sanitize_env_variables",
             type = str,
-            choices = ["Yes", "yes", "No", "no", "Y", "y", "N", "n", "True", "true", "False", "false", "T", "t", "F", "f", "1", "0"],
+            choices = BooleanAction.choices,
             action = BooleanAction,
             default = True,
             help = "Sanitize .env variables to mitigate sensitive info leak risk (default is True).")
@@ -447,14 +449,14 @@ if __name__ == "__main__":
         parser.add_argument(
             "-tre", "--tree", "--visualize_directory_tree",
             type = str,
-            choices = ["Yes", "yes", "No", "no", "Y", "y", "N", "n", "True", "true", "False", "false", "T", "t", "F", "f", "1", "0"],
+            choices = BooleanAction.choices,
             action = BooleanAction,
             default = True,
             help = "Visualize directory tree in the output file (default is True).")
 
         args = parser.parse_args()
 
-        crawlect = Crawlect(path = args.path, output = args.output, output_prefix = args.output_prefix, output_suffix = args.output_suffix, recur = args.recur, depth = args.depth, excl_pat_li = args.excl_pat_li, excl_fil_li = args.excl_fil_li, excl_ext_li = args.excl_ext_li, excl_dir_li = args.excl_dir_li, excl_fil_wr = args.excl_fil_wr, excl_ext_wr = args.excl_ext_wr, excl_dir_wr = args.excl_dir_wr, incl_fil_li = args.incl_fil_li, incl_ext_li = args.incl_ext_li, incl_dir_li = args.incl_dir_li, incl_fil_wr = args.incl_fil_wr, incl_ext_wr = args.incl_ext_wr, incl_dir_wr = args.incl_dir_wr, crawlectignore = args.crawlectignore, gitignore = args.gitignore, dockerignore = args.dockerignore,xenv = args.xenv, tree = args.tree)
+        crawlect = Crawlect(**vars(args))
 
         # Launch output file composition
         crawlect.outputService.compose()
