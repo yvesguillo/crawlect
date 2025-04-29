@@ -74,7 +74,12 @@ When starting with a new project — whether you're reviewing, refactoring, or c
 **Crawlect**, the tool that turns your project folder into a beautifully structured Markdown digest — effortlessly.
 
 ## Installation
-Crawlect currently runs as a standalone module. To use it, simply clone the repo or copy the files:
+~~Crawlect currently runs as a standalone module. To use it, simply clone the repo or copy the files:~~
+Crawlect LLM feature require OpenAI Python SDK. Venv TBD.
+
+```bash
+pip install openai
+```
 
 ```bash
 git clone https://github.com/yvesguillo/crawlect.git
@@ -212,12 +217,31 @@ You can combine filters creatively. Want to list all `.py` files **except** one 
 --incl_ext_li .py --excl_fil_li evil_script.py
 ```
 
-Voilà; precise, elegant, and slightly obsessive. Just like your code should be.
-
 ## Planned Features (ideas welcome!)
 - *Git* related filtering
 - *HTML* output
-- *LLM* API integration
+- *LLM* API integration  
+  OpenAI Snippet:
+  ```python
+  from openai import OpenAI
+
+  client = OpenAI(
+    api_key="your-openai-api-key-here"
+  )
+
+  prompt = "Here is the codebase description of a project:\n\n" + markdownSummary + "\n\nCan you write a clear and concise summary of what this project likely does, including its main purpose, technologies used, and any observations that might help understand its architecture or design choices?"
+
+  completion = client.chat.completions.create(
+    model="gpt-4o-mini",
+    store=True,
+    messages=[
+      {"role": "user", "content": prompt}
+    ]
+  )
+
+  print(completion.choices[0].message);
+  ```
+
 - Optional syntax highlighting themes
 - GUI launcher (maybe...)
 
