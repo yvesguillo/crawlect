@@ -18,7 +18,7 @@ class Crawlect:
     def __init__(self, path = None, output = None, output_prefix = None, output_suffix = None, recur = True, depth = inf, crawlectignore = None, gitignore = True, dockerignore = True, excl_pat_li = [], excl_fil_li = [], excl_ext_li = [], excl_dir_li = [], excl_fil_wr = [], excl_ext_wr = [], excl_dir_wr = [], incl_fil_li = [], incl_ext_li = [], incl_dir_li = [], incl_fil_wr = [], incl_ext_wr = [], incl_dir_wr = [], xenv = True, tree = True):
 
         # Store the class arguments for __repr__.
-        self.args = dict()
+        self.args = {}
 
         self.path = path
         self.args["path"] = self.path

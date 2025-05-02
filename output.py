@@ -21,7 +21,7 @@ class Output:
             raise TypeError(f"{type(self).__name__} class require and only accept one instance of Crawlect as argument.")
 
         # Store the class arguments for __repr__.
-        self.args = dict()
+        self.args = {}
 
         self.crawler = crawler
         self.args["crawler"] = self.crawler
