@@ -4,6 +4,12 @@ from pathlib import Path
 from fnmatch import fnmatch
 from math import inf
 
+# UTF-8 settings.
+import sys
+import io
+
+sys.stdout = io.TextIOWrapper(sys.stdout.detach(), encoding='utf-8')
+
 # Custom modules.
 from scan import Scan
 from format import Format
@@ -451,7 +457,7 @@ if __name__ == "__main__":
             type = str,
             choices = BooleanAction.choices,
             action = BooleanAction,
-            default = True,
+            default = False,
             help = "Visualize directory tree in the output file (default is True).")
 
         args = parser.parse_args()

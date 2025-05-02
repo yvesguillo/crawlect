@@ -1,6 +1,5 @@
 #! /usr/bin/env python3
 
-
 import json
 import hashlib
 from pathlib import Path
@@ -9,10 +8,8 @@ class Format():
     """
     La classe prend en entrée un chemin de fichier path fourni par la classe scan.
     Va identifier le type de fichier et le placer dans un codbox
-
     """
 
-    
     def __init__(self, crawler):
         self.args = dict()
         self.crawler = crawler
@@ -29,8 +26,6 @@ class Format():
                 self.languages = json.load(f)
         except:
             print("Tables de mapage introuvables")
-        
-        
 
     def insertCodebox(self, file):
         """
@@ -39,10 +34,12 @@ class Format():
         """
 
         extention = self.searchType(file)
+
         if extention == None:
             return None
+
         bloc = "`"
-        with open(file, "rt") as f:
+        with open(file, "rt", encoding = "utf-8") as f:
             code = f.read()
 
         # sources des commandes trouvées pour la gestion des textes : https://www.w3schools.com/python/python_ref_string.asp
@@ -60,14 +57,13 @@ class Format():
                     newlinge = "=".join(newlinge)
 
                 contenu += newlinge + "\n"
-            # print(contenu)
+
             return f"{3*bloc}{extention}\n{contenu}\n{3*bloc}"
 
         # vérifie que l'extention est pas du markdown car ce type de fichier dispose de codebox
         elif extention != "markdown":
             res = f"{3*bloc}{extention}\n{code}\n{3*bloc}"
-            # print(res)
-            # print("")
+
             return res
 
         else:
@@ -91,35 +87,28 @@ class Format():
             if maxrep >= 3:
                 maxrep += 1
                 res = f"{maxrep*bloc}{extention}\n{code}\n{maxrep*bloc}"
-                # print(res)
-                # print("")
+
                 return res
 
             else:
                 res = f"{3*bloc}{extention}\n{code}\n{3*bloc}"
-                # print(res)
-                # print("")
+
                 return res
-            
+
 
     def searchType(self, file):
-        """
-        Prend le chemin d'un fichier et retourne le type de fichier à inscrire dans la codebox
-        """
+        """Prend le chemin d'un fichier et retourne le type de fichier à inscrire dans la codebox."""
 
         # recherche sur le nom de fichier
         if file.name in self.languages:
-            # print(f"voici le fichier trouvée : {self.languages[file.name]}")
             return self.languages[file.name]
 
         elif file.suffix in self.languages:
-            # print(f"voici l'extention trouvée : {self.languages[file.suffix]}")
             return self.languages[file.suffix]
 
         else:
-            # print(f"fichier introuvés pour {file}")
             return None
-        
+
 
     def makeTreeMd(self, chemin,  chemin_ignorer= [], deep = 20, level=0, racine = True):
         """
@@ -127,27 +116,22 @@ class Format():
         retourne une arboressance des fichiers 
         ajoute un hashage afin de crée des liens dans le fichier markdown
         """
+
         if level >= deep + 1 :
             return ""
-        
-        
-        
-        
+
         if chemin.name in chemin_ignorer:
             return ""
-        
+
         if chemin.is_file in chemin_ignorer:
             return ""
-        
-        
+
         tree = ""
         indentation = "    "*level
 
         # Récupération du nom du dossier parent du dossier racine 
         if level == 0 and racine:
             tree += f"- **{chemin.resolve().name}/**  \n"
-        
-
 
         # On vérifie que nous ne somme pas dans la première occurence de récursivité
         if level>0:
@@ -172,10 +156,10 @@ class Format():
                     fichier_liste.append(item)
                 if item.is_dir():
                     dossier_liste.append(item)
-            
+
             dossiers = sorted(dossier_liste)
             fichiers = sorted(fichier_liste)
-              
+
             for fichier in fichiers:
                 try:
                 #appel récursif pour chaque fichier de la liste 
@@ -191,12 +175,6 @@ class Format():
 
                 # gestion en cas de dossier inacessible cause de manque de privilège 
                 except PermissionError:
-                    
                     tree += ""
-        #print(tree)
+
         return tree
-
-        
-
-
-

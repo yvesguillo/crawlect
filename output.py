@@ -4,7 +4,6 @@ from pathlib import Path
 from datetime import datetime
 from random import choices
 import string
-import hashlib
 
 class Output:
     """
@@ -36,7 +35,7 @@ class Output:
         self.currentOutputName = self.standardOutputName()
 
         # Early version.
-        with open(self.currentOutputName, self.crawler.writeRight) as outputFile:
+        with open(self.currentOutputName, self.crawler.writeRight, encoding = "utf-8") as outputFile:
 
             # Title
             outputFile.write(f"# {self.crawler.getTitle()}\n{str(date.year)}.{str("{:02d}".format(date.month))}.{str("{:02d}".format(date.day))} {str("{:02d}".format(date.hour))}:{str("{:02d}".format(date.minute))}\n\nGenerated with {type(self.crawler).__name__}.\n\n")
@@ -56,10 +55,8 @@ class Output:
             outputFile.write("## Files:\n\n")
             for file in sorted_files:
 
-                chemin_id = hashlib.md5(str(file.resolve()).encode()).hexdigest()
-
                 if file.is_file() and str(file) != self.currentOutputName:
-                    outputFile.write(f"<h3 id=\"{chemin_id}\">{file.name}</h3>  \n")
+                    outputFile.write(f"### {file.name}  \n")
                     outputFile.write(f"`{file}`\n\n")
                     if self.isFileToInclude(file):
                         try:
