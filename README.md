@@ -6,6 +6,8 @@
 
 Whether you're analyzing someone else's code or sharing your own, Crawlect makes it effortless to generate a comprehensive project snapshot — complete with syntax-highlighted code blocks, a tree-like structure overview, and fine-tuned filtering rules.
 
+> *Crawlect* is a study project initiated by [*Yves Guillo*](https://yvesguillo.ch) & [*Alexandre Jenzer*](https://github.com/Alex141298), supervised by [*Matthieu Ammiguet*](https://matthieuamiguet.ch/), ([*He-Arc*](https://www.he-arc.ch/en/) 2025).
+
 ## Why Crawlect?
 
 When starting with a new project — whether you're reviewing, refactoring, or collaborating — understanding its structure and key files is essential. Crawlect does the heavy lifting by:
@@ -218,31 +220,9 @@ You can combine filters creatively. Want to list all `.py` files **except** one 
 ```
 
 ## Planned Features (ideas welcome!)
-- *Git* related filtering
+- *Git* related filtering - (*prototyped*)
+- *LLM* API integration - (*in progress*)
 - *HTML* output
-- *LLM* API integration  
-  OpenAI Snippet:
-  ```python
-  from openai import OpenAI
-
-  client = OpenAI(
-    api_key="your-openai-api-key-here"
-  )
-
-  prompt = "Here is the codebase description of a project:\n\n" + markdownSummary + "\n\nCan you write a clear and concise summary of what this project likely does, including its main purpose, technologies used, and any observations that might help understand its architecture or design choices?"
-
-  completion = client.chat.completions.create(
-    model="gpt-4o-mini",
-    store=True,
-    messages=[
-      {"role": "user", "content": prompt}
-    ]
-  )
-
-  print(completion.choices[0].message);
-  ```
-
-- Optional syntax highlighting themes
 - GUI launcher (maybe...)
 
 ## References and thanks
