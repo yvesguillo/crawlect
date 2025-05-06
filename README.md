@@ -72,6 +72,44 @@ When starting with a new project — whether you're reviewing, refactoring, or c
 - **Format**: Detects file type, builds Markdown-friendly code blocks.
 - **Output**: Generates the final `.md` file.
 
+## *Crawlect* Refactoring plan
+
+### Modules to implement.
+
+1. Use [`gitignore_parser`](https://github.com/mherrmann/gitignore_parser) instead of `Crawlect.processIgnoreFiles()` custom methode.  
+  Demo:  
+    ```python
+    from gitignore_parser import parse_gitignore as parse_ignorefile
+
+    matches = parse_ignorefile("./.gitignore")
+    matches('./crawlect.py') # Expected: 'False'.
+    matches('./__pycache__/scan.cpython-312.pyc') # Expected: 'True'.
+
+    ```
+
+2. Implement or adapt *Leodanis Pozo Ramos*'s [`rptree`](https://github.com/realpython/rptree/) instead of `Format.makeTreeMd()` custom methode.  
+  Demo:  
+    ```python
+    from rptree import DirectoryTree
+    ```
+
+### Good practices
+Most common principle need to be enforced.
+
+1. DRY  
+  Some methodes and class are strongly similar or redundent, we need to enforce *OOP* inheritance or merge these.
+
+2. Open/Close  
+  Sub classes are currently strongly coupled with Crawlect which is not desired.
+
+3. Propper error handeling.
+
+
+### Syntax and guideslines
+
+1. Enforce [***PEP 8***](https://peps.python.org/pep-0008/)
+2. Generate propper docstrings.
+
 ## Crawlect – User Guide
 **Crawlect**, the tool that turns your project folder into a beautifully structured Markdown digest — effortlessly.
 
