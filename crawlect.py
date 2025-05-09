@@ -10,6 +10,9 @@ import io
 
 sys.stdout = io.TextIOWrapper(sys.stdout.detach(), encoding='utf-8')
 
+# Third party module.
+from gitignore_parser import parse_gitignore as parse_ignorefile
+
 # Custom modules.
 from scan import Scan
 from format import Format
@@ -31,18 +34,6 @@ class Crawlect:
         crawlectignore = None,
         gitignore = True,
         dockerignore = True,
-        excl_fil_li = [],
-        excl_ext_li = [],
-        excl_dir_li = [],
-        excl_fil_wr = [],
-        excl_ext_wr = [],
-        excl_dir_wr = [],
-        incl_fil_li = [],
-        incl_ext_li = [],
-        incl_dir_li = [],
-        incl_fil_wr = [],
-        incl_ext_wr = [],
-        incl_dir_wr = [],
         xenv = True,
         tree = True
     ):
@@ -71,34 +62,8 @@ class Crawlect:
         self.dockerignore = dockerignore
         self.args["dockerignore"] = self.dockerignore
 
-        self.mergedIgnore = []
+        self.simplePathToIgnore = []
         self.ignore_file_list = []
-
-        # Files and xtensions inclusion/exclusions parameters.
-        self.excl_fil_li = excl_fil_li
-        self.args["excl_fil_li"] = self.excl_fil_li
-        self.excl_ext_li = excl_ext_li
-        self.args["excl_ext_li"] = self.excl_ext_li
-        self.excl_dir_li = excl_dir_li
-        self.args["excl_dir_li"] = self.excl_dir_li
-        self.incl_fil_li = incl_fil_li
-        self.args["incl_fil_li"] = self.incl_fil_li
-        self.incl_ext_li = incl_ext_li
-        self.args["incl_ext_li"] = self.incl_ext_li
-        self.incl_dir_li = incl_dir_li
-        self.args["incl_dir_li"] = self.incl_dir_li
-        self.excl_fil_wr = excl_fil_wr
-        self.args["excl_fil_wr"] = self.excl_fil_wr
-        self.excl_ext_wr = excl_ext_wr
-        self.args["excl_ext_wr"] = self.excl_ext_wr
-        self.excl_dir_wr = excl_dir_wr
-        self.args["excl_dir_wr"] = self.excl_dir_wr
-        self.incl_fil_wr = incl_fil_wr
-        self.args["incl_fil_wr"] = self.incl_fil_wr
-        self.incl_ext_wr = incl_ext_wr
-        self.args["incl_ext_wr"] = self.incl_ext_wr
-        self.incl_dir_wr = incl_dir_wr
-        self.args["incl_dir_wr"] = self.incl_dir_wr
 
         # Advanced features parameters.
         self.xenv = xenv
@@ -293,27 +258,27 @@ class Crawlect:
     def processIgnoreFiles(self):
         """Check for ignore files settings and fetch ignore list from these."""
 
-        if self.crawlectignore is not None and Path(self.path + self.crawlectignore).exists():
+        if self.crawlectignore is not None and Path(self.crawlectignore).exists():
             # Ignore the ignore file itselfe.
-            self.mergedIgnore.append(self.path + self.crawlectignore)
+            self.simplePathToIgnore.append(Path(self.crawlectignore))
             # Append the ignore file path to the list of ignorefile to interogate for exclusion rules.
-            self.ignore_file_list.append(self.path + self.crawlectignore )
+            self.ignore_file_list.append(parse_ignorefile(Path(self.crawlectignore)))
 
         if self.gitignore and Path(self.path + "/.gitignore").exists():
             # Ignore the ignore file itselfe and .git folder as it seems logic in this case.
-            self.mergedIgnore.append(self.path + "/.gitignore")
-            self.mergedIgnore.append(self.path + ".git")
+            self.simplePathToIgnore.append(Path(self.path + "/.gitignore"))
+            self.simplePathToIgnore.append(Path(self.path + "/.git"))
             # Append the ignore file path to the list of ignorefile to interogate for exclusion rules.
-            self.ignore_file_list.append(self.path + "/.gitignore" )
+            self.ignore_file_list.append(parse_ignorefile(Path(self.path + "/.gitignore")))
 
         if self.dockerignore and Path(self.path + "/.dockerignore").exists():
             # Ignore the ignore file itselfe.
-            self.mergedIgnore.append(self.path + "/.dockerignore")
+            self.simplePathToIgnore.append(Path(self.path + "/.dockerignore"))
             # Append the ignore file path to the list of ignorefile to interogate for exclusion rules.
-            self.ignore_file_list.append(self.path + "/.dockerignore" )
+            self.ignore_file_list.append(parse_ignorefile(Path(self.path + "/.dockerignore")))
 
-        # Get unique ignore path values.
-        self.mergedIgnore = list(set(self.mergedIgnore))
+        # Avoid duplicates.
+        self.simplePathToIgnore = list(set(self.simplePathToIgnore))
 
 
     def generatePathList(self):
@@ -335,29 +300,13 @@ class Crawlect:
     def isPathIgnored(self, path):
         """Check if path match any .gitignore pattern or path include/exclude list parameter item."""
 
-        print("" + str(self.path) + "/" + str(path))
-        # Somthing to check here with relative path ("." vs "../tralala/youpy")
-        # Somthing to check here with relative path ("." vs "../tralala/youpy")
-        # Somthing to check here with relative path ("." vs "../tralala/youpy")
-        # Somthing to check here with relative path ("." vs "../tralala/youpy")
-        # Somthing to check here with relative path ("." vs "../tralala/youpy")
-        # Somthing to check here with relative path ("." vs "../tralala/youpy")
-        # Somthing to check here with relative path ("." vs "../tralala/youpy")
-
-        # Behaviour shall be different if path to check contain "/" or not....
-
-        for ignored in self.mergedIgnore:
+        for ignored in self.simplePathToIgnore:
             if fnmatch(path, ignored):
                 return True
 
-        # Check if path is to be ignored by one ignorefile.
-        # Check if path is to be ignored by one ignorefile.
-        # Check if path is to be ignored by one ignorefile.
-        # Check if path is to be ignored by one ignorefile.
-        # Check if path is to be ignored by one ignorefile.
-        # Check if path is to be ignored by one ignorefile.
-        # Check if path is to be ignored by one ignorefile.
-        # Check if path is to be ignored by one ignorefile.
+        for ignoreFile in self.ignore_file_list:
+            if ignoreFile(path):
+                return True
 
         return False
 
@@ -456,7 +405,7 @@ if __name__ == "__main__":
             "-crawlig", "--crawlectignore", "--crawlectignore_use",
             type = str,
             default = None,
-            help = "Use custom file as Crawlect exclusion rules (default is None).")
+            help = "Crawlect exclusion rules file path (default is None).")
 
         parser.add_argument(
             "-gitig", "--gitignore", "--gitignore_use",
@@ -473,79 +422,6 @@ if __name__ == "__main__":
             action = BooleanAction,
             default = True,
             help = "Use .dockerignore exclusion rules if exist (default is True).")
-
-        # Files and xtensions inclusion/exclusions parameters.
-        parser.add_argument(
-            "-xfl", "--excl_fil_li", "--excluded_files_from_listing",
-            nargs = "*",
-            default = [],
-            help = "List of files to exclude from listing (e.g.: README.md, profile.png).")
-
-        parser.add_argument(
-            "-xel", "--excl_ext_li", "--excluded_xtensions_from_listing",
-            nargs = "*",
-            default = [],
-            help = "List of file extensions to exclude from listing (e.g.: .jpg, .png).")
-
-        parser.add_argument(
-            "-xdl", "--excl_dir_li", "--excluded_directories_from_listing",
-            nargs = "*",
-            default = [],
-            help = "List of directories to exclude from listing (e.g.: bin, render).")
-
-        parser.add_argument(
-            "-ifl", "--incl_fil_li", "--include_files_for_listing",
-            nargs = "*",
-            default = [],
-            help = "List of files to include for listing (e.g.: README.md, profile.png).")
-
-        parser.add_argument(
-            "-iel", "--incl_ext_li", "--include_xtensions_for_listing",
-            nargs = "*",
-            default = [],
-            help = "List of file extensions to include for listing (e.g.: .jpg, .png).")
-
-        parser.add_argument(
-            "-idl", "--incl_dir_li", "--include_directories_for_listing",
-            nargs = "*",
-            default = [],
-            help = "List of directories to include for listing (e.g.: bin, render).")
-
-        parser.add_argument(
-            "-xfw", "--excl_fil_wr", "--excluded_files_from_writing",
-            nargs = "*",
-            default = [],
-            help = "List of files to exclude from writing (e.g.: README.md, profile.png).")
-
-        parser.add_argument(
-            "-xew", "--excl_ext_wr", "--excluded_xtensions_from_writing",
-            nargs = "*",
-            default = [],
-            help = "List of file extensions to exclude from writing (e.g.: .jpg, .png).")
-
-        parser.add_argument(
-            "-xdw", "--excl_dir_wr", "--excluded_directories_from_writing",
-            nargs = "*",
-            default = [],
-            help = "List of directories to exclude from writing (e.g.: bin, render).")
-
-        parser.add_argument(
-            "-ifw", "--incl_fil_wr", "--include_files_for_writing",
-            nargs = "*",
-            default = [],
-            help = "List of files to include for writing (e.g.: README.md, profile.png).")
-
-        parser.add_argument(
-            "-iew", "--incl_ext_wr", "--include_xtensions_for_writing",
-            nargs = "*",
-            default = [],
-            help = "List of file extensions to include for writing (e.g.: .jpg, .png).")
-
-        parser.add_argument(
-            "-idw", "--incl_dir_wr", "--include_directories_for_writing",
-            nargs = "*",
-            default = [],
-            help = "List of directories to include for writing (e.g.: bin, render).")
 
         # Advanced features parameters.
         parser.add_argument(

@@ -48,12 +48,9 @@ class Output:
 
             # Directory tree
             if self.crawler.tree:
-                exclude = self.crawler.excl_dir_li
-                exclude.append(self.currentOutputName)
                 outputFile.write(
                     f"## File structure\n\n"
-                    f"Directory tree.\n\n"
-                    f"{self.crawler.formatService.makeTreeMd(self.crawler.pathObj, chemin_ignorer = exclude, deep = self.crawler.depth)}\n\n"
+                    f"{self.crawler.formatService.makeTreeMd(crawler = self.crawler)}\n\n"
                 )
 
             # Files list
@@ -65,22 +62,20 @@ class Output:
             outputFile.write("## Files:\n\n")
 
             for file in sorted_files:
-
                 if file.is_file() and str(file) != self.currentOutputName:
                     outputFile.write(f"### {file.name.replace(".", "&period;")}  \n")
                     outputFile.write(f"[`{file}`]({file})\n\n")
 
-                    if self.isFileToInclude(file):
-                        try:
-                            content = self.crawler.formatService.insertCodebox(file)
-                            if not content is None:
-                                outputFile.write(self.crawler.formatService.insertCodebox(file))
+                    try:
+                        content = self.crawler.formatService.insertCodebox(file)
+                        if not content is None:
+                            outputFile.write(self.crawler.formatService.insertCodebox(file))
 
-                        except Exception as error:
-                                print(
-                                    f"\n!! - {type(error).__name__}:\n"
-                                    f"{type(self).__name__} could not create codebox from {repr(file)}: {error}"
-                                )
+                    except Exception as error:
+                            print(
+                                f"\n!! - {type(error).__name__}:\n"
+                                f"{type(self).__name__} could not create codebox from {repr(file)}: {error}"
+                            )
 
                     outputFile.write("\n")
 
@@ -104,61 +99,6 @@ class Output:
         + str("{:02d}".format(date.hour))
         + str("{:02d}".format(date.minute))
         + str("{:02d}".format(date.second))
-
-
-    # Almost identical methode in Scan and Output classes. Assess if this should be sent to a common class ("Filter" class ?).
-    def isFileToInclude(self, path):
-        """
-        Filter file `path` according to filtering rules.
-        All files pass if there are no rules.
-        Inclusion overrules exclusion.
-        File-name rules takes precedence against extension rules.
-        """
-
-        # Ignore files such as `.gitignore` rules above all.
-        if self.crawler.isPathIgnored(path):
-            return False
-
-        # No rules at all, everything pass. This is Anarchy!:
-        if (
-            self.crawler.excl_ext_wr == []
-            and self.crawler.excl_fil_wr == []
-            and self.crawler.incl_ext_wr == []
-            and self.crawler.incl_fil_wr == []
-        ):
-            return True
-
-        # Forcibly included by file-name always wins:
-        if path.name in self.crawler.incl_fil_wr:
-            return True
-
-        # Forcibly included by extension and not excluded by file-name wins:
-        if (
-            path.suffix in self.crawler.incl_ext_wr
-            and path.name not in self.crawler.excl_fil_wr
-        ):
-            return True
-
-        # Forcibly excluded by extension looses if not saved by file-name inclusion:
-        if (
-            path.suffix in self.crawler.excl_ext_wr
-            and path.name not in self.crawler.incl_fil_wr
-        ):
-            return False
-
-        # Forcibly excluded by file-name always looses:
-        if path.name in self.crawler.excl_fil_wr:
-            return False
-
-        # Is neither forcibly included or excluded but an extension or file inclusion is overruling:
-        if (
-            self.crawler.incl_ext_wr != []
-            or self.crawler.incl_fil_wr != []
-        ):
-            return False
-
-        # If I forgot some case scenario, you may pass Mr Tuttle:
-        return True
 
 
     def __str__(self):
