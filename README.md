@@ -1,4 +1,6 @@
-# Crawlect – Crawl, Collect & Document Your Codebase in Markdown
+# Crawlect
+
+**Crawl, Collect & Document Your Codebase in Markdown.**
 
 ![Crawlect](images/crawlect.avif)
 
@@ -6,7 +8,7 @@
 
 Whether you're analyzing someone else's code or sharing your own, Crawlect makes it effortless to generate a comprehensive project snapshot — complete with syntax-highlighted code blocks, a tree-like structure overview, and fine-tuned filtering rules.
 
-> *Crawlect* is a study project initiated by [*Yves Guillo*](https://yvesguillo.ch) & [*Alexandre Jenzer*](https://github.com/Alex141298), supervised by [*Matthieu Ammiguet*](https://matthieuamiguet.ch/), ([*He-Arc*](https://www.he-arc.ch/en/) 2025).
+> *Crawlect* is a study project initiated by [*Yves Guillo*](https://yvesguillo.ch) & [*Alexandre Jenzer*](https://github.com/Alex141298), supervised by [*Matthieu Ammiguet*](https://matthieuamiguet.ch/) during [*He-Arc*](https://www.he-arc.ch/en/)'s *CAS-IDD*'s *Python* module (2025).
 
 ## Why Crawlect?
 
