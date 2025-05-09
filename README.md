@@ -1,4 +1,6 @@
-# Crawlect – Crawl, Collect & Document Your Codebase in Markdown
+# Crawlect
+
+**Crawl, Collect & Document Your Codebase in Markdown.**
 
 ![Crawlect](images/crawlect.avif)
 
