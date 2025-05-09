@@ -27,6 +27,7 @@ class Format():
         except:
             print("Tables de mapage introuvables")
 
+
     def insertCodebox(self, file):
         """
         cette méthode prends en entrée un chemin de fichier avec son extention fourni par searchType()
@@ -136,8 +137,7 @@ class Format():
         # On vérifie que nous ne somme pas dans la première occurence de récursivité
         if level>0:
             if chemin.is_file():
-                chemin_id = hashlib.md5(str(chemin.resolve()).encode()).hexdigest()
-                tree += f"{indentation}- [{chemin.name}](#{chemin_id})  \n"
+                tree += f"{indentation}- [{chemin.name}](#{chemin.name})  \n"
 
             if chemin.is_dir():
                 if self.crawler.isPathIgnored(chemin):

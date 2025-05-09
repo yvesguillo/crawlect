@@ -28,6 +28,7 @@ class Output:
         self.currentOutputName = ""
         self.composition = ()
 
+
     def compose(self):
         """Compose output file."""
 
@@ -38,13 +39,22 @@ class Output:
         with open(self.currentOutputName, self.crawler.writeRight, encoding = "utf-8") as outputFile:
 
             # Title
-            outputFile.write(f"# {self.crawler.getTitle()}\n{str(date.year)}.{str("{:02d}".format(date.month))}.{str("{:02d}".format(date.day))} {str("{:02d}".format(date.hour))}:{str("{:02d}".format(date.minute))}\n\nGenerated with {type(self.crawler).__name__}.\n\n")
+            outputFile.write(
+                f"# {self.crawler.getTitle()}\n"
+                f"{str(date.year)}.{str("{:02d}".format(date.month))}.{str("{:02d}".format(date.day))} "
+                f"{str("{:02d}".format(date.hour))}:{str("{:02d}".format(date.minute))}\n\n"
+                f"Generated with {type(self.crawler).__name__}.\n\n"
+            )
 
             # Directory tree
             if self.crawler.tree:
                 exclude = self.crawler.excl_dir_li
                 exclude.append(self.currentOutputName)
-                outputFile.write(f"## File structure\n\nDirectory tree.\n\n{self.crawler.formatService.makeTreeMd(self.crawler.pathObj, chemin_ignorer = exclude, deep = self.crawler.depth)}\n\n")
+                outputFile.write(
+                    f"## File structure\n\n"
+                    f"Directory tree.\n\n"
+                    f"{self.crawler.formatService.makeTreeMd(self.crawler.pathObj, chemin_ignorer = exclude, deep = self.crawler.depth)}\n\n"
+                )
 
             # Files list
 
@@ -53,11 +63,13 @@ class Output:
             sorted_files.sort(key = lambda p: (p.parent, p.name))
 
             outputFile.write("## Files:\n\n")
+
             for file in sorted_files:
 
                 if file.is_file() and str(file) != self.currentOutputName:
-                    outputFile.write(f"### {file.name}  \n")
-                    outputFile.write(f"`{file}`\n\n")
+                    outputFile.write(f"### {file.name.replace(".", "&period;")}  \n")
+                    outputFile.write(f"[`{file}`]({file})\n\n")
+
                     if self.isFileToInclude(file):
                         try:
                             content = self.crawler.formatService.insertCodebox(file)
@@ -65,8 +77,13 @@ class Output:
                                 outputFile.write(self.crawler.formatService.insertCodebox(file))
 
                         except Exception as error:
-                            print(f"\n!! - {type(error).__name__}:\n{type(self).__name__} could not create codebox from {repr(file)}: {error}")
+                                print(
+                                    f"\n!! - {type(error).__name__}:\n"
+                                    f"{type(self).__name__} could not create codebox from {repr(file)}: {error}"
+                                )
+
                     outputFile.write("\n")
+
 
     def standardOutputName(self):
         """Return standard output file name if no filename specified."""
@@ -77,10 +94,17 @@ class Output:
         else:
             return self.crawler.output
 
+
     def yearmodahs(self, date = datetime.now()):
         """Return givent date as yearmoda plus hours and seconds string."""
 
-        return str(date.year) + str("{:02d}".format(date.month)) + str("{:02d}".format(date.day)) + str("{:02d}".format(date.hour)) + str("{:02d}".format(date.minute)) + str("{:02d}".format(date.second))
+        return str(date.year)
+        + str("{:02d}".format(date.month))
+        + str("{:02d}".format(date.day))
+        + str("{:02d}".format(date.hour))
+        + str("{:02d}".format(date.minute))
+        + str("{:02d}".format(date.second))
+
 
     # Almost identical methode in Scan and Output classes. Assess if this should be sent to a common class ("Filter" class ?).
     def isFileToInclude(self, path):
@@ -96,7 +120,12 @@ class Output:
             return False
 
         # No rules at all, everything pass. This is Anarchy!:
-        if self.crawler.excl_ext_wr == [] and self.crawler.excl_fil_wr == [] and self.crawler.incl_ext_wr == [] and self.crawler.incl_fil_wr == []:
+        if (
+            self.crawler.excl_ext_wr == []
+            and self.crawler.excl_fil_wr == []
+            and self.crawler.incl_ext_wr == []
+            and self.crawler.incl_fil_wr == []
+        ):
             return True
 
         # Forcibly included by file-name always wins:
@@ -104,11 +133,17 @@ class Output:
             return True
 
         # Forcibly included by extension and not excluded by file-name wins:
-        if path.suffix in self.crawler.incl_ext_wr and path.name not in self.crawler.excl_fil_wr:
+        if (
+            path.suffix in self.crawler.incl_ext_wr
+            and path.name not in self.crawler.excl_fil_wr
+        ):
             return True
 
         # Forcibly excluded by extension looses if not saved by file-name inclusion:
-        if path.suffix in self.crawler.excl_ext_wr and path.name not in self.crawler.incl_fil_wr:
+        if (
+            path.suffix in self.crawler.excl_ext_wr
+            and path.name not in self.crawler.incl_fil_wr
+        ):
             return False
 
         # Forcibly excluded by file-name always looses:
@@ -116,14 +151,19 @@ class Output:
             return False
 
         # Is neither forcibly included or excluded but an extension or file inclusion is overruling:
-        if self.crawler.incl_ext_wr != [] or self.crawler.incl_fil_wr != []:
+        if (
+            self.crawler.incl_ext_wr != []
+            or self.crawler.incl_fil_wr != []
+        ):
             return False
 
         # If I forgot some case scenario, you may pass Mr Tuttle:
         return True
 
+
     def __str__(self):
         return self.__repr__()
+
 
     def __repr__(self):
         argsString = []
