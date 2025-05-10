@@ -1,2 +1,7 @@
 # Bytcode cache
 __pycache__/
+
+# Personale and analysis
+*.memo
+.crawlectignore
+crawlect.md
