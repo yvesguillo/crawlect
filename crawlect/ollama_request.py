@@ -3,7 +3,7 @@
 from ollama import Client
 
 # Custom modules.
-from llm import LLM
+from .llm import LLM
 
 class Ollama_request(LLM):
     """Extend LLM class for Ollama support."""

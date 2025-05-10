@@ -3,7 +3,7 @@
 from openai import OpenAI
 
 # Custom modules.
-from llm import LLM
+from .llm import LLM
 
 class Openai_request(LLM):
     """Extend LLM class for Open AI (Chat GPT) support."""

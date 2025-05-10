@@ -14,9 +14,9 @@ sys.stdout = io.TextIOWrapper(sys.stdout.detach(), encoding='utf-8')
 from gitignore_parser import parse_gitignore as parse_ignorefile
 
 # Custom modules.
-from scan import Scan
-from format import Format
-from output import Output
+from .scan import Scan
+from .format import Format
+from .output import Output
 
 class Crawlect:
     """
@@ -454,7 +454,7 @@ if __name__ == "__main__":
         )
 
     except KeyboardInterrupt:
-        print("Interupted by user.")
+        print("Interrupted by user.")
 
     except Exception as error:
         print(f"\nUnexpected {type(error).__name__}:\n{error}\n")

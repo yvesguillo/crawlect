@@ -93,12 +93,14 @@ class Output:
     def yearmodahs(self, date = datetime.now()):
         """Return givent date as yearmoda plus hours and seconds string."""
 
-        return str(date.year)
-        + str("{:02d}".format(date.month))
-        + str("{:02d}".format(date.day))
-        + str("{:02d}".format(date.hour))
-        + str("{:02d}".format(date.minute))
-        + str("{:02d}".format(date.second))
+        return (
+            str(date.year)
+            + str("{:02d}".format(date.month))
+            + str("{:02d}".format(date.day))
+            + str("{:02d}".format(date.hour))
+            + str("{:02d}".format(date.minute))
+            + str("{:02d}".format(date.second))
+        )
 
 
     def __str__(self):
