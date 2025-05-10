@@ -50,8 +50,11 @@ class Scan:
                     files.append(candidatePath)
                     self.listPathIn(path = candidatePath, depth = depth-1, files = files)
 
-            except PermissionError as err:
-                print(f"\n!! - {type(err).__name__} :\n{type(self) .__name__} Could not list path {repr(candidatePath)}: {err} ")
+            except PermissionError as error:
+                print(f"\n!! - {type(error).__name__} :\n{type(self) .__name__} Could not list path due to permission {repr(candidatePath)}: {error} ")
+
+            except Exception as error:
+                print(f"\n!! - {type(error).__name__} :\n{type(self) .__name__} Could not list path due unexpected error {repr(candidatePath)}: {error} ")
 
         return files
 

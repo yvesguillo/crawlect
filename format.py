@@ -111,15 +111,79 @@ class Format():
             return None
 
 
-    def makeTreeMd(self, crawler = None):
+    def makeTreeMd(self, chemin = None, crawler = None, level = 0, racine = True):
+        """
+        prend un Path en entrée, des nom de fichier à ignorer, une profondeur de recherche
+        retourne une arboressance des fichiers 
+        ajoute un hashage afin de crée des liens dans le fichier markdown
+        """
 
         # Validate.
         if type(crawler).__name__ != "Crawlect":
             raise TypeError(f"{type(self).__name__} class require and only accept one instance of Crawlect as argument.")
 
-        tree = ""
+        if chemin is None:
+            chemin = crawler.pathObj
 
-        for path in crawler.files:
-            tree += "- " + str(path) + "\n"
+        if level >= crawler.depth + 1 :
+            return ""
+
+        if crawler.isPathIgnored(chemin):
+            return ""
+
+        tree = ""
+        indentation = "    " * level
+
+        # Récupération du nom du dossier parent du dossier racine 
+        if level == 0 and racine:
+            tree += f"- **{chemin.resolve().name}/**  \n"
+
+        # On vérifie que nous ne somme pas dans la première occurence de récursivité
+        if level > 0:
+            if chemin.is_file():
+                tree += f"{indentation}- [{chemin.name.replace(".", "&period;")}](#{chemin.name.replace(".", "&period;")})  \n"
+
+            if chemin.is_dir():
+                if self.crawler.isPathIgnored(chemin):
+                    return ""
+                tree += f"{indentation}- `{chemin.name}/`  \n"
+
+        if chemin.is_dir():
+            fichier_iterables = chemin.iterdir()
+            fichier_liste = []
+            dossier_liste = []
+
+            # séparation des dossier et des fichiers afin de les trier. 
+            # le but est d'afficher les fichiers avant les dossier dans un répertoire 
+            for item in fichier_iterables:
+                if item.is_file():
+                    fichier_liste.append(item)
+                if item.is_dir():
+                    dossier_liste.append(item)
+
+            dossiers = sorted(dossier_liste)
+            fichiers = sorted(fichier_liste)
+              
+            for fichier in fichiers:
+                try:
+                #appel récursif pour chaque fichier de la liste 
+                    tree += str(self.makeTreeMd(chemin = fichier, crawler = crawler, level = level + 1, racine = False))
+
+                #gestion en cas de fichier inaccessible pour cause de manque de privilège 
+                except PermissionError:
+                    tree += ""
+
+            for dossier in dossiers:
+                try:
+                #appel récursif pour chaque dossier de la liste 
+                    tree += str(self.makeTreeMd(chemin = dossier, crawler = crawler, level = level + 1, racine = False))
+
+                # gestion en cas de dossier inacessible cause de manque de privilège 
+                except PermissionError:
+                    tree += ""
+
+                except Exception as error:
+                    print(f"\n!! - {type(error).__name__} :\n{type(self) .__name__} Could not list path due unexpected error {repr(chemin)}: {error} ")
+                    tree += ""
 
         return tree

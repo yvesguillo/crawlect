@@ -48,10 +48,8 @@ class Output:
 
             # Directory tree
             if self.crawler.tree:
-                outputFile.write(
-                    f"## File structure\n\n"
-                    f"{self.crawler.formatService.makeTreeMd(crawler = self.crawler)}\n\n"
-                )
+                tree = self.crawler.formatService.makeTreeMd(crawler = self.crawler)
+                outputFile.write(f"## File structure\n\n{tree}\n\n")
 
             # Files list
 
