@@ -34,6 +34,8 @@ class Output:
 
         date = datetime.now()
         self.currentOutputName = self.standardOutputName()
+        # Add to Crawlect simple path exclusion list.
+        self.crawler.simplePathToIgnore.append(self.currentOutputName)
 
         # Early version.
         with open(self.currentOutputName, self.crawler.writeRight, encoding = "utf-8") as outputFile:
@@ -60,7 +62,7 @@ class Output:
             outputFile.write("## Files:\n\n")
 
             for file in sorted_files:
-                if file.is_file() and str(file) != self.currentOutputName:
+                if file.is_file():
                     outputFile.write(f"### {file.name.replace(".", "&period;")}  \n")
                     outputFile.write(f"[`{file}`]({file})\n\n")
 

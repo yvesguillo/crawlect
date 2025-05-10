@@ -3,6 +3,7 @@
 import json
 import hashlib
 from pathlib import Path
+import re
 
 class Format():
     """
@@ -59,40 +60,28 @@ class Format():
 
                 contenu += newlinge + "\n"
 
-            return f"{3*bloc}{extention}\n{contenu}\n{3*bloc}"
+            return f"{3 * bloc}{extention}\n{contenu}\n{3 * bloc}"
 
         # vérifie que l'extention est pas du markdown car ce type de fichier dispose de codebox
         elif extention != "markdown":
-            res = f"{3*bloc}{extention}\n{code}\n{3*bloc}"
+            res = f"{3 * bloc}{extention}\n{code}\n{3 * bloc}"
 
             return res
 
         else:
-            counter = 1
-            maxrep = 1
-
-            for l in range(1, len(code) - 1):
-                #compte le nombre de fois que le caractère "`" est présent à la suite 
-                if code[l] == code[l + 1] == "`":
-                    counter += 1
-
-                else:
-                    if counter > maxrep:
-                        maxrep = counter
-                        counter = 1
-
-            if counter > maxrep:
-                maxrep = counter
+            # Count the maximum amount of consecutive "`" in the file and retur the ammount in maxrep. maxrep will be 2 if none ar found.
+            matches = re.findall(r"`+", code)
+            maxrep = max((len(m) for m in matches), default = 2)
 
             # le nombre minimal pour une codebox est de 3 si on en compte 3 --> ajouter occurances afin d'englober la totalité
             if maxrep >= 3:
                 maxrep += 1
-                res = f"{maxrep*bloc}{extention}\n{code}\n{maxrep*bloc}"
+                res = f"{maxrep * bloc}{extention}\n{code}\n{maxrep * bloc}"
 
                 return res
 
             else:
-                res = f"{3*bloc}{extention}\n{code}\n{3*bloc}"
+                res = f"{3 * bloc}{extention}\n{code}\n{3 * bloc}"
 
                 return res
 
@@ -141,7 +130,7 @@ class Format():
         # On vérifie que nous ne somme pas dans la première occurence de récursivité
         if level > 0:
             if chemin.is_file():
-                tree += f"{indentation}- [{chemin.name.replace(".", "&period;")}](#{chemin.name.replace(".", "&period;")})  \n"
+                tree += f"{indentation}- [{chemin.name.replace(".", "&period;")}](#{chemin.name.replace(" ", "-").replace(".", "&period;")})  \n"
 
             if chemin.is_dir():
                 if self.crawler.isPathIgnored(chemin):
@@ -163,7 +152,7 @@ class Format():
 
             dossiers = sorted(dossier_liste)
             fichiers = sorted(fichier_liste)
-              
+
             for fichier in fichiers:
                 try:
                 #appel récursif pour chaque fichier de la liste 
