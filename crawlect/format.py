@@ -3,6 +3,7 @@
 import json
 import hashlib
 from pathlib import Path
+import re
 
 class Format():
     """
@@ -26,6 +27,7 @@ class Format():
                 self.languages = json.load(f)
         except:
             print("Tables de mapage introuvables")
+
 
     def insertCodebox(self, file):
         """
@@ -58,40 +60,28 @@ class Format():
 
                 contenu += newlinge + "\n"
 
-            return f"{3*bloc}{extention}\n{contenu}\n{3*bloc}"
+            return f"{3 * bloc}{extention}\n{contenu}\n{3 * bloc}"
 
         # vérifie que l'extention est pas du markdown car ce type de fichier dispose de codebox
         elif extention != "markdown":
-            res = f"{3*bloc}{extention}\n{code}\n{3*bloc}"
+            res = f"{3 * bloc}{extention}\n{code}\n{3 * bloc}"
 
             return res
 
         else:
-            counter = 1
-            maxrep = 1
-
-            for l in range(1, len(code) - 1):
-                #compte le nombre de fois que le caractère "`" est présent à la suite 
-                if code[l] == code[l + 1] == "`":
-                    counter += 1
-
-                else:
-                    if counter > maxrep:
-                        maxrep = counter
-                        counter = 1
-
-            if counter > maxrep:
-                maxrep = counter
+            # Count the maximum amount of consecutive "`" in the file and retur the ammount in maxrep. maxrep will be 2 if none ar found.
+            matches = re.findall(r"`+", code)
+            maxrep = max((len(m) for m in matches), default = 2)
 
             # le nombre minimal pour une codebox est de 3 si on en compte 3 --> ajouter occurances afin d'englober la totalité
             if maxrep >= 3:
                 maxrep += 1
-                res = f"{maxrep*bloc}{extention}\n{code}\n{maxrep*bloc}"
+                res = f"{maxrep * bloc}{extention}\n{code}\n{maxrep * bloc}"
 
                 return res
 
             else:
-                res = f"{3*bloc}{extention}\n{code}\n{3*bloc}"
+                res = f"{3 * bloc}{extention}\n{code}\n{3 * bloc}"
 
                 return res
 
@@ -110,34 +100,37 @@ class Format():
             return None
 
 
-    def makeTreeMd(self, chemin,  chemin_ignorer= [], deep = 20, level=0, racine = True):
+    def makeTreeMd(self, chemin = None, crawler = None, level = 0, racine = True):
         """
         prend un Path en entrée, des nom de fichier à ignorer, une profondeur de recherche
         retourne une arboressance des fichiers 
         ajoute un hashage afin de crée des liens dans le fichier markdown
         """
 
-        if level >= deep + 1 :
+        # Validate.
+        if type(crawler).__name__ != "Crawlect":
+            raise TypeError(f"{type(self).__name__} class require and only accept one instance of Crawlect as argument.")
+
+        if chemin is None:
+            chemin = crawler.pathObj
+
+        if level >= crawler.depth + 1 :
             return ""
 
-        if chemin.name in chemin_ignorer:
-            return ""
-
-        if chemin.is_file in chemin_ignorer:
+        if crawler.isPathIgnored(chemin):
             return ""
 
         tree = ""
-        indentation = "    "*level
+        indentation = "    " * level
 
         # Récupération du nom du dossier parent du dossier racine 
         if level == 0 and racine:
             tree += f"- **{chemin.resolve().name}/**  \n"
 
         # On vérifie que nous ne somme pas dans la première occurence de récursivité
-        if level>0:
+        if level > 0:
             if chemin.is_file():
-                chemin_id = hashlib.md5(str(chemin.resolve()).encode()).hexdigest()
-                tree += f"{indentation}- [{chemin.name}](#{chemin_id})  \n"
+                tree += f"{indentation}- [{chemin.name.replace(".", "&period;")}](#{chemin.name.replace(" ", "-").replace(".", "&period;")})  \n"
 
             if chemin.is_dir():
                 if self.crawler.isPathIgnored(chemin):
@@ -163,18 +156,23 @@ class Format():
             for fichier in fichiers:
                 try:
                 #appel récursif pour chaque fichier de la liste 
-                    tree += self.makeTreeMd(fichier, chemin_ignorer,deep,level +1, False)
+                    tree += str(self.makeTreeMd(chemin = fichier, crawler = crawler, level = level + 1, racine = False))
 
                 #gestion en cas de fichier inaccessible pour cause de manque de privilège 
                 except PermissionError:
                     tree += ""
+
             for dossier in dossiers:
                 try:
                 #appel récursif pour chaque dossier de la liste 
-                    tree += self.makeTreeMd(dossier, chemin_ignorer,deep, level +1, False)
+                    tree += str(self.makeTreeMd(chemin = dossier, crawler = crawler, level = level + 1, racine = False))
 
                 # gestion en cas de dossier inacessible cause de manque de privilège 
                 except PermissionError:
+                    tree += ""
+
+                except Exception as error:
+                    print(f"\n!! - {type(error).__name__} :\n{type(self) .__name__} Could not list path due unexpected error {repr(chemin)}: {error} ")
                     tree += ""
 
         return tree

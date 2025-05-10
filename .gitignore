@@ -1,7 +1,8 @@
-# Bytcode cache
+# Bytcode cache and other execution spaces.
 __pycache__/
+*.pyc
+venv/
 
-# Personale and analysis
+# Personal notes and analysis
 *.memo
-.crawlectignore
 crawlect.md

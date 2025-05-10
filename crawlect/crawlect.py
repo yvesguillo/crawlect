@@ -10,10 +10,13 @@ import io
 
 sys.stdout = io.TextIOWrapper(sys.stdout.detach(), encoding='utf-8')
 
+# Third party module.
+from gitignore_parser import parse_gitignore as parse_ignorefile
+
 # Custom modules.
-from scan import Scan
-from format import Format
-from output import Output
+from .scan import Scan
+from .format import Format
+from .output import Output
 
 class Crawlect:
     """
@@ -21,7 +24,19 @@ class Crawlect:
     Crawlect is a module intended to describe files from a given path and transcribe and save these into a single markdown file.
     """
 
-    def __init__(self, path = None, output = None, output_prefix = None, output_suffix = None, recur = True, depth = inf, crawlectignore = None, gitignore = True, dockerignore = True, excl_pat_li = [], excl_fil_li = [], excl_ext_li = [], excl_dir_li = [], excl_fil_wr = [], excl_ext_wr = [], excl_dir_wr = [], incl_fil_li = [], incl_ext_li = [], incl_dir_li = [], incl_fil_wr = [], incl_ext_wr = [], incl_dir_wr = [], xenv = True, tree = True):
+    def __init__(self,
+        path = None,
+        output = None,
+        output_prefix = None,
+        output_suffix = None,
+        recur = True,
+        depth = inf,
+        crawlectignore = None,
+        gitignore = True,
+        dockerignore = True,
+        xenv = True,
+        tree = True
+    ):
 
         # Store the class arguments for __repr__.
         self.args = {}
@@ -46,35 +61,9 @@ class Crawlect:
         self.args["gitignore"] = self.gitignore
         self.dockerignore = dockerignore
         self.args["dockerignore"] = self.dockerignore
-        self.mergedIgnore = []
 
-        # Files and xtensions inclusion/exclusions parameters.
-        self.excl_pat_li = excl_pat_li
-        self.args["excl_pat_li"] = self.excl_pat_li
-        self.excl_fil_li = excl_fil_li
-        self.args["excl_fil_li"] = self.excl_fil_li
-        self.excl_ext_li = excl_ext_li
-        self.args["excl_ext_li"] = self.excl_ext_li
-        self.excl_dir_li = excl_dir_li
-        self.args["excl_dir_li"] = self.excl_dir_li
-        self.incl_fil_li = incl_fil_li
-        self.args["incl_fil_li"] = self.incl_fil_li
-        self.incl_ext_li = incl_ext_li
-        self.args["incl_ext_li"] = self.incl_ext_li
-        self.incl_dir_li = incl_dir_li
-        self.args["incl_dir_li"] = self.incl_dir_li
-        self.excl_fil_wr = excl_fil_wr
-        self.args["excl_fil_wr"] = self.excl_fil_wr
-        self.excl_ext_wr = excl_ext_wr
-        self.args["excl_ext_wr"] = self.excl_ext_wr
-        self.excl_dir_wr = excl_dir_wr
-        self.args["excl_dir_wr"] = self.excl_dir_wr
-        self.incl_fil_wr = incl_fil_wr
-        self.args["incl_fil_wr"] = self.incl_fil_wr
-        self.incl_ext_wr = incl_ext_wr
-        self.args["incl_ext_wr"] = self.incl_ext_wr
-        self.incl_dir_wr = incl_dir_wr
-        self.args["incl_dir_wr"] = self.incl_dir_wr
+        self.simplePathToIgnore = []
+        self.ignore_file_list = []
 
         # Advanced features parameters.
         self.xenv = xenv
@@ -95,6 +84,7 @@ class Crawlect:
 
         self.generatePathList()
 
+
     # To be enhanced. State patern for interactive/module mode?
     def validateParam(self):
         """Validate attributes and regenerate dynamic attributes."""
@@ -105,44 +95,90 @@ class Crawlect:
 
         # Interactive mode.
         if __name__ == "__main__":
-
             while self.path is None:
-                self.path = input(f"\n# Missing argument #\n{type(self).__name__} require a path to crawl. Please enter the desired path (e.g.: '.') or [Ctrl]+[C] then [Enter] to abort.\n")
+                self.path = input(
+                    f"\n# Missing argument #\n"
+                    f"{type(self).__name__} require a path to crawl.\n"
+                    f"Please enter the desired path (e.g.: '.').\n"
+                    f"Or [Ctrl]+[C] then [Enter] to abort.\n"
+                )
 
             while not Path(self.path).exists():
-                self.path = input(f"\n# Path error #\n{type(self).__name__} could not find {repr(self.path)}, please enter the path to crawl.\n")
+                self.path = input(
+                    f"\n# Path error #\n"
+                    f"{type(self).__name__} could not find {repr(self.path)},\n"
+                    f"please enter the path to crawl.\n"
+                    f"Or [Ctrl]+[C] then [Enter] to abort.\n"
+                )
 
             while self.output is None and self.output_prefix is None:
-                print(f"\n# Missing argument #\n{type(self).__name__} require an output file-name for static output file-name (e.g.: './description.md')\nOR\nan output prefix and output suffix for unique output file-name (e.g.: './descript' as prefix, and '.md' as suffix), this will create a path similar to: './descript-202506041010-g5ef9h.md'")
+                print(
+                    f"\n# Missing argument #\n"
+                    f"{type(self).__name__} require an output file-name for static output file-name\n"
+                    f"(e.g.: './description.md')\n"
+                    f"OR\n"
+                    f"an output prefix and output suffix for unique output file-name\n"
+                    f"(e.g.: './descript' as prefix, and '.md' as suffix),\n"
+                    f"this will create a path similar to: './descript-202506041010-g5ef9h.md'."
+                )
+
                 while True:
-                    _ = input("Please choose between 'static' and 'unique', or [Ctrl]+[C] then [Enter] to abort.\n").lower()
+                    _ = input(
+                        "Please choose between 'static' and 'unique'.\n"
+                        "Or [Ctrl]+[C] then [Enter] to abort.\n"
+                    ).lower()
+
                     if _ == "static":
                         while self.output is None or not self.output:
-                            self.output = input("Please enter a static output file-name, e.g.: './output.md' or [Ctrl]+[C] then [Enter] to abort.\n")
+                            self.output = input(
+                            "Please enter a static output file-name, e.g.: './output.md'.\n"
+                            "Or [Ctrl]+[C] then [Enter] to abort.\n"
+                            )
+
                         break
+
                     elif _ == "unique":
                         while self.output_prefix is None or not self.output_prefix:
-                            self.output_prefix = input("Please enter a prefix, e.g.: './output' or [Ctrl]+[C] then [Enter] to abort.\n")
+                            self.output_prefix = input(
+                                "Please enter a prefix, e.g.: './output'.\n"
+                                "Or [Ctrl]+[C] then [Enter] to abort.\n"
+                            )
+
                         while self.output_suffix is None:
-                            self.output_suffix = input("Please enter a suffix, e.g.: '.md' (suffix can be empty) or [Ctrl]+[C] then [Enter] to abort.\n")
+                            self.output_suffix = input(
+                                "Please enter a suffix, e.g.: '.md' (suffix can be empty).\n"
+                                "Or [Ctrl]+[C] then [Enter] to abort.\n"
+                            )
+
                         break
+
                     else:
                         continue
 
             if self.output is not None:
                 if Path(self.output).exists():
-                        print(f"\n# File overwrite #\n{type(self).__name__} is about to overwrite {repr(self.output)}. Its content will be lost!")
+                        print(
+                            f"\n# File overwrite #\n{type(self).__name__} is about to\n"
+                            f"overwrite {repr(self.output)}. Its content will be lost!"
+                        )
+
                         while True:
-                            _ = input("Please choose between 'proceed' and 'change', or [Ctrl]+[C] then [Enter] to abort.\n").lower()
+                            _ = input(
+                                "Please choose between 'proceed' and 'change'.\n"
+                                "Or [Ctrl]+[C] then [Enter] to abort.\n"
+                            ).lower()
+
                             if _ == "proceed":
                                 # File overwrite permission granted upon request in CLI mode.
                                 self.writeRight = "w"
                                 break
+
                             elif _ == "change":
                                 self.output = None
                                 self.output_prefix = None
                                 self.validate()
                                 break
+
                             else:
                                 continue
 
@@ -154,113 +190,130 @@ class Crawlect:
 
             if self.output is not None:
                 if Path(self.output).exists():
-                    raise IOError(f"\n# Permission error #\n{type(self).__name__} do not allow file {repr(self.output)} to be overwrited in module mode. Please errase the file first if you want to keep this output path.")
+                    raise IOError(
+                        f"\n# Permission error #\n"
+                        f"{type(self).__name__} do not allow file {repr(self.output)} to be overwrited in module mode. "
+                        "Please errase the file first if you want to keep this output path."
+                    )
 
             validationMessage = ""
             if self.path is None:
                 validationMessage += "- A path to crawl, e.g.: path = '.'\n"
+
             elif not Path(self.path).exists():
                 validationMessage += f"A valid path to crawl, {self.path} cannot be found.\n"
+
             if self.output is None and self.output_prefix is None:
-                validationMessage += "- An output file-name for static output file-name (e.g.: --output = './description.md')\nOR\nan output prefix and output suffix for unique output file-name (e.g.: --output_prefix = './descript', --output_suffix = '.md' as suffix), this will create a path similar to: './descript-202506041010-g5ef9h.md'\n"
+                validationMessage += "- An output file-name for static output file-name (e.g.: --output = './description.md')\n"
+                "OR\n"
+                "an output prefix and output suffix for unique output file-name "
+                "(e.g.: --output_prefix = './descript', --output_suffix = '.md' as suffix),\n"
+                "this will create a path similar to: './descript-202506041010-g5ef9h.md'\n"
+
             if validationMessage:
                 raise AttributeError(f"\n# Argument error #\n{type(self).__name__} requires:\n{validationMessage}Got: {self}")
+
 
     def warmUp(self):
         """Set needed variable for Crawlect service init phase"""
         try:
             self.pathObj = Path(self.path)
+
         except:
             print(f"Error: on {type(self).__name__}:\ncould not set its paths from path attribute.")
             raise
 
         try:
             self.title = self.pathObj.resolve().name
+
         except:
             print(f"Error: on {type(self).__name__}:\ncould not set its title.")
             raise
+
 
     def initServices(self):
         """Build Crawlect services"""
         try:
             self.scanService = Scan(self)
+
         except:
             print(f"Error: on {type(self).__name__}:\ncould not refresh and initiate its Scan service.")
             raise
 
         try:
             self.formatService = Format(self) # Format does not take Crawlect instance as parameter.
+
         except:
             print(f"Error: on {type(self).__name__}:\ncould not refresh and initiate its Format service.")
             raise
 
         try:
             self.outputService = Output(self)
+
         except:
             print(f"Error: on {type(self).__name__}:\ncould not refresh and initiate its Output service.")
             raise
 
+
     def processIgnoreFiles(self):
         """Check for ignore files settings and fetch ignore list from these."""
-        if self.crawlectignore is not None:
-            self.mergedIgnore.extend(self.getIgnoreListFromFile(self.crawlectignore))
+
+        if self.crawlectignore is not None and Path(self.crawlectignore).exists():
+            # Ignore the ignore file itselfe.
+            self.simplePathToIgnore.append(Path(self.crawlectignore))
+            # Append the ignore file path to the list of ignorefile to interogate for exclusion rules.
+            self.ignore_file_list.append(parse_ignorefile(Path(self.crawlectignore)))
 
         if self.gitignore and Path(self.path + "/.gitignore").exists():
-            self.mergedIgnore.extend(self.getIgnoreListFromFile(self.path + "/.gitignore"))
-            self.mergedIgnore.append(".git")
+            # Ignore the ignore file itselfe and .git folder as it seems logic in this case.
+            self.simplePathToIgnore.append(Path(self.path + "/.gitignore"))
+            self.simplePathToIgnore.append(Path(self.path + "/.git"))
+            # Append the ignore file path to the list of ignorefile to interogate for exclusion rules.
+            self.ignore_file_list.append(parse_ignorefile(Path(self.path + "/.gitignore")))
 
         if self.dockerignore and Path(self.path + "/.dockerignore").exists():
-            self.mergedIgnore.extend(self.getIgnoreListFromFile(self.path + "/.dockerignore"))
+            # Ignore the ignore file itselfe.
+            self.simplePathToIgnore.append(Path(self.path + "/.dockerignore"))
+            # Append the ignore file path to the list of ignorefile to interogate for exclusion rules.
+            self.ignore_file_list.append(parse_ignorefile(Path(self.path + "/.dockerignore")))
 
-        # Get unique ignore path values.
-        self.mergedIgnore = list(set(self.mergedIgnore))
+        # Avoid duplicates.
+        self.simplePathToIgnore = list(set(self.simplePathToIgnore))
+
 
     def generatePathList(self):
         """Prepare the path list which will be treated and written in output file."""
         try:
             self.files = self.scanService.listPathIn()
+
         except:
             print(f"Error: on {type(self).__name__}:\ncould not refresh and proceed to paths listing.")
             raise
+
 
     def getTitle(self):
         """Simply returns path to crawl's name"""
         return self.title
 
-    def getIgnoreListFromFile(self, file = None):
-        """Try to get ignore file and parse its ignore rules in a list."""
-
-        # Does not support advanced .gitignore syntax such as the "!" for not ignoring at the moment. It will probably not be handled here but in the *Scan* class thought.
-
-        ignoreList = []
-        try:
-            with open(file) as ignoreFile:
-                for line in ignoreFile.read().splitlines():
-                     if line and "#" not in line:
-                        ignoreList.append(line)
-        except Exception as error:
-            print(f"\n!! - {type(error).__name__}:\n{type(self).__name__} could not process getIgnoreListFromFile({repr(file)}): {error}")
-        return ignoreList
 
     # Assess if this should be sent to a common class ("Filter" class ?).
     def isPathIgnored(self, path):
         """Check if path match any .gitignore pattern or path include/exclude list parameter item."""
 
-        # Does not support advanced .gitignore syntax such as the "!" for not ignoring at the moment.
-
-        for ignored in self.mergedIgnore:
+        for ignored in self.simplePathToIgnore:
             if fnmatch(path, ignored):
                 return True
 
-        # Check if path is in path ignore list parameter.
-        for excludedPath in self.excl_pat_li:
-            if path == Path(excludedPath):
+        for ignoreFile in self.ignore_file_list:
+            if ignoreFile(path):
                 return True
 
         return False
 
+
     def __str__(self):
         return self.__repr__()
+
 
     def __repr__(self):
         argsString = []
@@ -299,7 +352,9 @@ if __name__ == "__main__":
         # Parameters.
         parser = argparse.ArgumentParser(
             description = "Crawlect crawl a given path to list and describe all files on a single markdown file.",
-            epilog = "Filtering rules allow you to forcibly include or exclude certain directories, files names or file extensions. All files will be listed if there are no rules. Inclusion overrules exclusion on same caracteristics and file-name rules takes precedence against extension rules."
+            epilog = "Filtering rules allow you to forcibly include or exclude certain directories, files names or file extensions. "
+            "All files will be listed if there are no rules. "
+            "Inclusion overrules exclusion on same caracteristics and file-name rules takes precedence against extension rules."
         )
 
         parser.add_argument(
@@ -318,14 +373,18 @@ if __name__ == "__main__":
             "-op", "--output_prefix", "--output_file_prefix",
             type = str,
             default = "description",
-            help = "Output markdown digest file prefix ('description' by default) associated with --output_suffix can be use as an alternative to '--output' argument to generate a unique file-name (e.g.: --output_prefix = './descript', output_suffix = '.md' will create './descript-202506041010-g5ef9h.md').")
+            help = "Output markdown digest file prefix ('description' by default) "
+            "associated with --output_suffix can be use as an alternative to '--output' argument to generate a unique file-name "
+            "(e.g.: --output_prefix = './descript', output_suffix = '.md' will create './descript-202506041010-g5ef9h.md').")
 
         parser.add_argument(
             "-os", "--output_suffix", "--output_file_suffix",
             type = str,
             default = ".md",
             
-            help = "Output markdown digest file prefix ('.md' by default) associated with --output_prefix can be use as an alternative to '--output' argument to generate a unique file-name (e.g.: --output_prefix = './descript', output_suffix = '.md' will create './descript-202506041010-g5ef9h.md').")
+            help = "Output markdown digest file prefix ('.md' by default) "
+            "associated with --output_prefix can be use as an alternative to '--output' argument to generate a unique file-name "
+            "(e.g.: --output_prefix = './descript', output_suffix = '.md' will create './descript-202506041010-g5ef9h.md').")
 
         parser.add_argument(
             "-r", "--recur", "--recursive_crawling",
@@ -346,7 +405,7 @@ if __name__ == "__main__":
             "-crawlig", "--crawlectignore", "--crawlectignore_use",
             type = str,
             default = None,
-            help = "Use custom file as Crawlect exclusion rules (default is None).")
+            help = "Crawlect exclusion rules file path (default is None).")
 
         parser.add_argument(
             "-gitig", "--gitignore", "--gitignore_use",
@@ -364,85 +423,6 @@ if __name__ == "__main__":
             default = True,
             help = "Use .dockerignore exclusion rules if exist (default is True).")
 
-        # Files and xtensions inclusion/exclusions parameters.
-        parser.add_argument(
-            "-xpl", "--excl_pat_li", "--excluded_paths_from_listing",
-            nargs = "*",
-            default = [],
-            help = "List of paths to exclude from listing (e.g.: ./messy_folder/, ./album/vacation_56.png).")
-
-        parser.add_argument(
-            "-xfl", "--excl_fil_li", "--excluded_files_from_listing",
-            nargs = "*",
-            default = [],
-            help = "List of files to exclude from listing (e.g.: README.md, profile.png).")
-
-        parser.add_argument(
-            "-xel", "--excl_ext_li", "--excluded_xtensions_from_listing",
-            nargs = "*",
-            default = [],
-            help = "List of file extensions to exclude from listing (e.g.: .jpg, .png).")
-
-        parser.add_argument(
-            "-xdl", "--excl_dir_li", "--excluded_directories_from_listing",
-            nargs = "*",
-            default = [],
-            help = "List of directories to exclude from listing (e.g.: bin, render).")
-
-        parser.add_argument(
-            "-ifl", "--incl_fil_li", "--include_files_for_listing",
-            nargs = "*",
-            default = [],
-            help = "List of files to include for listing (e.g.: README.md, profile.png).")
-
-        parser.add_argument(
-            "-iel", "--incl_ext_li", "--include_xtensions_for_listing",
-            nargs = "*",
-            default = [],
-            help = "List of file extensions to include for listing (e.g.: .jpg, .png).")
-
-        parser.add_argument(
-            "-idl", "--incl_dir_li", "--include_directories_for_listing",
-            nargs = "*",
-            default = [],
-            help = "List of directories to include for listing (e.g.: bin, render).")
-
-        parser.add_argument(
-            "-xfw", "--excl_fil_wr", "--excluded_files_from_writing",
-            nargs = "*",
-            default = [],
-            help = "List of files to exclude from writing (e.g.: README.md, profile.png).")
-
-        parser.add_argument(
-            "-xew", "--excl_ext_wr", "--excluded_xtensions_from_writing",
-            nargs = "*",
-            default = [],
-            help = "List of file extensions to exclude from writing (e.g.: .jpg, .png).")
-
-        parser.add_argument(
-            "-xdw", "--excl_dir_wr", "--excluded_directories_from_writing",
-            nargs = "*",
-            default = [],
-            help = "List of directories to exclude from writing (e.g.: bin, render).")
-
-        parser.add_argument(
-            "-ifw", "--incl_fil_wr", "--include_files_for_writing",
-            nargs = "*",
-            default = [],
-            help = "List of files to include for writing (e.g.: README.md, profile.png).")
-
-        parser.add_argument(
-            "-iew", "--incl_ext_wr", "--include_xtensions_for_writing",
-            nargs = "*",
-            default = [],
-            help = "List of file extensions to include for writing (e.g.: .jpg, .png).")
-
-        parser.add_argument(
-            "-idw", "--incl_dir_wr", "--include_directories_for_writing",
-            nargs = "*",
-            default = [],
-            help = "List of directories to include for writing (e.g.: bin, render).")
-
         # Advanced features parameters.
         parser.add_argument(
             "-xen", "--xenv", "--sanitize_env_variables",
@@ -457,7 +437,7 @@ if __name__ == "__main__":
             type = str,
             choices = BooleanAction.choices,
             action = BooleanAction,
-            default = False,
+            default = True,
             help = "Visualize directory tree in the output file (default is True).")
 
         args = parser.parse_args()
@@ -468,10 +448,13 @@ if __name__ == "__main__":
         crawlect.outputService.compose()
 
         # Confirm.
-        print(f"\n{type(crawlect.outputService).__name__} processed {repr(crawlect.getTitle())} and stored description in {repr(crawlect.outputService.currentOutputName)}.")
+        print(
+            f"\n{type(crawlect.outputService).__name__} processed {repr(crawlect.getTitle())} "
+            f"and stored description in {repr(crawlect.outputService.currentOutputName)}."
+        )
 
     except KeyboardInterrupt:
-        print("Interupted by user.")
+        print("Interrupted by user.")
 
     except Exception as error:
         print(f"\nUnexpected {type(error).__name__}:\n{error}\n")

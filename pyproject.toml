@@ -1,0 +1,13 @@
+[project]
+name = "Crawlect"
+version = "1.0.0"
+description = "Crawl, Collect & Document Your Codebase in Markdown."
+authors = [
+  {name = "Yves Guillo", email = "yves@yvesguillo.ch"},
+  {name = "Alexandre Jenzer"}
+]
+license = {text = "MIT"}
+requires-python = ">=3.10"
+dependencies = [
+  "gitignore_parser==0.1.12"
+]
