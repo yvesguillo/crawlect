@@ -74,195 +74,172 @@ When starting with a new project — whether you're reviewing, refactoring, or c
 - **Format**: Detects file type, builds Markdown-friendly code blocks.
 - **Output**: Generates the final `.md` file.
 
-## *Crawlect* Refactoring plan
+## Getting Started
 
-### Modules to implement.
+Crawlect is written in Python and requires minimal setup. Just clone, set up the virtual environment, and you’re ready to document codebases like a Markdown ninja.
 
-1. Use [`gitignore_parser`](https://github.com/mherrmann/gitignore_parser) instead of `Crawlect.processIgnoreFiles()` custom methode.  
-  Demo:  
-    ```python
-    from gitignore_parser import parse_gitignore as parse_ignorefile
-
-    matches = parse_ignorefile("./.gitignore")
-    matches('./crawlect.py') # Expected: 'False'.
-    matches('./__pycache__/scan.cpython-312.pyc') # Expected: 'True'.
-
-    ```
-
-2. Implement or adapt *Leodanis Pozo Ramos*'s [`rptree`](https://github.com/realpython/rptree/) instead of `Format.makeTreeMd()` custom methode.  
-  Demo:  
-    ```python
-    from rptree import DirectoryTree
-    ```
-
-### Good practices
-Most common principle need to be enforced.
-
-1. DRY  
-  Some methodes and class are strongly similar or redundent, we need to enforce *OOP* inheritance or merge these.
-
-2. Open/Close  
-  Sub classes are currently strongly coupled with Crawlect which is not desired.
-
-3. Propper error handeling.
-
-
-### Syntax and guideslines
-
-1. Enforce [***PEP 8***](https://peps.python.org/pep-0008/)
-2. Generate propper docstrings.
-
-## Crawlect – User Guide
-**Crawlect**, the tool that turns your project folder into a beautifully structured Markdown digest — effortlessly.
-
-## Installation
-~~Crawlect currently runs as a standalone module. To use it, simply clone the repo or copy the files:~~
-Crawlect LLM feature require OpenAI Python SDK. Venv TBD.
-
-```bash
-pip install openai
-```
+### 1. Clone the repo
 
 ```bash
 git clone https://github.com/yvesguillo/crawlect.git
 cd crawlect
-python3 crawlect.py
 ```
-*(Packaging for pip? Let us know. We'll help you make it pip-installable!)*
 
-## Quick Start
-Generate a Markdown description of the current directory:
+### 2. Run the setup script
+
+Make it executable first if needed (Linux/macOS):
 
 ```bash
-python3 crawlect.py -p . -o ./description.md
-```
-This will scan the current folder recursively and write a structured `description.md` including the contents of most files.
+chmod +x setup.sh
+````
 
-## Usage Overview
-You can run Crawlect via the CLI with plenty of flexible options:
+Then run:
 
 ```bash
-python3 crawlect.py --path ./my-project --output ./my-doc.md
+./setup.sh
 ```
-Or dynamically generate unique filenames:
+
+> This script creates a `venv`, activates it, and installs dependencies.
+
+**OR** manually install dependencies:
 
 ```bash
-python3 crawlect.py --path ./my-project --output_prefix ./docs/crawl --output_suffix .md
+pip install -r ./requirements.txt
 ```
-You can filter files and folders:
+
+### 3. Run Crawlect
 
 ```bash
-# Exclude .png and .jpg files from listing
---excl_ext_li .png .jpg
-
-# Include only .py and .md files for writing
---incl_ext_wr .py .md
+python -m crawlect.crawlect -p . -o ../digest.md
 ```
-You can also:
 
-- Limit depth (`--depth 2`)
-- Disable recursive crawling (`--recur no`)
-- Enable the directory tree overview (`--tree yes`)
-- Sanitize .env files (`--xenv yes`)
-- Apply `.gitignore`, `.dockerignore`, and `.crawlectignore` files automatically
+> This will scan the current folder, and generate a Markdown file named `digest.md` in the parent directory.
 
-### Example Command
+### 4. Teardown (optional)
+
+When you're done (if you used `setup.sh` script), you can clean everything up with:
+
 ```bash
-python3 crawlect.py \
-  --path ./awesome-project \
-  --output_prefix ./docs/snapshot \
-  --output_suffix .md \
-  --excl_ext_li .log .png .jpg \
-  --incl_ext_wr .py .json \
-  --tree yes \
-  --xenv yes
+./teardown.sh
 ```
-Creates a structured markdown file (with a unique name), ignoring noisy files and including `.py` and `.json` contents.
 
-### Tips
+> This will deactivate and delete the `venv`.
 
-- `.env` files are *auto-sanitized*; values are replaced by `YourValueFor_<varname>`
-- Inclusion rules overrule exclusion
-- File name rules take precedence over extension rules
-- `.gitignore`, `.dockerignore`, and `.crawlectignore` are respected if available
+## CLI Options
 
-### Module Mode
+Here are the most useful flags Crawlect understands:
 
-You can use Crawlect as a **Python module** too:
+| Options | Description |
+|:--|:--|
+| `-p`, `--path` | Path to crawl (default: current folder `.`) |
+| `-o`, `--output` | Output markdown file name (e.g. `digest.md`) |
+| `-op`, `--output_prefix` | Prefix for output filename if you want it auto-named |
+| `-os`, `--output_suffix` | Suffix (usually `.md`) to combine with prefix |
+| `-r`, `--recur` | Recursive crawling (`yes`/`no`, default: yes) |
+| `-d`, `--depth` | Max directory depth (default: infinite) |
+| `-crawlig` | Path to `.crawlectignore` file |
+| `-gitig`, `--gitignore` | Use `.gitignore` rules (default: yes) |
+| `-dokig`, `--dockerignore` | Use `.dockerignore` rules (default: yes) |
+| `-xen`, `--xenv` | Sanitize `.env` values (default: yes) |
+| `-tre`, `--tree` | Include tree structure in output (default: yes) |
+
+#### Example
+
+```bash
+python -m crawlect.crawlect \
+  -p ./awesomeproject \
+  -o ../digest.md \
+  -r yes \
+  -d 2 \
+  -crawlig ./filetoignore.txt \
+  -gitig no \
+  -dokig no \
+  -xen no \
+  -tre yes
+````
+
+## How Filtering Works
+
+Crawlect supports standard `.gitignore` filtering. You can use:
+
+- `.crawlectignore` (optional and custom rules — your secret weapon)
+- `.gitignore` and `.dockerignore` (auto-detected and parsed like Git would)
+
+These filters follow the [standard `.gitignore` syntax](https://git-scm.com/docs/gitignore), such as:
+
+```gitignore
+# Ignore markdown files
+*.md
+
+# Ignore the venv folder
+venv/
+
+# Ignore one super busy folder except for this very important file.
+.git/*
+!.git/mysuperimportantfile.love
+
+# Ignore logs, but keep error.log
+*.log
+!important-error.log
+````
+
+Just create a `.crawlectignore` at the root or anywhere and pass it like this:
+
+```bash
+python -m crawlect.crawlect -p . -o digest.md -crawlig ../myspecialfolder/.crawlectignore
+```
+
+> Bonus: Crawlect will *also* exclude the ignore file itself from the digest, so your `.crawlectignore` won’t show up in the output.
+
+## Example Output
+
+Here's a sneak peek at what Crawlect produces:
+
+````markdown
+# my-awesome-project
+2025.05.10 14:22
+
+Generated with Crawlect.
+
+## File structure
+
+- **src/**
+    - [main.py](#main&period;py)
+    - [utils.py](#utils&period;py)
+
+## Files:
+
+### main.py  
+[`src/main.py`](src/main.py)
 
 ```python
-from crawlect import Crawlect
+from .utils import un_plus_un
 
-myCrawler = Crawlect(path=".", output="./project_overview.md")
-myCrawler.outputService.compose()
+def main():
+    print(f"Hello! Did you know that one plus one is strictly similar to \n{un_plus_un()}?")
 ```
 
-## Advanced Filtering Features
+### main.py  
+[`src/utils.py`](src/utils.py)
 
-Crawlect doesn’t just crawl. It **obeys your rules like a good little spider**; deciding which files and folders to list and which to write based on powerful filtering logic.
-
-### How Filtering Works
-
-There are **two phases** of filtering:  
-1. **Listing phase** (`_li` suffix): decides which files and folders are shown in the output structure.  
-2. **Writing phase** (`_wr` suffix): decides which files have their content embedded in the Markdown output.
-
-You can filter by:
-- **File names** (`incl_fil_*`, `excl_fil_*`)
-- **File extensions** (`incl_ext_*`, `excl_ext_*`)
-- **Directories** (`incl_dir_*`, `excl_dir_*`)
-
-### Rule Hierarchy (Who wins?)
-Here’s how Crawlect resolves conflicts:
-
-**FILE NAME RULES** > **EXTENSION RULES** > **DIRECTORY RULES**
-
-For both listing and writing:
-- Inclusion always overrules exclusion at the same level
-- File name rules take precedence over extension rules
-- If no rules? Crawlect lets everything in = anarchy mode!
-
-### Ignore Files
-Crawlect parses `.gitignore`, `.dockerignore`, and `.crawlectignore` files:
-- Any matching path will be excluded from both listing and writing
-- `.git` folder is also auto-excluded if `.gitignore` is active
-- Lines starting with `#` or empty lines are ignored
-
-> **Note:** Advanced `.gitignore` syntax like `!pattern` is currently not supported (yet!)
-
-### Examples
-
-List all files except `.jpg` and `.png`:
-```bash
---excl_ext_li .jpg .png
+```python
+def un_plus_un():
+    return "deux"
 ```
-
-Only list `.py` and `.md` files:
-```bash
---incl_ext_li .py .md
-```
-
-List everything except `node_modules` directory:
-```bash
---excl_dir_li node_modules
-```
-
-Write only `.py` and `README.md` contents:
-```bash
---incl_ext_wr .py --incl_fil_wr README.md
-```
-
-### Pro tip
-You can combine filters creatively. Want to list all `.py` files **except** one specific script?
-
-```bash
---incl_ext_li .py --excl_fil_li evil_script.py
-```
+````
 
 ## Planned Features (ideas welcome!)
 - *LLM* API integration - (*in progress*)
 - *HTML* output
 - GUI launcher (maybe...)
+
+## Contributing
+
+Got ideas? Found a bug? Want to teach Crawlect how to dance in HTML?
+
+Feel free to fork, star, or open an issue — we're open to collabs and suggestions.
+
+> Friendly contributors get markdown cookies.
 
 ## References and thanks
 
