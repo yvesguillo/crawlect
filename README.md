@@ -127,21 +127,21 @@ When you're done (if you used `setup.sh` script), you can clean everything up wi
 
 ## CLI Options
 
-Here are the most useful flags Crawlect understands:
+Here are the most useful options Crawlect understands:
 
 | Options | Description |
 |:--|:--|
-| `-p`, `--path` | Path to crawl (default: current folder `.`) |
-| `-o`, `--output` | Output markdown file name (e.g. `digest.md`) |
-| `-op`, `--output_prefix` | Prefix for output filename if you want it auto-named |
-| `-os`, `--output_suffix` | Suffix (usually `.md`) to combine with prefix |
-| `-r`, `--recur` | Recursive crawling (`yes`/`no`, default: yes) |
-| `-d`, `--depth` | Max directory depth (default: infinite) |
-| `-crawlig` | Path to `.crawlectignore` file |
-| `-gitig`, `--gitignore` | Use `.gitignore` rules (default: yes) |
-| `-dokig`, `--dockerignore` | Use `.dockerignore` rules (default: yes) |
-| `-xen`, `--xenv` | Sanitize `.env` values (default: yes) |
-| `-tre`, `--tree` | Include tree structure in output (default: yes) |
+| `-p`, `--path`, `--path_to_crawl` | Path to crawl (default: current folder `.`) |
+| `-o`, `--output`, `--output_file` | Output markdown file name (e.g. `digest.md`) |
+| `-op`, `--output_prefix`, `--output_file_prefix` | Prefix for output filename if you want it auto-named |
+| `-os`, `--output_suffix`, `--output_file_suffix` | Suffix (usually `.md`) to combine with prefix |
+| `-r`, `--recur`, `--recursive_crawling` | Recursive crawling (default: `True`) |
+| `-d`, `--depth`, `--recursive_crawling_depth` | Max directory depth (default: infinite) |
+| `-crawlig`, `--crawlectignore`, `--crawlectignore_use` | Path to custom ignor file |
+| `-gitig`, `--gitignore`, `--gitignore_use` | Use `.gitignore` rules (default: `True`) |
+| `-dokig`, `--dockerignore`, `--dockerignore_use` | Use `.dockerignore` rules (default: `True`) |
+| `-xen`, `--xenv`, `--sanitize_env_variables` | Sanitize `.env` values (default: `True`) |
+| `-tre`, `--tree`, `--visualize_directory_tree` | Include tree structure in output (default: `True`) |
 
 #### Example
 
@@ -156,7 +156,7 @@ python -m crawlect.crawlect \
   -dokig no \
   -xen no \
   -tre yes
-````
+```
 
 ## How Filtering Works
 
@@ -181,7 +181,7 @@ venv/
 # Ignore logs, but keep error.log
 *.log
 !important-error.log
-````
+```
 
 Just create a `.crawlectignore` at the root or anywhere and pass it like this:
 
@@ -230,6 +230,7 @@ def un_plus_un():
 
 ## Planned Features (ideas welcome!)
 - *LLM* API integration - (*in progress*)
+- PIP package
 - *HTML* output
 - GUI launcher (maybe...)
 
