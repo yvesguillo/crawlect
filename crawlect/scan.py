@@ -1,7 +1,5 @@
 #! /usr/bin/env python3
 
-from pathlib import Path
-
 class Scan:
     """
     Scan class contains Crawlect directories tree scan utilities.

@@ -1,7 +1,20 @@
-# Bytcode cache and other execution spaces.
+# Python packaging artifacts
+build/
+dist/
+*.egg-info/
+
+# Virtual environment (if created locally)
+venv/
+.env/
+
+# Mac / Windows / Editor stuff
+.DS_Store
+Thumbs.db
+*.swp
+
+# Bytcode cache
 __pycache__/
 *.pyc
-venv/
 
 # Personal notes and analysis
 *.memo
