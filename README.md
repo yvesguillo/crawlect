@@ -254,7 +254,6 @@ def un_plus_un():
 
 ## Planned Features (ideas welcome!)
 - *LLM* API integration - (*in progress*)
-- PIP package - (*in progress*)
 - *HTML* output
 - GUI launcher (maybe...)
 
