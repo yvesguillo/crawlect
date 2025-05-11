@@ -1,7 +1,7 @@
 #! /usr/bin/env python3
 
 import json
-import hashlib
+import importlib.resources
 from pathlib import Path
 import re
 
@@ -16,17 +16,18 @@ class Format():
         self.crawler = crawler
         self.args["crawler"] = self.crawler
 
+        self.languages = {}
+
         # récupérer l'emplacement du script (pour les fichiers de config )
-        sciptPath = Path(__file__).resolve().parent
-
-        #création du lien 
-        langPath = sciptPath /"languages.json"
         try:
-
-            with langPath.open("rt") as f:
+            with importlib.resources.files("crawlect").joinpath("languages.json").open("rt") as f:
                 self.languages = json.load(f)
-        except:
-            print("Tables de mapage introuvables")
+        except FileNotFoundError:
+            print("Could not find languages.json in Crawlect package.")
+            raise
+        except Exception as error:
+            print(f"Unexpected error loading languages.json: {error}")
+            raise
 
 
     def insertCodebox(self, file):

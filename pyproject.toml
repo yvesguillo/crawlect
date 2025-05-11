@@ -2,12 +2,22 @@
 name = "Crawlect"
 version = "1.0.0"
 description = "Crawl, Collect & Document Your Codebase in Markdown."
+readme = "README.md"
 authors = [
   {name = "Yves Guillo", email = "yves@yvesguillo.ch"},
   {name = "Alexandre Jenzer"}
 ]
-license = {text = "MIT"}
+license = "MIT"
 requires-python = ">=3.10"
 dependencies = [
   "gitignore_parser==0.1.12"
 ]
+
+[project.scripts]
+crawlect = "crawlect.__main__:main"
+
+[tool.setuptools.package-data]
+"crawlect" = ["languages.json"]
+
+[tool.setuptools]
+packages = ["crawlect"]

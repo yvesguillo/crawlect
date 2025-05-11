@@ -77,7 +77,7 @@ class Output:
                                 f"{type(self).__name__} could not create codebox from {repr(file)}: {error}"
                             )
 
-                    outputFile.write("\n")
+                    outputFile.write("\n\n")
 
 
     def standardOutputName(self):

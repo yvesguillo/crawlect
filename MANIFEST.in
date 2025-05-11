@@ -1,0 +1,7 @@
+include README.md
+include crawlect/languages.json
+include images/crawlect.avif
+
+# Exclude helper scripts from the package as they do not make sense for pip package.
+exclude setup.sh
+exclude teardown.sh

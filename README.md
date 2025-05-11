@@ -76,7 +76,35 @@ When starting with a new project — whether you're reviewing, refactoring, or c
 
 ## Getting Started
 
-Crawlect is written in Python and requires minimal setup. Just clone, set up the virtual environment, and you’re ready to document codebases like a Markdown ninja.
+Crawlect is written in Python and requires minimal setup. Install the package or clone it to set up the virtual environment, and you’re ready to document codebases like a Markdown ninja.
+
+### Install Crawlect via `pip` (The Handy Way™)
+
+Tired of fiddling with virtual environments just to run a CLI tool? We got you.
+
+You can install Crawlect globally in just a few seconds:
+
+```bash
+pip install git+https://github.com/yvesguillo/crawlect.git
+```
+
+Then summon your loyal markdown minion from *anywhere* on your system:
+
+```bash
+crawlect -p . -o digest.md
+```
+
+> No clutter, no drama. It just works.
+
+#### Why choose the `pip` route?
+
+* You can call `crawlect` from **any folder** — no need to `cd` into the repo.
+* Great for **repeated use** or integrating into your tooling.
+* Keeps your system clean (no extra scripts, venvs, or manual installs).
+
+### (Optional) Local Dev Mode
+
+If you're planning to **tinker with Crawlect**, we’ve still got you covered.
 
 ### 1. Clone the repo
 
@@ -101,7 +129,7 @@ Then run:
 
 > This script creates a `venv`, activates it, and installs dependencies.
 
-**OR** manually install dependencies:
+**OR** manually install requirements.txt:
 
 ```bash
 pip install -r ./requirements.txt
@@ -137,7 +165,7 @@ Here are the most useful options Crawlect understands:
 | `-os`, `--output_suffix`, `--output_file_suffix` | Suffix (usually `.md`) to combine with prefix |
 | `-r`, `--recur`, `--recursive_crawling` | Recursive crawling (default: `True`) |
 | `-d`, `--depth`, `--recursive_crawling_depth` | Max directory depth (default: infinite) |
-| `-crawlig`, `--crawlectignore`, `--crawlectignore_use` | Path to custom ignor file |
+| `-crawlig`, `--crawlectignore`, `--crawlectignore_use` | Use `.crawlectignore` rules (default: `True`) |
 | `-gitig`, `--gitignore`, `--gitignore_use` | Use `.gitignore` rules (default: `True`) |
 | `-dokig`, `--dockerignore`, `--dockerignore_use` | Use `.dockerignore` rules (default: `True`) |
 | `-xen`, `--xenv`, `--sanitize_env_variables` | Sanitize `.env` values (default: `True`) |
@@ -151,7 +179,7 @@ python -m crawlect.crawlect \
   -o ../digest.md \
   -r yes \
   -d 2 \
-  -crawlig ./filetoignore.txt \
+  -crawlig yes \
   -gitig no \
   -dokig no \
   -xen no \
@@ -162,7 +190,7 @@ python -m crawlect.crawlect \
 
 Crawlect supports standard `.gitignore` filtering. You can use:
 
-- `.crawlectignore` (optional and custom rules — your secret weapon)
+- `.crawlectignore` (optional and custom rules — your secret weapon, auto-detected and parsed like Git would)
 - `.gitignore` and `.dockerignore` (auto-detected and parsed like Git would)
 
 These filters follow the [standard `.gitignore` syntax](https://git-scm.com/docs/gitignore), such as:
@@ -183,13 +211,9 @@ venv/
 !important-error.log
 ```
 
-Just create a `.crawlectignore` at the root or anywhere and pass it like this:
+Just create a `.crawlectignore` at the root of your project for special exclusions / inclusions:
 
-```bash
-python -m crawlect.crawlect -p . -o digest.md -crawlig ../myspecialfolder/.crawlectignore
-```
-
-> Bonus: Crawlect will *also* exclude the ignore file itself from the digest, so your `.crawlectignore` won’t show up in the output.
+> Bonus: Crawlect will *also* exclude the ignore file itself from the digest, so your `.crawlectignore` or any *ignore* file won’t show up in the output unless you choose not to use these.
 
 ## Example Output
 
@@ -230,7 +254,7 @@ def un_plus_un():
 
 ## Planned Features (ideas welcome!)
 - *LLM* API integration - (*in progress*)
-- PIP package
+- PIP package - (*in progress*)
 - *HTML* output
 - GUI launcher (maybe...)
 
