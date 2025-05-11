@@ -2,7 +2,6 @@
 
 import json
 import importlib.resources
-from pathlib import Path
 import re
 
 class Format():

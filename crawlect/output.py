@@ -1,6 +1,5 @@
 #! /usr/bin/env python3
 
-from pathlib import Path
 from datetime import datetime
 from random import choices
 import string
@@ -51,7 +50,7 @@ class Output:
             # Directory tree
             if self.crawler.tree:
                 tree = self.crawler.formatService.makeTreeMd(crawler = self.crawler)
-                outputFile.write(f"## File structure\n\n{tree}\n\n")
+                outputFile.write(f"## File structure\n\n{tree}\n")
 
             # Files list
 
@@ -64,12 +63,12 @@ class Output:
             for file in sorted_files:
                 if file.is_file():
                     outputFile.write(f"### {file.name.replace(".", "&period;")}  \n")
-                    outputFile.write(f"[`{file}`]({file})\n\n")
+                    outputFile.write(f"[`{file}`]({file})\n")
 
                     try:
                         content = self.crawler.formatService.insertCodebox(file)
                         if not content is None:
-                            outputFile.write(self.crawler.formatService.insertCodebox(file))
+                            outputFile.write("\n" + self.crawler.formatService.insertCodebox(file) + "\n")
 
                     except Exception as error:
                             print(
@@ -77,7 +76,7 @@ class Output:
                                 f"{type(self).__name__} could not create codebox from {repr(file)}: {error}"
                             )
 
-                    outputFile.write("\n\n")
+                    outputFile.write("\n")
 
 
     def standardOutputName(self):
