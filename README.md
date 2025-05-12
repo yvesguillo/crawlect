@@ -252,18 +252,14 @@ def un_plus_un():
 ```
 ````
 
-## Planned Features (ideas welcome!)
+## Roadmap & Crazy Ideas (ideas welcome!)
 - *LLM* API integration - (*in progress*)
 - *HTML* output
 - GUI launcher (maybe...)
 
 ## Contributing
-
-Got ideas? Found a bug? Want to teach Crawlect how to dance in HTML?
-
-Feel free to fork, star, or open an issue — we're open to collabs and suggestions.
-
-> Friendly contributors get markdown cookies.
+Got ideas? Spot a bug? Wanna make this thing even cooler?  
+Feel free to fork, star, or open an issue — we’d love to hear from you!
 
 ## References and thanks
 

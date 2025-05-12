@@ -8,28 +8,28 @@ class LLM:
         # Store the class arguments for __repr__.
         self.args = {}
 
-        # Auto kindness mode attributes.
-        self.auto_kind = {}
-        self.auto_kind["greetings"] = "Hello!\n"
-        self.auto_kind["thanks"] = "Thank you!\n"
+        # Auto chat mode attributes.
+        self.auto_chat = {}
+        self.auto_chat["greetings"] = "Hello!\n"
+        self.auto_chat["thanks"] = "Thank you!\n"
 
         # History.
         self.history = {}
         self.history["messages"] = []
         self.history["responses"] = []
 
-    def request(self, message = None, auto_kind = True):
+    def request(self, message = None, auto_chat = True):
 
         # Validate.
         if message is None:
             raise AttributeError(f"\n# Argument error #\n{type(self).__name__}.request requires a prompt message. Got: {repr(message)}.")
 
-        #Auto kindness mode.
-        if auto_kind:
+        #Auto chat mode.
+        if auto_chat:
             if len(self.history["messages"]) < 1:
-                message = self.auto_kind["greetings"] + message
+                message = self.auto_chat["greetings"] + message
             else:
-                message = self.auto_kind["thanks"] + message
+                message = self.auto_chat["thanks"] + message
 
         response = self._prompt(message = message)
 
@@ -39,7 +39,7 @@ class LLM:
         return response
 
     def _prompt(self, message):
-        return f"You sent {repr(message)} to LLM."
+        return f"You sent \"{message[0:100]}…\" to LLM."
 
     def __str__(self):
         return self.__repr__()

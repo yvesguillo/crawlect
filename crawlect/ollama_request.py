@@ -39,26 +39,3 @@ class Ollama_request(LLM):
         )
 
         return response['message']['content']
-
-
-####################
-# INTERACTIVE MODE #
-####################
-
-if __name__ == "__main__":
-
-    import traceback
-
-    try:
-        pass
-
-    except KeyboardInterrupt:
-        print("Interupted by user.")
-
-    except Exception as error:
-        print(f"\nUnexpected {type(error).__name__}:\n{error}\n")
-
-        # Debug.
-        lines = traceback.format_tb(error.__traceback__)
-        for line in lines:
-            print(line)
