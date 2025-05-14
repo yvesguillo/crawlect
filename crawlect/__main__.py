@@ -130,10 +130,8 @@ def main():
     try:
         # Parameters.
         parser = argparse.ArgumentParser(
-            description = "Crawlect crawl a given path to list and describe all files on a single markdown file.",
-            epilog = "Filtering rules allow you to forcibly include or exclude certain directories, files names or file extensions. "
-            "All files will be listed if there are no rules. "
-            "Inclusion overrules exclusion on same caracteristics and file-name rules takes precedence against extension rules."
+            description = "Crawlect is a Python module designed to crawl a given directory, collect relevant files and contents, and document the entire structure in a clean, readable Markdown file.",
+            epilog = "By default, Crawlect applies filtering rules from any .gitignore, .dockerignore or .crawlectignore present in the scanned path's first level."
         )
 
         parser.add_argument(
@@ -220,6 +218,13 @@ def main():
             action = BooleanAction,
             default = True,
             help = "Visualize directory tree in the output file (default is True).")
+
+        # LLM parameters.
+        parser.add_argument(
+            "-llm", "--llm_config", "--llm_api_model_key",
+            nargs = "*",
+            default = [],
+            help = "LLM configuration: -llm <api> <model> <api-key> [<request 1>, <request 2>, …]. e.g.: `-llm openai gpt-4.1-nano supersecretkey recom docstring readme`.")
 
         args = parser.parse_args()
 
