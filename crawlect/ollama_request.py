@@ -19,10 +19,6 @@ class Ollama_request(LLM):
 
         super().__init__()
 
-        # Store the class arguments for __repr__.
-        self.args = {}
-
-        # Open AI settings.
         self.host = host
         self.args["host"] = self.host
         self.model = model

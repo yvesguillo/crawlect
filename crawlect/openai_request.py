@@ -22,10 +22,6 @@ class Openai_request(LLM):
 
         super().__init__()
 
-        # Store the class arguments for __repr__.
-        self.args = {}
-
-        # Open AI settings.
         self.api_key = api_key
         self.args["api_key"] = self.api_key
         self.model = model

@@ -4,9 +4,7 @@ class LLM:
     """LLM class handles standard LLM prompting."""
 
     def __init__(self):
-
-        # Store the class arguments for __repr__.
-        self.args = {}
+        self.model = "LLM"
 
         # Auto chat mode attributes.
         self.auto_chat = {}
@@ -17,6 +15,9 @@ class LLM:
         self.history = {}
         self.history["messages"] = []
         self.history["responses"] = []
+
+        # Store the class arguments for __repr__.
+        self.args = {}
 
     def request(self, message = None, auto_chat = True):
 
@@ -39,10 +40,13 @@ class LLM:
         return response
 
     def _prompt(self, message):
-        return f"You sent \"{message[0:100]}…\" to LLM."
+        return f"\nYou sent this to {self.get_model_name()}:\n\"{message[0:1000]}{"…" if len(message) > 100 else ""}\"\n"
 
     def __str__(self):
         return self.__repr__()
+
+    def get_model_name(self):
+        return str(self.model).split(":")[0]
 
     def __repr__(self):
         argsString = []
