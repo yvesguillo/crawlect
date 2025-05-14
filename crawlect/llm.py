@@ -9,7 +9,8 @@ class LLM:
         # Auto chat mode attributes.
         self.auto_chat = {}
         self.auto_chat["greetings"] = "Hello!\n"
-        self.auto_chat["thanks"] = "Thank you!\n"
+        self.auto_chat["opening"] = "Thank you!\n"
+        self.auto_chat["closing"] = "\n"
 
         # History.
         self.history = {}
@@ -25,12 +26,15 @@ class LLM:
         if message is None:
             raise AttributeError(f"\n# Argument error #\n{type(self).__name__}.request requires a prompt message. Got: {repr(message)}.")
 
+        # Clean message
+        message = message.strip()
+
         #Auto chat mode.
         if auto_chat:
             if len(self.history["messages"]) < 1:
                 message = self.auto_chat["greetings"] + message
             else:
-                message = self.auto_chat["thanks"] + message
+                message = self.auto_chat["opening"] + message + self.auto_chat["closing"]
 
         response = self._prompt(message = message)
 
@@ -40,7 +44,7 @@ class LLM:
         return response
 
     def _prompt(self, message):
-        return f"\nYou sent this to {self.get_model_name()}:\n\"{message[0:1000]}{"…" if len(message) > 100 else ""}\"\n"
+        return f"\nYou sent this to {self.get_model_name()}:\n\"{message[0:100]}{"…" if len(message) > 100 else ""}\"\n"
 
     def __str__(self):
         return self.__repr__()

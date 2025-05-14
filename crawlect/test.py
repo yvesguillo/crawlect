@@ -13,10 +13,58 @@ try:
 
     llm = LLM()
 
-    llm.auto_chat["greetings"] = f"Hello {llm.get_model_name()}! I'm a simple *Python* procedural script intended to help the user about a project codebase. User requested that I work with you about this codebase. I'm not designed to have conversation, so if this is OK with you, I will simply send a request and only expect the answers from you, without wrapping phrases or texts such as greetings or consecutive questions. Here is the codebase we are talking about: [CODEBASE IN MARKDOWN[\n{codebase}\n]]\nHere is the first request:\n"
+    llm.auto_chat["greetings"] = (
+        f"Hello {llm.get_model_name()}! You are a code analysis assistant. The following codebase is provided for review:\n"
+        f"[CODEBASE START]\n{codebase}\n[CODEBASE END]\n"
+    )
 
-    print(llm.request("Plup"))
+    llm.auto_chat["opening"] = "Thank you!\n"
 
+    llm.auto_chat["closing"] = "\n[Instruction: Output should be Markdown only. No comments, no intro phrases.]\n"
+
+    print(llm.request(
+        "Please return your detailed recommendations about the codebase.\n"
+        "\n"
+        "Organize your response in the following sections using Markdown headings:\n"
+        "- Code Optimization\n"
+        "- Logic Issues\n"
+        "- Good Practices\n"
+        "- Code Standards Compliance\n"
+        "\n"
+        "Respond in *Markdown* format only.\n"
+    ))
+
+    print(llm.request(
+        "Please write standard Python docstrings for each class or method found in the codebase.\n"
+        "\n"
+        "For each item, provide:\n"
+        "- File path\n"
+        "- Class or method name\n"
+        "- Generated docstring (in Google-style format)\n"
+        "\n"
+        "Respond using this Markdown format:\n"
+        "\n"
+        "### File: `path/to/file.py`\n"
+        "#### Class: `MyClass`\n"
+        "```python\n"
+        "\"\"\"[Google-style docstring here]\"\"\"\n"
+        "```\n"
+    ))
+
+    print(llm.request(
+        "Please provide a standard `README.md` file content for this codebase.\n"
+        "\n"
+        "Structure it with the following sections:\n"
+        "- Project Title\n"
+        "- Description\n"
+        "- Features\n"
+        "- Installation\n"
+        "- Usage\n"
+        "- Examples (if any)\n"
+        "- License\n"
+        "\n"
+        "Respond with the complete content in Markdown format only, suitable for a GitHub public repository.\n"
+    ))
 
 ##################################################################################
 except KeyboardInterrupt:
