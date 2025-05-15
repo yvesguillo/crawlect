@@ -5,7 +5,7 @@ from openai import OpenAI
 # Custom modules.
 from .llm import LLM
 
-class Openai_request(LLM):
+class Openai_Request(LLM):
     """Extend LLM class for Open AI (Chat GPT) support."""
 
     _default_model = "gpt-4.1-nano"
@@ -13,11 +13,11 @@ class Openai_request(LLM):
     def __init__(self, api_key = None, model = None):
 
         # Validate.
-        if api_key is None:
-            raise AttributeError(f"\n# Argument error #\n{type(self).__name__} requires an Open AI API key.")
+        if api_key is None or not isinstance(api_key, str):
+            raise AttributeError(f"\n# Argument error #\n{type(self).__name__} requires an Open AI API key string.")
 
-        if model is None:
-            print(f"\n{type(self).__name__} requires a model name, got: {repr(model)}. {repr(self._default_model)} will be used instead.")
+        if model is None or not isinstance(model, str):
+            print(f"\n{type(self).__name__} requires a model name string, got: {repr(model)}. {repr(self._default_model)} will be used instead.")
             model = self._default_model
 
         super().__init__()

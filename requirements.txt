@@ -1,8 +1,8 @@
-# [`gitignore_parser`](https://github.com/mherrmann/gitignore_parser) by [Michael Herrmann](https://github.com/mherrmann/)
+# [`gitignore_parser`](https://pypi.org/project/gitignore-parser/) by [Michael Herrmann](https://github.com/mherrmann/)
 gitignore_parser==0.1.12
 
 # [`openai`](https://pypi.org/project/openai/)
-openai==1.78.0
+openai==1.78.1
 
 # [`ollama`](https://pypi.org/project/ollama/)
 ollama==0.4.8

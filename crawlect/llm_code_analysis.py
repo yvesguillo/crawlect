@@ -1,28 +1,31 @@
-import traceback
-import sys
-import io
+#! /usr/bin/env python3
 
-sys.stdout = io.TextIOWrapper(sys.stdout.detach(), encoding='utf-8')
+# Custom modules.
+from .llm import LLM
 
-from llm import LLM
+class LLM_Code_Analysis:
+    """Manage analysis request to LLM."""
 
-try:
-##################################################################################
+    def __init__(self, llm = None, codebase = None):
+        # Validate.
+        if llm is None or not issubclass(llm, LLM):
+            raise AttributeError(f"\n# Argument error #\n{type(self).__name__} requires a LLM to interact with.")
 
-    codebase = "def one_plus_one():\n    return \"deux\""
+        if codebase is None or not isinstance(codebase, str):
+            raise AttributeError(f"\n# Argument error #\n{type(self).__name__} requires a codebase string to analyse.")
 
-    llm = LLM()
+        self.llm = llm
+        self.codebase = codebase
 
-    llm.auto_chat["greetings"] = (
-        f"Hello {llm.get_model_name()}! You are a code analysis assistant. The following codebase is provided for review:\n"
-        f"[CODEBASE START]\n{codebase}\n[CODEBASE END]\n"
-    )
+        # Alter llm auto_chat.
+        self.llm.auto_chat["greetings"] = (
+            f"Hello {self.llm.get_model_name()}! You are a code analysis assistant. The following codebase is provided for review:\n"
+            f"[CODEBASE START]\n{codebase}\n[CODEBASE END]\n"
+        )
+        self.llm.auto_chat["closing"] = "\n[Instruction: Output should be Markdown only. No comments, no intro phrases.]\n"
 
-    llm.auto_chat["opening"] = "Thank you!\n"
-
-    llm.auto_chat["closing"] = "\n[Instruction: Output should be Markdown only. No comments, no intro phrases.]\n"
-
-    print(llm.request(
+    def review(self):
+        return self.llm.request(message = (
         "Please return your detailed recommendations about the codebase.\n"
         "\n"
         "Organize your response in the following sections using Markdown headings:\n"
@@ -34,7 +37,8 @@ try:
         "Respond in *Markdown* format only.\n"
     ))
 
-    print(llm.request(
+    def docstring(self):
+        return self.llm.request(message = (
         "Please write standard Python docstrings for each class or method found in the codebase.\n"
         "\n"
         "For each item, provide:\n"
@@ -51,7 +55,8 @@ try:
         "```\n"
     ))
 
-    print(llm.request(
+    def readme(self):
+        return self.llm.request(message = (
         "Please provide a standard `README.md` file content for this codebase.\n"
         "\n"
         "Structure it with the following sections:\n"
@@ -65,15 +70,3 @@ try:
         "\n"
         "Respond with the complete content in Markdown format only, suitable for a GitHub public repository.\n"
     ))
-
-##################################################################################
-except KeyboardInterrupt:
-    print("Interrupted by user.")
-
-except Exception as error:
-    print(f"\nUnexpected {type(error).__name__}:\n{error}\n")
-
-    # Debug.
-    lines = traceback.format_tb(error.__traceback__)
-    for line in lines:
-        print(line)

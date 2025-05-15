@@ -5,17 +5,17 @@ from ollama import Client
 # Custom modules.
 from .llm import LLM
 
-class Ollama_request(LLM):
+class Ollama_Request(LLM):
     """Extend LLM class for Ollama support."""
 
     def __init__(self, host = None, model = None):
 
         # Validate.
-        if host is None:
-            raise AttributeError(f"\n# Argument error #\n{type(self).__name__} requires an Ollama host URL (e.g.: \"http://localhost:11434\"), got {repr(host)}.")
+        if host is None or not isinstance(host, str):
+            raise AttributeError(f"\n# Argument error #\n{type(self).__name__} requires an Ollama host URL string (e.g.: 'http://localhost:11434'), got {repr(host)}.")
 
-        if model is None:
-            raise AttributeError(f"\n# Argument error #\n{type(self).__name__} requires a pulled LLM model (e.g.: \"dolphin-phi\"), got {repr(model)}.")
+        if model is None or not isinstance(model, str):
+            raise AttributeError(f"\n# Argument error #\n{type(self).__name__} requires a pulled LLM model string (e.g.: 'smollm2'), got {repr(model)}.")
 
         super().__init__()
 

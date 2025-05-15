@@ -1,11 +1,28 @@
 # Custom modules.
 from .crawlect import Crawlect
+from .llm_code_analysis import LLM_Code_Analysis
 
 # Standard modules.
 from pathlib import Path
 import argparse
 import traceback
 from math import inf
+
+# Conditionnal Imports.
+def init_openai():
+    from .openai_request import Openai_Request
+    return Openai_Request
+
+def init_ollama():
+    from .ollama_request import Ollama_Request
+    return Ollama_Request
+
+# Globals.
+# LLM.
+AVAILABLE_LLM_API_CLASS = {
+    "openai": init_openai,
+    "ollama": init_ollama
+}
 
 class BooleanAction(argparse.Action):
     """
@@ -24,9 +41,10 @@ class BooleanAction(argparse.Action):
             raise argparse.ArgumentTypeError(f"Unsupported boolean value: {values}")
 
 
-# To be enhanced. State patern for interactive/module mode?
 def validateCrawlectParams(args):
-    """Validate attributes and regenerate dynamic attributes."""
+    """Validate attributes and creat a Crawlect instance."""
+
+    crawlect = None
 
     # Add writeRight attribute to be passed to Crawlect upon file overwrite request prompt.
     if not hasattr(args, 'writeRight'):
@@ -110,7 +128,7 @@ def validateCrawlectParams(args):
                     ).lower()
 
                     if _ == "proceed":
-                        # File overwrite permission granted upon request in CLI mode.
+                        # File overwrite permission granted upon request.
                         args.writeRight = "w"
                         break
 
@@ -123,7 +141,58 @@ def validateCrawlectParams(args):
                     else:
                         continue
 
-    return args
+    try:
+        # Clean useless args for Crawlect.
+        args.pop("llm_config")
+
+        crawlect = Crawlect(**vars(args))
+    except Exception as error:
+        raise Exception(f"\n!! - {type(error).__name__} :\nvalidateCrawlectParams could not initialize Crawlect.")
+
+    return crawlect
+
+
+def validateLLMParams(args: argparse.Namespace) -> Optional[LLM]:
+    """Validate attributes and creat an LLM instance."""
+
+    if len(args.llm_config) < 4:
+        raise ValueError("LLM config must contain at least 4 parameters: <api> <host> <api_key> <model>.")
+
+    llm = None
+
+    if args.llm_config:
+        try:
+            LLM_API_CLASS = AVAILABLE_LLM_API_CLASS[args.llm_config[0]]()
+
+        except Exception as error:
+            raise Exception(
+                f"\n!! - {type(error).__name__} :\nvalidateLLMParams could not load {repr(args.llm_config[0])} API: {error}\n"
+                "LLM configuration and all LLM requests will be ignored.\n"
+            )
+
+        try:
+            llm = LLM_API_CLASS(host = args.llm_config[1], api_key = args.llm_config[2], model = args.llm_config[3])
+
+        except Exception as error:
+            raise Exception(
+                f"\n!! - {type(error).__name__} :\nvalidateLLMParams could not initialize {repr(args.llm_config[0])} API with"
+                f"host = {repr(args.llm_config[1])}, api_key = {repr(args.llm_config[2])}, model = {repr(args.llm_config[3])}: {error}\n"
+                "LLM configuration and all LLM requests will be ignored.\n"
+            )
+
+    return llm
+
+
+def validateLLMRequests(args: argparse.Namespace) -> list[str]:
+    """Validate LLM requesys."""
+
+    requests = []
+
+    for _ in range(4, len(args.llm_config) - 1):
+        if hasattr(LLM_Code_Analysis, args.llm_config[_]):
+            requests.append(args.llm_config[_])
+
+    return requests
 
 
 def main():
@@ -224,22 +293,53 @@ def main():
             "-llm", "--llm_config", "--llm_api_model_key",
             nargs = "*",
             default = [],
-            help = "LLM configuration: -llm <api> <model> <api-key> [<request 1>, <request 2>, …]. e.g.: `-llm openai gpt-4.1-nano supersecretkey recom docstring readme`.")
+            help = "LLM configuration: -llm <llm_api> <host> <api_key> <model> <request 1> [<request 2> <request 3> …].")
 
         args = parser.parse_args()
 
-        args = validateCrawlectParams(args)
 
-        crawlect = Crawlect(**vars(args))
+        # Execute.
+        try:
+            # Digest.
+            crawlect = validateCrawlectParams(args)
+            # Launch output file composition.
+            crawlect.outputService.compose()
 
-        # Launch output file composition
-        crawlect.outputService.compose()
+            # Confirm digest creation.
+            print(
+                f"\n{type(crawlect.outputService).__name__} processed {repr(crawlect.getTitle())} "
+                f"and stored digest in {repr(crawlect.outputService.currentOutputName)}."
+            )
 
-        # Confirm.
-        print(
-            f"\n{type(crawlect.outputService).__name__} processed {repr(crawlect.getTitle())} "
-            f"and stored description in {repr(crawlect.outputService.currentOutputName)}."
-        )
+            # Analysis.
+            try:
+                llm = validateLLMParams(args)
+
+                with open(Path(crawlect.outputService.currentOutputName), "r", encoding = "utf-8") as file:
+                    codebase = file.read()
+
+                analysis = LLM_Code_Analysis(llm, codebase)
+
+                requests = validateLLMRequests(args)
+
+                with open(crawlect.outputService.currentOutputName + ".analysis.md", "w", encoding = "utf-8") as analysisFile:
+
+                    for request in requests:
+                        analysisFile.write(
+                            f"\n//////////////////// {request} ////////////////////\n"
+                            f"{getattr(analysis, request)()}\n"
+                        )
+
+                # Confirm analysis.
+                print(
+                    f"\n{type(analysis).__name__} analysed {repr(crawlect.outputService.currentOutputName)}."
+                )
+            except Exception as error:
+                raise Exception(f"\n!! - {type(error).__name__} :\nAnalysis failed.\n")
+
+        except Exception as error:
+            raise Exception(f"\n!! - {type(error).__name__} :\nCrawlect composition failed.\n")
+
 
     except KeyboardInterrupt:
         print("Interrupted by user.")

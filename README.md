@@ -30,50 +30,6 @@ When starting with a new project — whether you're reviewing, refactoring, or c
 
 ***Think of Crawlect as your markdown-minion; obedient, efficient, and allergic to messy folders.***
 
-## Architecture:
-
-```text
-                         +-------------------+
-                         | CLI OR  py Script |
-                         +---------+---------+
-                                   |
-                     Filters rules |
-                      Path Objects |
-                                   v
-                          +-----------------+
-                          | Crawlect        |
-                          +--------+--------+
-                                   |
-                     Filters rules |
-                      Path Objects |
-                                   |
-         +-------------------------+-------------------------+
-         |                         |                         |
-         v                         v                         v
-+-----------------+       +--------------- -+       +-----------------+
-| Scan            |       | Format          |       | Output          |
-|(List files)     |------>|(Detect type &   |------>|(Compose final   |
-|                 |   |   | insert codebox) |   |   | Markdown file)  |
-+-----------------+   |   +-----------------+   |   +--------+--------+
-                      |                         |            |
-                Files to list            Codebox strings     |
-                 (Obj Paths)              (string (MD))      |
-                                                             |
-                                   +-------------------------+
-                                   |
-                                   v
-                          +-----------------+
-                          | Markdown file   |
-                          | --------        |
-                          | ---             |
-                          +-----------------+
-```
-
-- **Crawlect**: Manager class, handles options, sequence, client parameters, and service classes.
-- **Scan**: Crawls the directories and applies filtering logic.
-- **Format**: Detects file type, builds Markdown-friendly code blocks.
-- **Output**: Generates the final `.md` file.
-
 ## Getting Started
 
 Crawlect is written in Python and requires minimal setup. Install the package or clone it to set up the virtual environment, and you’re ready to document codebases like a Markdown ninja.
@@ -170,6 +126,7 @@ Here are the most useful options Crawlect understands:
 | `-dokig`, `--dockerignore`, `--dockerignore_use` | Use `.dockerignore` rules (default: `True`) |
 | `-xen`, `--xenv`, `--sanitize_env_variables` | Sanitize `.env` values (default: `True`) |
 | `-tre`, `--tree`, `--visualize_directory_tree` | Include tree structure in output (default: `True`) |
+| `-llm`, `--llm_config`, `--llm_api_model_key` | LLM configuration (empty by default)|
 
 #### Example
 
@@ -253,7 +210,6 @@ def un_plus_un():
 ````
 
 ## Roadmap & Crazy Ideas (ideas welcome!)
-- *LLM* API integration - (*in progress*)
 - *HTML* output
 - GUI launcher (maybe...)
 

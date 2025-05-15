@@ -7,15 +7,20 @@ class LLM:
         self.model = "LLM"
 
         # Auto chat mode attributes.
-        self.auto_chat = {}
-        self.auto_chat["greetings"] = "Hello!\n"
-        self.auto_chat["opening"] = "Thank you!\n"
-        self.auto_chat["closing"] = "\n"
+        self.auto_chat = {
+            # Used only for first prompt.
+            "greetings" : f"Hello {self.get_model_name()}!\n",
+            # Used to open all new prompt except for first one.
+            "opening" : "Thank you!\n",
+            # Used to close all prompt.
+            "closing" : "\n"
+        }
 
         # History.
-        self.history = {}
-        self.history["messages"] = []
-        self.history["responses"] = []
+        self.history = {
+            "messages" : [],
+            "responses" : []
+        }
 
         # Store the class arguments for __repr__.
         self.args = {}
@@ -23,8 +28,8 @@ class LLM:
     def request(self, message = None, auto_chat = True):
 
         # Validate.
-        if message is None:
-            raise AttributeError(f"\n# Argument error #\n{type(self).__name__}.request requires a prompt message. Got: {repr(message)}.")
+        if message is None and not isinstance(message, str):
+            raise AttributeError(f"\n# Argument error #\n{type(self).__name__}.request requires a prompt message string.")
 
         # Clean message
         message = message.strip()
@@ -46,11 +51,17 @@ class LLM:
     def _prompt(self, message):
         return f"\nYou sent this to {self.get_model_name()}:\n\"{message[0:100]}{"…" if len(message) > 100 else ""}\"\n"
 
-    def __str__(self):
-        return self.__repr__()
-
     def get_model_name(self):
         return str(self.model).split(":")[0]
+
+    def get_greetings(self):
+        return (
+            f"Hello {llm.get_model_name()}! You are a code analysis assistant. The following codebase is provided for review:\n"
+            f"[CODEBASE START]\n{codebase}\n[CODEBASE END]\n"
+        )
+
+    def __str__(self):
+        return self.__repr__()
 
     def __repr__(self):
         argsString = []
