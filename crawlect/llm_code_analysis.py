@@ -8,7 +8,7 @@ class LLM_Code_Analysis:
 
     def __init__(self, llm = None, codebase = None):
         # Validate.
-        if llm is None or not issubclass(llm, LLM):
+        if llm is None or not isinstance(llm, LLM):
             raise AttributeError(f"\n# Argument error #\n{type(self).__name__} requires a LLM to interact with.")
 
         if codebase is None or not isinstance(codebase, str):

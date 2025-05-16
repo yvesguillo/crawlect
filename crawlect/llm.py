@@ -1,47 +1,46 @@
 #! /usr/bin/env python3
 
 class LLM:
-    """LLM class handles standard LLM prompting."""
+    """LLM base class for standardized interaction with any LLM API."""
 
-    def __init__(self):
-        self.model = "LLM"
-
-        # Auto chat mode attributes.
-        self.auto_chat = {
-            # Used only for first prompt.
-            "greetings" : f"Hello {self.get_model_name()}!\n",
-            # Used to open all new prompt except for first one.
-            "opening" : "Thank you!\n",
-            # Used to close all prompt.
-            "closing" : "\n"
-        }
-
-        # History.
-        self.history = {
-            "messages" : [],
-            "responses" : []
-        }
+    def __init__(self, **kwargs):
+        self.model = kwargs.get("model", "LLM")
 
         # Store the class arguments for __repr__.
-        self.args = {}
+        self.args = kwargs
 
-    def request(self, message = None, auto_chat = True):
+        expected = {"host", "api_key", "model"}
+        for key in kwargs:
+            if key not in expected:
+                print(f"Unused LLM parameter: {key} = {kwargs[key]}")
 
-        # Validate.
-        if message is None and not isinstance(message, str):
+        # Auto chat mode attributes
+        self.auto_chat = {
+            "greetings": f"Hello {self.get_model_name()}!\n",
+            "opening": "Thank you!\n",
+            "closing": "\n"
+        }
+
+        # History
+        self.history = {
+            "messages": [],
+            "responses": []
+        }
+
+    def request(self, message=None, auto_chat=True):
+        if message is None or not isinstance(message, str):
             raise AttributeError(f"\n# Argument error #\n{type(self).__name__}.request requires a prompt message string.")
 
-        # Clean message
         message = message.strip()
 
-        #Auto chat mode.
+        # Auto chat formatting
         if auto_chat:
             if len(self.history["messages"]) < 1:
                 message = self.auto_chat["greetings"] + message
             else:
                 message = self.auto_chat["opening"] + message + self.auto_chat["closing"]
 
-        response = self._prompt(message = message)
+        response = self._prompt(message=message)
 
         self.history["messages"].append(message)
         self.history["responses"].append(response)
@@ -49,23 +48,20 @@ class LLM:
         return response
 
     def _prompt(self, message):
-        return f"\nYou sent this to {self.get_model_name()}:\n\"{message[0:100]}{"…" if len(message) > 100 else ""}\"\n"
+        return f"\nYou sent this to {self.get_model_name()}:\n\"{message[:100]}{'…' if len(message) > 100 else ''}\"\n"
 
     def get_model_name(self):
         return str(self.model).split(":")[0]
 
     def get_greetings(self):
         return (
-            f"Hello {llm.get_model_name()}! You are a code analysis assistant. The following codebase is provided for review:\n"
-            f"[CODEBASE START]\n{codebase}\n[CODEBASE END]\n"
+            f"Hello {self.get_model_name()}! You are a code analysis assistant. The following codebase is provided for review:\n"
+            f"[CODEBASE START]\n{{codebase}}\n[CODEBASE END]\n"
         )
 
     def __str__(self):
         return self.__repr__()
 
     def __repr__(self):
-        argsString = []
-        for arg, value in self.args.items():
-            argsString.append(f"{arg} = {repr(value)}")
-        parameters = ", ".join(argsString)
+        parameters = ", ".join(f"{k} = {repr(v)}" for k, v in self.args.items())
         return f"{type(self).__name__}({parameters})"

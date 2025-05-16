@@ -142,17 +142,17 @@ def validateCrawlectParams(args):
                         continue
 
     try:
-        # Clean useless args for Crawlect.
-        args.pop("llm_config")
+        args_dict = vars(args).copy()
+        args_dict.pop("llm_config", None)
 
-        crawlect = Crawlect(**vars(args))
+        crawlect = Crawlect(**args_dict)
     except Exception as error:
         raise Exception(f"\n!! - {type(error).__name__} :\nvalidateCrawlectParams could not initialize Crawlect.")
 
     return crawlect
 
 
-def validateLLMParams(args: argparse.Namespace) -> Optional[LLM]:
+def validateLLMParams(args):
     """Validate attributes and creat an LLM instance."""
 
     if len(args.llm_config) < 4:
@@ -165,16 +165,20 @@ def validateLLMParams(args: argparse.Namespace) -> Optional[LLM]:
             LLM_API_CLASS = AVAILABLE_LLM_API_CLASS[args.llm_config[0]]()
 
         except Exception as error:
-            raise Exception(
+            print(
                 f"\n!! - {type(error).__name__} :\nvalidateLLMParams could not load {repr(args.llm_config[0])} API: {error}\n"
                 "LLM configuration and all LLM requests will be ignored.\n"
             )
 
         try:
-            llm = LLM_API_CLASS(host = args.llm_config[1], api_key = args.llm_config[2], model = args.llm_config[3])
+            llm = LLM_API_CLASS(**{
+                "host": args.llm_config[1],
+                "api_key": args.llm_config[2],
+                "model": args.llm_config[3],
+            })
 
         except Exception as error:
-            raise Exception(
+            print(
                 f"\n!! - {type(error).__name__} :\nvalidateLLMParams could not initialize {repr(args.llm_config[0])} API with"
                 f"host = {repr(args.llm_config[1])}, api_key = {repr(args.llm_config[2])}, model = {repr(args.llm_config[3])}: {error}\n"
                 "LLM configuration and all LLM requests will be ignored.\n"
@@ -183,14 +187,15 @@ def validateLLMParams(args: argparse.Namespace) -> Optional[LLM]:
     return llm
 
 
-def validateLLMRequests(args: argparse.Namespace) -> list[str]:
+def validateLLMRequests(args):
     """Validate LLM requesys."""
 
     requests = []
 
-    for _ in range(4, len(args.llm_config) - 1):
-        if hasattr(LLM_Code_Analysis, args.llm_config[_]):
-            requests.append(args.llm_config[_])
+    for method_name in args.llm_config[4:]:
+
+        if hasattr(LLM_Code_Analysis, method_name):
+            requests.append(method_name)
 
     return requests
 
@@ -302,6 +307,7 @@ def main():
         try:
             # Digest.
             crawlect = validateCrawlectParams(args)
+
             # Launch output file composition.
             crawlect.outputService.compose()
 
@@ -312,30 +318,32 @@ def main():
             )
 
             # Analysis.
-            try:
-                llm = validateLLMParams(args)
+            # Check if LLM params exists.
+            if args.llm_config:
+                try:
+                    llm = validateLLMParams(args)
 
-                with open(Path(crawlect.outputService.currentOutputName), "r", encoding = "utf-8") as file:
-                    codebase = file.read()
+                    with open(Path(crawlect.outputService.currentOutputName), "r", encoding = "utf-8") as file:
+                        codebase = file.read()
 
-                analysis = LLM_Code_Analysis(llm, codebase)
+                    analysis = LLM_Code_Analysis(llm, codebase)
 
-                requests = validateLLMRequests(args)
+                    requests = validateLLMRequests(args)
 
-                with open(crawlect.outputService.currentOutputName + ".analysis.md", "w", encoding = "utf-8") as analysisFile:
+                    with open(crawlect.outputService.currentOutputName + ".analysis.md", "w", encoding = "utf-8") as analysisFile:
 
-                    for request in requests:
-                        analysisFile.write(
-                            f"\n//////////////////// {request} ////////////////////\n"
-                            f"{getattr(analysis, request)()}\n"
-                        )
+                        for request in requests:
+                            analysisFile.write(
+                                f"\n//////////////////// {request} ////////////////////\n"
+                                f"{getattr(analysis, request)()}\n"
+                            )
 
-                # Confirm analysis.
-                print(
-                    f"\n{type(analysis).__name__} analysed {repr(crawlect.outputService.currentOutputName)}."
-                )
-            except Exception as error:
-                raise Exception(f"\n!! - {type(error).__name__} :\nAnalysis failed.\n")
+                    # Confirm analysis.
+                    print(
+                        f"\n{type(analysis).__name__} analysed {repr(crawlect.outputService.currentOutputName)}."
+                    )
+                except Exception as error:
+                    print(f"\n!! - {type(error).__name__} :\nAnalysis failed.\n")
 
         except Exception as error:
             raise Exception(f"\n!! - {type(error).__name__} :\nCrawlect composition failed.\n")
@@ -351,3 +359,7 @@ def main():
         lines = traceback.format_tb(error.__traceback__)
         for line in lines:
             print(line)
+
+
+if __name__ == "__main__":
+    main()
