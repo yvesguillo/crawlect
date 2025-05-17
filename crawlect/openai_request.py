@@ -1,7 +1,10 @@
 #! /usr/bin/env python3
 
-from openai import OpenAI
+# Custom modules.
 from .llm import LLM
+
+# Standard modules.
+from openai import OpenAI
 
 class Openai_Request(LLM):
     """Extend LLM class for OpenAI (ChatGPT) support."""
@@ -18,12 +21,12 @@ class Openai_Request(LLM):
         kwargs["model"] = model
         super().__init__(**kwargs)
 
-        self.client = OpenAI(api_key=api_key)
+        self.client = OpenAI(api_key = api_key)
 
     def _prompt(self, message):
         completion = self.client.chat.completions.create(
-            model=self.model,
-            store=True,
-            messages=[{"role": "user", "content": message}]
+            model = self.model,
+            store = True,
+            messages = [{"role": "user", "content": message}]
         )
         return completion.choices[0].message.content

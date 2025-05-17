@@ -1,7 +1,10 @@
 #! /usr/bin/env python3
 
-from ollama import Client
+# Custom modules.
 from .llm import LLM
+
+# Standard modules.
+from ollama import Client
 
 class Ollama_Request(LLM):
     """Extend LLM class for Ollama support."""
@@ -17,11 +20,11 @@ class Ollama_Request(LLM):
 
         super().__init__(**kwargs)
 
-        self.client = Client(host=host)
+        self.client = Client(host = host)
 
     def _prompt(self, message):
         response = self.client.chat(
-            model=self.model,
-            messages=[{"role": "user", "content": message}]
+            model = self.model,
+            messages = [{"role": "user", "content": message}]
         )
         return response['message']['content']

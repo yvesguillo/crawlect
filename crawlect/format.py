@@ -1,5 +1,6 @@
 #! /usr/bin/env python3
 
+# Standard modules.
 import json
 import importlib.resources
 import re

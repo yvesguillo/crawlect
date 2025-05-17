@@ -16,8 +16,7 @@ class LLM:
 
         # Auto chat mode attributes
         self.auto_chat = {
-            "greetings": f"Hello {self.get_model_name()}!\n",
-            "opening": "Thank you!\n",
+            "opening": f"Hello {self.get_model_name()}!\n",
             "closing": "\n"
         }
 
@@ -27,7 +26,7 @@ class LLM:
             "responses": []
         }
 
-    def request(self, message=None, auto_chat=True):
+    def request(self, message = None, auto_chat = True):
         if message is None or not isinstance(message, str):
             raise AttributeError(f"\n# Argument error #\n{type(self).__name__}.request requires a prompt message string.")
 
@@ -35,12 +34,9 @@ class LLM:
 
         # Auto chat formatting
         if auto_chat:
-            if len(self.history["messages"]) < 1:
-                message = self.auto_chat["greetings"] + message
-            else:
-                message = self.auto_chat["opening"] + message + self.auto_chat["closing"]
+            message = self.auto_chat["opening"] + message + self.auto_chat["closing"]
 
-        response = self._prompt(message=message)
+        response = self._prompt(message = message)
 
         self.history["messages"].append(message)
         self.history["responses"].append(response)
@@ -52,12 +48,6 @@ class LLM:
 
     def get_model_name(self):
         return str(self.model).split(":")[0]
-
-    def get_greetings(self):
-        return (
-            f"Hello {self.get_model_name()}! You are a code analysis assistant. The following codebase is provided for review:\n"
-            f"[CODEBASE START]\n{{codebase}}\n[CODEBASE END]\n"
-        )
 
     def __str__(self):
         return self.__repr__()

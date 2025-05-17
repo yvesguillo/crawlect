@@ -115,24 +115,29 @@ Here are the most useful options Crawlect understands:
 
 | Options | Description |
 |:--|:--|
-| `-p`, `--path`, `--path_to_crawl` | Path to crawl (default: current folder `.`) |
-| `-o`, `--output`, `--output_file` | Output markdown file name (e.g. `digest.md`) |
-| `-op`, `--output_prefix`, `--output_file_prefix` | Prefix for output filename if you want it auto-named |
-| `-os`, `--output_suffix`, `--output_file_suffix` | Suffix (usually `.md`) to combine with prefix |
-| `-r`, `--recur`, `--recursive_crawling` | Recursive crawling (default: `True`) |
-| `-d`, `--depth`, `--recursive_crawling_depth` | Max directory depth (default: infinite) |
-| `-crawlig`, `--crawlectignore`, `--crawlectignore_use` | Use `.crawlectignore` rules (default: `True`) |
-| `-gitig`, `--gitignore`, `--gitignore_use` | Use `.gitignore` rules (default: `True`) |
-| `-dokig`, `--dockerignore`, `--dockerignore_use` | Use `.dockerignore` rules (default: `True`) |
-| `-xen`, `--xenv`, `--sanitize_env_variables` | Sanitize `.env` values (default: `True`) |
-| `-tre`, `--tree`, `--visualize_directory_tree` | Include tree structure in output (default: `True`) |
-| `-llm`, `--llm_config`, `--llm_api_model_key` | LLM configuration (empty by default)|
+| `-p`, `--path` | Path to crawl (default: current folder `.`) |
+| `-o`, `--output` | Output markdown file name (e.g. `digest.md`) |
+| `-op`, `--output_prefix` | Prefix for output filename if you want it auto-named |
+| `-os`, `--output_suffix` | Suffix (usually `.md`) to combine with prefix |
+| `-r`, `--recur` | Recursive crawling (default: `True`) |
+| `-d`, `--depth` | Max directory depth (default: infinite) |
+| `-craig`, `--crawlectignore` | Use `.crawlectignore` rules (default: `True`) |
+| `-gitig`, `--gitignore` | Use `.gitignore` rules (default: `True`) |
+| `-dokig`, `--dockerignore` | Use `.dockerignore` rules (default: `True`) |
+| `-xen`, `--xenv` | Sanitize `.env` values (default: `True`) |
+| `-tre`, `--tree` | Include tree structure in output (default: `True`) |
+| `-llmapi`, `--llm-api` | LLM provider to use (e.g., 'openai' or 'ollama'). |
+| `-llmost`, `--llm-host` | Host URL for the LLM API (only required for Ollama). |
+| `-llmkey`, `--llm-api-key` | API key for the LLM (only required for OpenAI). |
+| `-llmmod`, `--llm-model` | Model name to use (e.g., 'gpt-4' or 'llama3'). |
+| `-llmreq`, `--llm-request` | LLM tasks to perform: review, docstring, readme. |
 
-#### Example
+#### Examples
+
+Scan *awesomeproject* folder and write its *digest.md* in parent folder including project folder tree, while ignoring *.gitignore* and *.dockerignore* rules but interpreting *.crawlectignore* filtering, without sanitizing *.env* files.
 
 ```bash
-python -m crawlect.crawlect \
-  -p ./awesomeproject \
+crawlect -p ./awesomeproject \
   -o ../digest.md \
   -r yes \
   -d 2 \
@@ -142,6 +147,64 @@ python -m crawlect.crawlect \
   -xen no \
   -tre yes
 ```
+
+Scan curent folder and write its *digest.md* in parent folder then request *OpenAi*'s *gpt-4* model to review and create docstrings from the codebase.
+
+```bash
+crawlect -p . \
+  -o ../digest.md \
+  --llm-api openai \
+  --llm-api-key yoursupersecretkey \
+  --llm-model gpt-4 \
+  --llm-request review docstring
+```
+
+## How LLM Feature Works
+
+Ever wish your code could write its own **README**, explain its quirks, or fill in those long-forgotten **docstrings**?  
+With Crawlect’s *LLM-powered analysis*, it can.
+
+### What happens under the hood?
+
+When you add the `--llm-*` parameters to your command, Crawlect will:
+
+1. **Generate the full project digest** as Markdown.
+2. **Read that digest** and send it to your favorite LLM (*OpenAI* or *Ollama*, your pick).
+3. **Inject it into a custom prompt** depending on your request:
+   - `review`: ask the model to review and critique the code.
+   - `docstring`: generate docstrings for classes and functions.
+   - `readme`: draft a clean, professional README.md based on your project.
+
+The responses are then written to a second file (`<output path>.analysis.md`).
+
+### Supported LLMs
+
+- **OpenAI** – use with `--llm-api openai`, supply your `--llm-api-key`, and pick your `--llm-model` (e.g., `gpt-4`).
+- **Ollama** – run local models (like `llama3`) without an internet connection. Just set `--llm-api ollama` and `--llm-host http://localhost:11434`.
+
+### Example
+
+Scan curent folder and write its *digest.md* in parent folder then request *Ollama* to run a a request to *Llama3* model and create a README documentation from the codebase.
+
+```bash
+crawlect -p . \
+  -o ../digest.md \
+  --llm-api ollama \
+  --llm-host http://localhost:11434 \
+  --llm-model llama3 \
+  --llm-request readme
+```
+
+> Crawlect will write your digest, then generate an `<output path>.analysis.md` file packed with insights.  
+> And **Yes!** This *README.md* have been generated like that. Well… with a bit of edit, but yet, much faster. Spend less time on boilerplate — more on content and *style*.
+
+### Bonus
+
+Crawlect injects the **entire codebase** (in Markdown format) *once*, then asks the LLM to perform each task **with that shared context**. This means:
+
+- No repeated uploads.
+- Coherent answers across tasks.
+- Responses that actually make sense together.
 
 ## How Filtering Works
 
@@ -174,7 +237,9 @@ Just create a `.crawlectignore` at the root of your project for special exclusio
 
 ## Example Output
 
-Here's a sneak peek at what Crawlect produces:
+### Digest
+
+Here's a sneak peek at what Crawlect produces as digest:
 
 ````markdown
 # my-awesome-project
@@ -209,9 +274,36 @@ def un_plus_un():
 ```
 ````
 
-## Roadmap & Crazy Ideas (ideas welcome!)
+### Analysis
+
+LLM code analysis will look like that:
+
+```markdown
+////////////
+// REVIEW //
+////////////
+
+<Markdown-formatted review by the LLM>
+
+
+///////////////
+// DOCSTRING //
+///////////////
+
+<Auto-generated docstrings with file/class/function structure>
+
+
+////////////
+// README //
+////////////
+
+<Markdown README suggestion ready to paste>
+```
+
+## Roadmap & Crazy Ideas
+
 - *HTML* output
-- GUI launcher (maybe...)
+- GUI launcher (Probably, *Swing* training is coming…)
 
 ## Contributing
 Got ideas? Spot a bug? Wanna make this thing even cooler?  
@@ -219,8 +311,6 @@ Feel free to fork, star, or open an issue — we’d love to hear from you!
 
 ## References and thanks
 
-### Markdown code syntax table - From [jincheng9 on GitHub](https://github.com/jincheng9/markdown_supported_languages)
-
-### Argpars boolean argument treatment - From [Codemia](https://codemia.io/knowledge-hub/path/parsing_boolean_values_with_argparse)
-
-### [`gitignore_parser`](https://github.com/mherrmann/gitignore_parser) by [Michael Herrmann](https://github.com/mherrmann/)
+- Markdown code syntax table - From [jincheng9 on GitHub](https://github.com/jincheng9/markdown_supported_languages)
+- Argpars boolean argument treatment - From [Codemia](https://codemia.io/knowledge-hub/path/parsing_boolean_values_with_argparse)
+- [`gitignore_parser`](https://github.com/mherrmann/gitignore_parser) by [Michael Herrmann](https://github.com/mherrmann/)

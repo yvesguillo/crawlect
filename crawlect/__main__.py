@@ -147,44 +147,32 @@ def validateCrawlectParams(args):
 
         crawlect = Crawlect(**args_dict)
     except Exception as error:
-        raise Exception(f"\n!! - {type(error).__name__} :\nvalidateCrawlectParams could not initialize Crawlect.")
+        raise Exception(f"\n!! - {type(error).__name__} :\nvalidateCrawlectParams could not initialize Crawlect:\n{error}")
 
     return crawlect
 
 
 def validateLLMParams(args):
-    """Validate attributes and creat an LLM instance."""
+    """Validate and instantiate the appropriate LLM API class based on CLI args."""
 
-    if len(args.llm_config) < 4:
-        raise ValueError("LLM config must contain at least 4 parameters: <api> <host> <api_key> <model>.")
+    llm_class_factory = AVAILABLE_LLM_API_CLASS.get(args.llm_api)
 
-    llm = None
+    if not llm_class_factory:
+        raise ValueError(f"Unknown LLM API: {args.llm_api}")
 
-    if args.llm_config:
-        try:
-            LLM_API_CLASS = AVAILABLE_LLM_API_CLASS[args.llm_config[0]]()
+    kwargs = {"model": args.llm_model}
 
-        except Exception as error:
-            print(
-                f"\n!! - {type(error).__name__} :\nvalidateLLMParams could not load {repr(args.llm_config[0])} API: {error}\n"
-                "LLM configuration and all LLM requests will be ignored.\n"
-            )
+    if args.llm_api == "openai":
+        if not args.llm_api_key:
+            raise ValueError("OpenAI requires --llm-api-key.")
+        kwargs["api_key"] = args.llm_api_key
 
-        try:
-            llm = LLM_API_CLASS(**{
-                "host": args.llm_config[1],
-                "api_key": args.llm_config[2],
-                "model": args.llm_config[3],
-            })
+    elif args.llm_api == "ollama":
+        if not args.llm_host:
+            raise ValueError("Ollama requires --llm-host.")
+        kwargs["host"] = args.llm_host
 
-        except Exception as error:
-            print(
-                f"\n!! - {type(error).__name__} :\nvalidateLLMParams could not initialize {repr(args.llm_config[0])} API with"
-                f"host = {repr(args.llm_config[1])}, api_key = {repr(args.llm_config[2])}, model = {repr(args.llm_config[3])}: {error}\n"
-                "LLM configuration and all LLM requests will be ignored.\n"
-            )
-
-    return llm
+    return llm_class_factory()(**kwargs)
 
 
 def validateLLMRequests(args):
@@ -192,7 +180,7 @@ def validateLLMRequests(args):
 
     requests = []
 
-    for method_name in args.llm_config[4:]:
+    for method_name in args.llm_request:
 
         if hasattr(LLM_Code_Analysis, method_name):
             requests.append(method_name)
@@ -209,36 +197,36 @@ def main():
         )
 
         parser.add_argument(
-            "-p", "--path", "--path_to_crawl",
+            "-p", "--path",
             type = str,
             default = ".",
-            help = "Path to crawl (default is current folder \".\").")
+            help = "Path to crawl (default is current folder '.'').")
 
         parser.add_argument(
-            "-o", "--output", "--output_file",
+            "-o", "--output",
             type = str,
-            default = None,
-            help = "Output markdown digest file (default is None).")
+            default = "digest.md",
+            help = "Output markdown digest file ('digest.md' by default).")
 
         parser.add_argument(
-            "-op", "--output_prefix", "--output_file_prefix",
+            "-op", "--output_prefix",
             type = str,
-            default = "description",
-            help = "Output markdown digest file prefix ('description' by default) "
+            default = "digest",
+            help = "Output markdown digest file prefix ('digest' by default), "
             "associated with --output_suffix can be use as an alternative to '--output' argument to generate a unique file-name "
             "(e.g.: --output_prefix = './descript', output_suffix = '.md' will create './descript-202506041010-g5ef9h.md').")
 
         parser.add_argument(
-            "-os", "--output_suffix", "--output_file_suffix",
+            "-os", "--output_suffix",
             type = str,
             default = ".md",
             
-            help = "Output markdown digest file prefix ('.md' by default) "
+            help = "Output markdown digest file prefix ('.md' by default), "
             "associated with --output_prefix can be use as an alternative to '--output' argument to generate a unique file-name "
             "(e.g.: --output_prefix = './descript', output_suffix = '.md' will create './descript-202506041010-g5ef9h.md').")
 
         parser.add_argument(
-            "-r", "--recur", "--recursive_crawling",
+            "-r", "--recur",
             type = str,
             choices = BooleanAction.choices,
             action = BooleanAction,
@@ -246,14 +234,14 @@ def main():
             help = "Enable recursive crawling (default is True).")
 
         parser.add_argument(
-            "-d", "--depth", "--recursive_crawling_depth",
+            "-d", "--depth",
             type = int,
             default = inf,
             help = "Scan depth limit (default is infinite).")
 
         # Ignore files handling.
         parser.add_argument(
-            "-crawlig", "--crawlectignore", "--crawlectignore_use",
+            "-craig", "--crawlectignore",
             type = str,
             choices = BooleanAction.choices,
             action = BooleanAction,
@@ -261,7 +249,7 @@ def main():
             help = "Use .crawlectignore exclusion rules if exist (default is True).")
 
         parser.add_argument(
-            "-gitig", "--gitignore", "--gitignore_use",
+            "-gitig", "--gitignore",
             type = str,
             choices = BooleanAction.choices,
             action = BooleanAction,
@@ -269,7 +257,7 @@ def main():
             help = "Use .gitignore exclusion rules if exist (default is True).")
 
         parser.add_argument(
-            "-dokig", "--dockerignore", "--dockerignore_use",
+            "-dokig", "--dockerignore",
             type = str,
             choices = BooleanAction.choices,
             action = BooleanAction,
@@ -278,7 +266,7 @@ def main():
 
         # Advanced features parameters.
         parser.add_argument(
-            "-xen", "--xenv", "--sanitize_env_variables",
+            "-xen", "--xenv",
             type = str,
             choices = BooleanAction.choices,
             action = BooleanAction,
@@ -286,7 +274,7 @@ def main():
             help = "Sanitize .env variables to mitigate sensitive info leak risk (default is True).")
 
         parser.add_argument(
-            "-tre", "--tree", "--visualize_directory_tree",
+            "-tre", "--tree",
             type = str,
             choices = BooleanAction.choices,
             action = BooleanAction,
@@ -295,10 +283,26 @@ def main():
 
         # LLM parameters.
         parser.add_argument(
-            "-llm", "--llm_config", "--llm_api_model_key",
-            nargs = "*",
-            default = [],
-            help = "LLM configuration: -llm <llm_api> <host> <api_key> <model> <request 1> [<request 2> <request 3> …].")
+            "-llmapi", "--llm-api",
+            choices = AVAILABLE_LLM_API_CLASS.keys(),
+            help = "LLM provider to use (e.g., 'openai' or 'ollama').")
+
+        parser.add_argument(
+            "-llmost", "--llm-host",
+            help = "Host URL for the LLM API (only required for Ollama).")
+
+        parser.add_argument(
+            "-llmkey", "--llm-api-key",
+            help = "API key for the LLM (only required for OpenAI).")
+
+        parser.add_argument(
+            "-llmmod", "--llm-model",
+            help = "Model name to use (e.g., 'gpt-4' or 'llama3').")
+
+        parser.add_argument(
+            "-llmreq", "--llm-request",
+            nargs = "+",
+            help = "LLM tasks to perform: review, docstring, readme.")
 
         args = parser.parse_args()
 
@@ -317,36 +321,42 @@ def main():
                 f"and stored digest in {repr(crawlect.outputService.currentOutputName)}."
             )
 
-            # Analysis.
-            # Check if LLM params exists.
-            if args.llm_config:
-                try:
-                    llm = validateLLMParams(args)
-
-                    with open(Path(crawlect.outputService.currentOutputName), "r", encoding = "utf-8") as file:
-                        codebase = file.read()
-
-                    analysis = LLM_Code_Analysis(llm, codebase)
-
-                    requests = validateLLMRequests(args)
-
-                    with open(crawlect.outputService.currentOutputName + ".analysis.md", "w", encoding = "utf-8") as analysisFile:
-
-                        for request in requests:
-                            analysisFile.write(
-                                f"\n//////////////////// {request} ////////////////////\n"
-                                f"{getattr(analysis, request)()}\n"
-                            )
-
-                    # Confirm analysis.
-                    print(
-                        f"\n{type(analysis).__name__} analysed {repr(crawlect.outputService.currentOutputName)}."
-                    )
-                except Exception as error:
-                    print(f"\n!! - {type(error).__name__} :\nAnalysis failed.\n")
-
         except Exception as error:
-            raise Exception(f"\n!! - {type(error).__name__} :\nCrawlect composition failed.\n")
+            raise Exception(f"\n!! - {type(error).__name__} :\nCrawlect composition failed:\n{error}")
+
+
+        # Analysis.
+        # Check if LLM params exists.
+        if args.llm_request:
+            try:
+                llm = validateLLMParams(args)
+
+                with open(Path(crawlect.outputService.currentOutputName), "r", encoding = "utf-8") as file:
+                    codebase = file.read()
+
+                analysis = LLM_Code_Analysis(llm, codebase)
+
+                requests = validateLLMRequests(args)
+
+                with open(crawlect.outputService.currentOutputName + ".analysis.md", "w", encoding = "utf-8") as analysisFile:
+
+                    for request in requests:
+                        analysisFile.write(
+                            f"///{len(request) * "/"}///\n"
+                            f"// {request.upper()} //\n"
+                            f"///{len(request) * "/"}///\n"
+                            "\n"
+                            f"{getattr(analysis, request)()}\n"
+                            "\n"
+                            "\n"
+                        )
+
+                # Confirm analysis.
+                print(
+                    f"\n{type(analysis).__name__} analysed {repr(crawlect.outputService.currentOutputName)}."
+                )
+            except Exception as error:
+                raise Exception(f"\n!! - {type(error).__name__} :\nAnalysis failed:\n{error}")
 
 
     except KeyboardInterrupt:

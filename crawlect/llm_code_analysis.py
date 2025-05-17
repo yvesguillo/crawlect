@@ -18,7 +18,7 @@ class LLM_Code_Analysis:
         self.codebase = codebase
 
         # Alter llm auto_chat.
-        self.llm.auto_chat["greetings"] = (
+        self.llm.auto_chat["opening"] = (
             f"Hello {self.llm.get_model_name()}! You are a code analysis assistant. The following codebase is provided for review:\n"
             f"[CODEBASE START]\n{codebase}\n[CODEBASE END]\n"
         )

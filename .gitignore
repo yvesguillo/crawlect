@@ -7,7 +7,7 @@ dist/
 venv/
 
 # Environment files
-.env
+*.env
 
 # Mac / Windows / Editor stuff
 .DS_Store

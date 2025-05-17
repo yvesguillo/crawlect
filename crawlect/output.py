@@ -1,5 +1,6 @@
 #! /usr/bin/env python3
 
+# Standard modules.
 from datetime import datetime
 from random import choices
 import string
