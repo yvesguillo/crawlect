@@ -1,6 +1,17 @@
+#! /usr/bin/env python3
+
 # Custom modules.
 from .crawlect import Crawlect
 from .llm_code_analysis import LLM_Code_Analysis
+from .cli import (
+    validate_crawlect_params,
+    validate_llm_params,
+    run_llm_analysis,
+    open_file
+)
+
+# Conditionnal Imports.
+from .llm_api_loader import get_llm_api_class_map
 
 # Standard modules.
 from pathlib import Path
@@ -8,185 +19,11 @@ import argparse
 import traceback
 from math import inf
 
-# Conditionnal Imports.
-def init_openai():
-    from .openai_request import Openai_Request
-    return Openai_Request
+def verbose(message):
+    """Handle verbosity"""
 
-def init_ollama():
-    from .ollama_request import Ollama_Request
-    return Ollama_Request
-
-# Globals.
-# LLM.
-AVAILABLE_LLM_API_CLASS = {
-    "openai": init_openai,
-    "ollama": init_ollama
-}
-
-class BooleanAction(argparse.Action):
-    """
-    This method converts argpars argument string to a boolean (e.g.: "yes" => True).
-    From [Codemia](https://codemia.io/knowledge-hub/path/parsing_boolean_values_with_argparse)
-    """
-
-    choices = ["yes", "no", "y", "n", "true", "false", "1", "0"]
-
-    def __call__(self, parser, namespace, values, option_string = None):
-        if values.lower() in ("yes", "y", "true", "t", "1"):
-            setattr(namespace, self.dest, True)
-        elif values.lower() in ("no", "n", "false", "f", "0"):
-            setattr(namespace, self.dest, False)
-        else:
-            raise argparse.ArgumentTypeError(f"Unsupported boolean value: {values}")
-
-
-def validateCrawlectParams(args):
-    """Validate attributes and creat a Crawlect instance."""
-
-    crawlect = None
-
-    # Add writeRight attribute to be passed to Crawlect upon file overwrite request prompt.
-    if not hasattr(args, 'writeRight'):
-        args.writeRight = "x"
-
-    # Max depth adaptation if recur is False.
-    if not args.recur:
-        args.depth = 1
-
-    while args.path is None:
-        args.path = input(
-            "\n# Missing argument #\n"
-            "Crawlect require a path to crawl.\n"
-            "Please enter the desired path (e.g.: '.').\n"
-            "Or [Ctrl]+[C] then [Enter] to abort.\n"
-        )
-
-    while not Path(args.path).exists():
-        args.path = input(
-            "\n# Path error #\n"
-            f"Crawlect could not find {repr(args.path)},\n"
-            "please enter the path to crawl.\n"
-            "Or [Ctrl]+[C] then [Enter] to abort.\n"
-        )
-
-    while args.output is None and args.output_prefix is None:
-        print(
-            "\n# Missing argument #\n"
-            "Crawlect require an output file-name for static output file-name\n"
-            "(e.g.: './description.md')\n"
-            "OR\n"
-            "an output prefix and output suffix for unique output file-name\n"
-            "(e.g.: './descript' as prefix, and '.md' as suffix),\n"
-            "this will create a path similar to: './descript-202506041010-g5ef9h.md'."
-        )
-
-        while True:
-            _ = input(
-                "Please choose between 'static' and 'unique'.\n"
-                "Or [Ctrl]+[C] then [Enter] to abort.\n"
-            ).lower()
-
-            if _ == "static":
-                while args.output is None or not args.output:
-                    args.output = input(
-                    "Please enter a static output file-name, e.g.: './output.md'.\n"
-                    "Or [Ctrl]+[C] then [Enter] to abort.\n"
-                    )
-
-                break
-
-            elif _ == "unique":
-                while args.output_prefix is None or not args.output_prefix:
-                    args.output_prefix = input(
-                        "Please enter a prefix, e.g.: './output'.\n"
-                        "Or [Ctrl]+[C] then [Enter] to abort.\n"
-                    )
-
-                while args.output_suffix is None:
-                    args.output_suffix = input(
-                        "Please enter a suffix, e.g.: '.md' (suffix can be empty).\n"
-                        "Or [Ctrl]+[C] then [Enter] to abort.\n"
-                    )
-
-                break
-
-            else:
-                continue
-
-    if args.output is not None:
-        if Path(args.output).exists():
-                print(
-                    "\n# File overwrite #\nCrawlect is about to\n"
-                    f"overwrite {repr(args.output)}. Its content will be lost!"
-                )
-
-                while True:
-                    _ = input(
-                        "Please choose between 'proceed' and 'change'.\n"
-                        "Or [Ctrl]+[C] then [Enter] to abort.\n"
-                    ).lower()
-
-                    if _ == "proceed":
-                        # File overwrite permission granted upon request.
-                        args.writeRight = "w"
-                        break
-
-                    elif _ == "change":
-                        args.output = None
-                        args.output_prefix = None
-                        validateCrawlectParams(args)
-                        break
-
-                    else:
-                        continue
-
-    try:
-        args_dict = vars(args).copy()
-        args_dict.pop("llm_config", None)
-
-        crawlect = Crawlect(**args_dict)
-    except Exception as error:
-        raise Exception(f"\n!! - {type(error).__name__} :\nvalidateCrawlectParams could not initialize Crawlect:\n{error}")
-
-    return crawlect
-
-
-def validateLLMParams(args):
-    """Validate and instantiate the appropriate LLM API class based on CLI args."""
-
-    llm_class_factory = AVAILABLE_LLM_API_CLASS.get(args.llm_api)
-
-    if not llm_class_factory:
-        raise ValueError(f"Unknown LLM API: {args.llm_api}")
-
-    kwargs = {"model": args.llm_model}
-
-    if args.llm_api == "openai":
-        if not args.llm_api_key:
-            raise ValueError("OpenAI requires --llm-api-key.")
-        kwargs["api_key"] = args.llm_api_key
-
-    elif args.llm_api == "ollama":
-        if not args.llm_host:
-            raise ValueError("Ollama requires --llm-host.")
-        kwargs["host"] = args.llm_host
-
-    return llm_class_factory()(**kwargs)
-
-
-def validateLLMRequests(args):
-    """Validate LLM requesys."""
-
-    requests = []
-
-    for method_name in args.llm_request:
-
-        if hasattr(LLM_Code_Analysis, method_name):
-            requests.append(method_name)
-
-    return requests
-
+    if VERBOSE:
+        print("// " + message, flush = True)
 
 def main():
     try:
@@ -202,173 +39,177 @@ def main():
             default = ".",
             help = "Path to crawl (default is current folder '.'').")
 
-        parser.add_argument(
+        output_group = parser.add_argument_group("Output options")
+
+        exclusive = output_group.add_mutually_exclusive_group()
+
+        exclusive.add_argument(
             "-o", "--output",
             type = str,
-            default = "digest.md",
-            help = "Output markdown digest file ('digest.md' by default).")
+            help = "Static output file path (e.g. './digest.md')."
+        )
 
-        parser.add_argument(
+        exclusive.add_argument(
             "-op", "--output_prefix",
             type = str,
-            default = "digest",
-            help = "Output markdown digest file prefix ('digest' by default), "
-            "associated with --output_suffix can be use as an alternative to '--output' argument to generate a unique file-name "
-            "(e.g.: --output_prefix = './descript', output_suffix = '.md' will create './descript-202506041010-g5ef9h.md').")
+            help = "Prefix for dynamically generated output file name (e.g. './digest')."
+        )
 
-        parser.add_argument(
+        # Suffix is optional only if prefix is provided
+        output_group.add_argument(
             "-os", "--output_suffix",
             type = str,
             default = ".md",
-            
-            help = "Output markdown digest file prefix ('.md' by default), "
-            "associated with --output_prefix can be use as an alternative to '--output' argument to generate a unique file-name "
-            "(e.g.: --output_prefix = './descript', output_suffix = '.md' will create './descript-202506041010-g5ef9h.md').")
+            help = "Suffix for dynamic filename (e.g. '.md')."
+        )
 
         parser.add_argument(
-            "-r", "--recur",
+            "--recur",
             type = str,
-            choices = BooleanAction.choices,
-            action = BooleanAction,
+            action = argparse.BooleanOptionalAction,
             default = True,
-            help = "Enable recursive crawling (default is True).")
+            help = "Enable recursive crawling (default: enabled). Use --no-recur to disable."
+        )
 
         parser.add_argument(
             "-d", "--depth",
             type = int,
             default = inf,
-            help = "Scan depth limit (default is infinite).")
+            help = "Scan depth limit (default is infinite)."
+        )
 
         # Ignore files handling.
         parser.add_argument(
-            "-craig", "--crawlectignore",
-            type = str,
-            choices = BooleanAction.choices,
-            action = BooleanAction,
+            "--crawlig",
+            action = argparse.BooleanOptionalAction,
             default = True,
-            help = "Use .crawlectignore exclusion rules if exist (default is True).")
+            help = "Use .crawlectignore exclusion rules if exist (default: enabled). Use --no-crawlig to disable."
+        )
 
         parser.add_argument(
-            "-gitig", "--gitignore",
-            type = str,
-            choices = BooleanAction.choices,
-            action = BooleanAction,
+            "--gitig",
+            action = argparse.BooleanOptionalAction,
             default = True,
-            help = "Use .gitignore exclusion rules if exist (default is True).")
+            help = "Use .gitignore exclusion rules if exist (default: enabled). Use --no-gitig to disable."
+        )
 
         parser.add_argument(
-            "-dokig", "--dockerignore",
-            type = str,
-            choices = BooleanAction.choices,
-            action = BooleanAction,
+            "--dockig",
+            action = argparse.BooleanOptionalAction,
             default = True,
-            help = "Use .dockerignore exclusion rules if exist (default is True).")
+            help = "Use .dockerignore exclusion rules if exist (default: enabled). Use --no-dockig to disable."
+        )
 
         # Advanced features parameters.
         parser.add_argument(
-            "-xen", "--xenv",
-            type = str,
-            choices = BooleanAction.choices,
-            action = BooleanAction,
+            "--xenv",
+            action = argparse.BooleanOptionalAction,
             default = True,
-            help = "Sanitize .env variables to mitigate sensitive info leak risk (default is True).")
+            help = "Sanitize .env variables to mitigate sensitive info leak risk (default: enabled). Use --no-xenv to disable."
+        )
 
         parser.add_argument(
-            "-tre", "--tree",
-            type = str,
-            choices = BooleanAction.choices,
-            action = BooleanAction,
+            "--tree",
+            action = argparse.BooleanOptionalAction,
             default = True,
-            help = "Visualize directory tree in the output file (default is True).")
+            help = "Visualize directory tree in the output file (default: enabled). Use --no-tree to disable."
+        )
 
         # LLM parameters.
         parser.add_argument(
             "-llmapi", "--llm-api",
-            choices = AVAILABLE_LLM_API_CLASS.keys(),
-            help = "LLM provider to use (e.g., 'openai' or 'ollama').")
+            choices = get_llm_api_class_map().keys(),
+            help = "LLM provider to use (e.g., 'openai' or 'ollama')."
+        )
 
         parser.add_argument(
-            "-llmost", "--llm-host",
-            help = "Host URL for the LLM API (only required for Ollama).")
+            "-llmhost", "--llm-host",
+            help = "Host URL for the LLM API (only required for Ollama)."
+        )
 
         parser.add_argument(
             "-llmkey", "--llm-api-key",
-            help = "API key for the LLM (only required for OpenAI).")
+            help = "API key for the LLM (only required for OpenAI)."
+        )
 
         parser.add_argument(
             "-llmmod", "--llm-model",
-            help = "Model name to use (e.g., 'gpt-4' or 'llama3').")
+            help = "Model name to use (e.g., 'gpt-4' or 'llama3')."
+        )
 
         parser.add_argument(
             "-llmreq", "--llm-request",
             nargs = "+",
-            help = "LLM tasks to perform: review, docstring, readme.")
+            help = "LLM tasks to perform: review, docstring, readme."
+        )
+
+        parser.add_argument(
+            "-open", "--open",
+            action = argparse.BooleanOptionalAction,
+            default = False,
+            help = "Open the output files once generated (default: disabled)."
+        )
+
+        parser.add_argument(
+            "-verbose", "--verbose",
+            action = argparse.BooleanOptionalAction,
+            default = True,
+            help = "Toggle verbosity (default: enabled). Use --no-verbose to disable."
+        )
 
         args = parser.parse_args()
 
+        # Global.
+        global VERBOSE
+        VERBOSE = args.verbose
 
         # Execute.
         try:
             # Digest.
-            crawlect = validateCrawlectParams(args)
+            crawlect = validate_crawlect_params(args)
 
             # Launch output file composition.
+            verbose(f"Launched {repr(crawlect.getTitle())} processing.")
             crawlect.outputService.compose()
 
             # Confirm digest creation.
-            print(
-                f"\n{type(crawlect.outputService).__name__} processed {repr(crawlect.getTitle())} "
-                f"and stored digest in {repr(crawlect.outputService.currentOutputName)}."
-            )
+            verbose(f"Processed {repr(crawlect.getTitle())} and stored digest in {repr(crawlect.outputService.currentOutputName)}.")
+
+            # Open the generated file if requested.
+            if args.open:
+                open_file(Path(crawlect.outputService.currentOutputName))
 
         except Exception as error:
             raise Exception(f"\n!! - {type(error).__name__} :\nCrawlect composition failed:\n{error}")
 
 
         # Analysis.
-        # Check if LLM params exists.
         if args.llm_request:
             try:
-                llm = validateLLMParams(args)
-
-                with open(Path(crawlect.outputService.currentOutputName), "r", encoding = "utf-8") as file:
-                    codebase = file.read()
-
-                analysis = LLM_Code_Analysis(llm, codebase)
-
-                requests = validateLLMRequests(args)
-
-                with open(crawlect.outputService.currentOutputName + ".analysis.md", "w", encoding = "utf-8") as analysisFile:
-
-                    for request in requests:
-                        analysisFile.write(
-                            f"///{len(request) * "/"}///\n"
-                            f"// {request.upper()} //\n"
-                            f"///{len(request) * "/"}///\n"
-                            "\n"
-                            f"{getattr(analysis, request)()}\n"
-                            "\n"
-                            "\n"
-                        )
+                verbose(f"Launched {repr(crawlect.getTitle())} analysis.")
+                run_llm_analysis(crawlect, args)
 
                 # Confirm analysis.
-                print(
-                    f"\n{type(analysis).__name__} analysed {repr(crawlect.outputService.currentOutputName)}."
-                )
+                verbose(f"Processed {repr(crawlect.getTitle())} and stored analysis in {repr(crawlect.outputService.analysisPathName)}.")
+
+                # Open the generated file if requested.
+                if args.open:
+                    open_file(Path(crawlect.outputService.analysisPathName))
+
             except Exception as error:
                 raise Exception(f"\n!! - {type(error).__name__} :\nAnalysis failed:\n{error}")
 
 
     except KeyboardInterrupt:
-        print("Interrupted by user.")
+        verbose("Interrupted by user.")
 
     except Exception as error:
-        print(f"\nUnexpected {type(error).__name__}:\n{error}\n")
+        verbose(f"\nUnexpected {type(error).__name__}:\n{error}\n")
 
         # Debug.
         lines = traceback.format_tb(error.__traceback__)
         for line in lines:
-            print(line)
+            verbose(line)
 
 
 if __name__ == "__main__":

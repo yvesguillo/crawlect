@@ -97,7 +97,7 @@ pip install -r ./requirements.txt
 python -m crawlect.crawlect -p . -o ../digest.md
 ```
 
-> This will scan the current folder, and generate a Markdown file named `digest.md` in the parent directory.
+> This will scan the current folder and generate a Markdown file named `digest.md` in the parent directory.
 
 ### 4. Teardown (optional)
 
@@ -115,26 +115,28 @@ Here are the most useful options Crawlect understands:
 
 | Options | Description |
 |:--|:--|
-| `-p`, `--path` | Path to crawl (default: current folder `.`) |
-| `-o`, `--output` | Output markdown file name (e.g. `digest.md`) |
-| `-op`, `--output_prefix` | Prefix for output filename if you want it auto-named |
-| `-os`, `--output_suffix` | Suffix (usually `.md`) to combine with prefix |
-| `-r`, `--recur` | Recursive crawling (default: `True`) |
-| `-d`, `--depth` | Max directory depth (default: infinite) |
-| `-craig`, `--crawlectignore` | Use `.crawlectignore` rules (default: `True`) |
-| `-gitig`, `--gitignore` | Use `.gitignore` rules (default: `True`) |
-| `-dokig`, `--dockerignore` | Use `.dockerignore` rules (default: `True`) |
-| `-xen`, `--xenv` | Sanitize `.env` values (default: `True`) |
-| `-tre`, `--tree` | Include tree structure in output (default: `True`) |
-| `-llmapi`, `--llm-api` | LLM provider to use (e.g., 'openai' or 'ollama'). |
+| `-p`, `--path` | Path to crawl (default is current folder `.`). |
+| `-o`, `--output` | Static output file path (e.g. `./digest.md`). |
+| `-op`, `--output_prefix` | Prefix for dynamic output unique file name (e.g. `./digest`). |
+| `-os`, `--output_suffix` | Suffix for dynamic output unique file name (e.g. `.md`). |
+| `-r`, `--recur` | Enable recursive crawling (default: enabled). Use `--no-recur` to disable. |
+| `-d`, `--depth` | Scan depth limit (default is infinite). |
+| `-craig`, `--crawlectignore` | Use .crawlectignore exclusion rules if exist (default: enabled). Use `--no-crawlig` to disable. |
+| `-gitig`, `--gitignore` | Use .gitignore exclusion rules if exist (default: enabled). Use `--no-gitig` to disable. |
+| `-dokig`, `--dockerignore` | Use .dockerignore exclusion rules if exist (default: enabled). Use `--no-dockig` to disable. |
+| `-xen`, `--xenv` | Sanitize .env variables to mitigate sensitive info leak risk (default: enabled). Use `--no-xenv` to disable. |
+| `-tre`, `--tree` | Visualize directory tree in the output file (default: enabled). Use `--no-tree` to disable. |
+| `-llmapi`, `--llm-api` | LLM provider to use (e.g., `openai` or `ollama`). |
 | `-llmost`, `--llm-host` | Host URL for the LLM API (only required for Ollama). |
 | `-llmkey`, `--llm-api-key` | API key for the LLM (only required for OpenAI). |
-| `-llmmod`, `--llm-model` | Model name to use (e.g., 'gpt-4' or 'llama3'). |
-| `-llmreq`, `--llm-request` | LLM tasks to perform: review, docstring, readme. |
+| `-llmmod`, `--llm-model` | Model name to use (e.g., `gpt-4.1-nano` or `llama3`). |
+| `-llmreq`, `--llm-request` | LLM tasks to perform: `review`, `docstring`, `readme`. |
+| `-open`, `--open` | Open the output files once generated (default: disabled). |
+| `-verbose`, `--verbose` | Toggle verbosity (default: enabled). Use `--no-verbose` to disable. |
 
 #### Examples
 
-Scan *awesomeproject* folder and write its *digest.md* in parent folder including project folder tree, while ignoring *.gitignore* and *.dockerignore* rules but interpreting *.crawlectignore* filtering, without sanitizing *.env* files.
+Scan *awesomeproject* folder and write its *digest.md* in parent folder, including project folder tree, while ignoring `.gitignore` and `.dockerignore` rules but interpreting `.crawlectignore` filtering, without sanitizing `.env` files, then open the generated file with the default system reader.
 
 ```bash
 crawlect -p ./awesomeproject \
@@ -145,10 +147,11 @@ crawlect -p ./awesomeproject \
   -gitig no \
   -dokig no \
   -xen no \
-  -tre yes
+  -tre yes\
+  -open
 ```
 
-Scan curent folder and write its *digest.md* in parent folder then request *OpenAi*'s *gpt-4* model to review and create docstrings from the codebase.
+Scan curent folder and write its `digest.md` in parent folder, then request *OpenAi*'s `gpt-4.1-nano` model to review and create docstrings from the codebase.
 
 ```bash
 crawlect -p . \
@@ -179,12 +182,12 @@ The responses are then written to a second file (`<output path>.analysis.md`).
 
 ### Supported LLMs
 
-- **OpenAI** – use with `--llm-api openai`, supply your `--llm-api-key`, and pick your `--llm-model` (e.g., `gpt-4`).
+- **OpenAI** – use with `--llm-api openai`, supply your `--llm-api-key`, and pick your `--llm-model` (e.g., `gpt-4.1-nano`).
 - **Ollama** – run local models (like `llama3`) without an internet connection. Just set `--llm-api ollama` and `--llm-host http://localhost:11434`.
 
 ### Example
 
-Scan curent folder and write its *digest.md* in parent folder then request *Ollama* to run a a request to *Llama3* model and create a README documentation from the codebase.
+Scan current folder and write its *digest.md* in parent folder then request *Ollama* to run a request to *Llama3* model and create README documentation from the codebase.
 
 ```bash
 crawlect -p . \
@@ -196,7 +199,7 @@ crawlect -p . \
 ```
 
 > Crawlect will write your digest, then generate an `<output path>.analysis.md` file packed with insights.  
-> And **Yes!** This *README.md* have been generated like that. Well… with a bit of edit, but yet, much faster. Spend less time on boilerplate — more on content and *style*.
+> And **Yes!** This *README.md* have been generated like that. Well… with a bit of editing, yet much faster. Spend less time on boilerplate — more on content and *style*.
 
 ### Bonus
 

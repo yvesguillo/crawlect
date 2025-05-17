@@ -1,3 +1,5 @@
+#! /usr/bin/env python3
+
 """
 Crawlect
 Crawl, Collect & Document Your Codebase in Markdown.
