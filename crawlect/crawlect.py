@@ -24,57 +24,32 @@ class Crawlect:
     Crawlect is a module intended to describe files from a given path and transcribe and save these into a single markdown file.
     """
 
-    def __init__(self,
-        path = None,
-        output = None,
-        output_prefix = None,
-        output_suffix = None,
-        recur = True,
-        depth = inf,
-        crawlectignore = True,
-        gitignore = True,
-        dockerignore = True,
-        xenv = True,
-        tree = True,
-        writeRight = None
-    ):
+    def __init__(self, **kwargs):
 
         # Store the class arguments for __repr__.
-        self.args = {}
+        self.args = kwargs
 
-        self.path = path
-        self.args["path"] = self.path
-        self.output = output
-        self.args["output"] = self.output
-        self.output_prefix = output_prefix
-        self.args["output_prefix"] = self.output_prefix
-        self.output_suffix = output_suffix
-        self.args["output_suffix"] = self.output_suffix
-        self.recur = recur
-        self.args["recur"] = self.recur
-        self.depth = depth
-        self.args["depth"] = self.depth
+        self.path = kwargs.get("path", ".")
+        self.output = kwargs.get("output", "digest.md")
+        self.output_prefix = kwargs.get("output_prefix", "digest")
+        self.output_suffix = kwargs.get("output_suffix", ".md")
+        self.recur = kwargs.get("recur", True)
+        self.depth = kwargs.get("depth", inf)
 
         # Ignore files handling.
-        self.crawlectignore = crawlectignore
-        self.args["crawlectignore"] = self.crawlectignore
-        self.gitignore = gitignore
-        self.args["gitignore"] = self.gitignore
-        self.dockerignore = dockerignore
-        self.args["dockerignore"] = self.dockerignore
+        self.crawlectignore = kwargs.get("crawlectignore", True)
+        self.gitignore = kwargs.get("gitignore", True)
+        self.dockerignore = kwargs.get("dockerignore", True)
 
         self.simplePathToIgnore = []
         self.ignore_file_list = []
 
         # Advanced features parameters.
-        self.xenv = xenv
-        self.args["xenv"] = self.xenv
-        self.tree = tree
-        self.args["tree"] = self.tree
+        self.xenv = kwargs.get("xenv", True)
+        self.tree = kwargs.get("tree", True)
 
         # File overwrite setings.
-        self.writeRight = writeRight
-        self.args["writeRight"] = self.writeRight
+        self.writeRight = kwargs.get("writeRight", )
 
         self.warmUp()
 
@@ -186,8 +161,5 @@ class Crawlect:
 
 
     def __repr__(self):
-        argsString = []
-        for arg, value in self.args.items():
-            argsString.append(f"{arg} = {repr(value)}")
-        parameters = ", ".join(argsString)
+        parameters = ", ".join(f"{k} = {repr(v)}" for k, v in self.args.items())
         return f"{type(self).__name__}({parameters})"

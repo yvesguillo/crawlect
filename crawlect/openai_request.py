@@ -1,35 +1,25 @@
 #! /usr/bin/env python3
 
-from openai import OpenAI
-
 # Custom modules.
 from .llm import LLM
 
-class Openai_request(LLM):
-    """Extend LLM class for Open AI (Chat GPT) support."""
+# Standard modules.
+from openai import OpenAI
+
+class Openai_Request(LLM):
+    """Extend LLM class for OpenAI (ChatGPT) support."""
 
     _default_model = "gpt-4.1-nano"
 
-    def __init__(self, api_key = None, model = None):
+    def __init__(self, **kwargs):
+        api_key = kwargs.get("api_key")
+        model = kwargs.get("model", self._default_model)
 
-        # Validate.
-        if api_key is None:
-            raise AttributeError(f"\n# Argument error #\n{type(self).__name__} requires an Open AI API key.")
+        if not isinstance(api_key, str):
+            raise AttributeError(f"{type(self).__name__} requires an 'api_key' string.")
 
-        if model is None:
-            print(f"\n{type(self).__name__} requires a model name, got: {repr(model)}. {repr(self._default_model)} will be used instead.")
-            model = self._default_model
-
-        super().__init__()
-
-        # Store the class arguments for __repr__.
-        self.args = {}
-
-        # Open AI settings.
-        self.api_key = api_key
-        self.args["api_key"] = self.api_key
-        self.model = model
-        self.args["model"] = self.model
+        kwargs["model"] = model
+        super().__init__(**kwargs)
 
         self.client = OpenAI(api_key = api_key)
 
@@ -39,5 +29,4 @@ class Openai_request(LLM):
             store = True,
             messages = [{"role": "user", "content": message}]
         )
-
         return completion.choices[0].message.content

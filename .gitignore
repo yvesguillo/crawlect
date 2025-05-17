@@ -5,7 +5,9 @@ dist/
 
 # Virtual environment (if created locally)
 venv/
-.env/
+
+# Environment files
+*.env
 
 # Mac / Windows / Editor stuff
 .DS_Store

@@ -1,64 +1,30 @@
 #! /usr/bin/env python3
 
-from ollama import Client
-
 # Custom modules.
 from .llm import LLM
 
-class Ollama_request(LLM):
+# Standard modules.
+from ollama import Client
+
+class Ollama_Request(LLM):
     """Extend LLM class for Ollama support."""
 
-    def __init__(self, host = None, model = None):
+    def __init__(self, **kwargs):
+        host = kwargs.get("host")
+        model = kwargs.get("model")
 
-        # Validate.
-        if host is None:
-            raise AttributeError(f"\n# Argument error #\n{type(self).__name__} requires an Ollama host URL (e.g.: \"http://localhost:11434\"), got {repr(host)}.")
+        if not isinstance(host, str):
+            raise AttributeError(f"{type(self).__name__} requires a 'host' string (e.g.: 'http://localhost:11434').")
+        if not isinstance(model, str):
+            raise AttributeError(f"{type(self).__name__} requires a 'model' string (e.g.: 'llama3').")
 
-        if model is None:
-            raise AttributeError(f"\n# Argument error #\n{type(self).__name__} requires a pulled LLM model (e.g.: \"dolphin-phi\"), got {repr(model)}.")
-
-        super().__init__()
-
-        # Store the class arguments for __repr__.
-        self.args = {}
-
-        # Open AI settings.
-        self.host = host
-        self.args["host"] = self.host
-        self.model = model
-        self.args["model"] = self.model
+        super().__init__(**kwargs)
 
         self.client = Client(host = host)
 
     def _prompt(self, message):
-        completion = self.client.chat(
+        response = self.client.chat(
             model = self.model,
-            messages = [
-                {"role": "user", "content": message}
-            ]
+            messages = [{"role": "user", "content": message}]
         )
-
         return response['message']['content']
-
-
-####################
-# INTERACTIVE MODE #
-####################
-
-if __name__ == "__main__":
-
-    import traceback
-
-    try:
-        pass
-
-    except KeyboardInterrupt:
-        print("Interupted by user.")
-
-    except Exception as error:
-        print(f"\nUnexpected {type(error).__name__}:\n{error}\n")
-
-        # Debug.
-        lines = traceback.format_tb(error.__traceback__)
-        for line in lines:
-            print(line)

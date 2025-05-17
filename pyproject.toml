@@ -1,6 +1,6 @@
 [project]
 name = "Crawlect"
-version = "1.0.0"
+version = "1.0.1"
 description = "Crawl, Collect & Document Your Codebase in Markdown."
 readme = "README.md"
 authors = [
@@ -11,6 +11,8 @@ license = "MIT"
 requires-python = ">=3.10"
 dependencies = [
   "gitignore_parser==0.1.12"
+  "openai==1.78.1"
+  "ollama==0.4.8"
 ]
 
 [project.scripts]
