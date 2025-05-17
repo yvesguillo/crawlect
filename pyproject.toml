@@ -10,8 +10,8 @@ authors = [
 license = "MIT"
 requires-python = ">=3.10"
 dependencies = [
-  "gitignore_parser==0.1.12"
-  "openai==1.78.1"
+  "gitignore_parser==0.1.12",
+  "openai==1.78.1",
   "ollama==0.4.8"
 ]
 
