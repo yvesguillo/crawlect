@@ -187,9 +187,6 @@ def run_llm_analysis(crawlect, args):
     with open(digest_path, "r", encoding="utf-8") as file:
         codebase = file.read()
 
-    #####DEBUG
-    codebase = "```python\nprint(\"Hello World.\")\n```"
-
     analysis = LLM_Code_Analysis(llm, codebase)
 
     output_path = digest_path.with_suffix(digest_path.suffix + ".analysis.md")
