@@ -1,6 +1,6 @@
 [project]
 name = "Crawlect"
-version = "1.0.2"
+version = "1.0.3"
 description = "Crawl, collect & document your codebase in Markdown — now with integrated LLM analysis."
 readme = "README.md"
 authors = [
@@ -33,7 +33,7 @@ keywords = [
 
 [project.urls]
 "Homepage" = "https://github.com/yvesguillo/crawlect"
-"Issues" = "https://github.com/YOUR_USER/crawlect/issues"
+"Issues" = "https://github.com/yvesguillo/crawlect/issues"
 
 [project.scripts]
 crawlect = "crawlect.__main__:main"
