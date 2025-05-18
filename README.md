@@ -1,10 +1,11 @@
 # Crawlect
 
-**Crawl, Collect & Document Your Codebase in Markdown.**
+**Now with *LLM* IA integrated analysis.  
+Crawl, Collect & Document Your Codebase in Markdown.**  
 
 ![Crawlect](images/crawlect.avif)
 
-**Crawlect** is a Python module designed to *crawl* a given directory, *collect* relevant files and contents, and *document* the entire structure in a clean, readable Markdown file.
+**Crawlect** is a Python module designed to *crawl* a given directory, *collect* relevant files and contents, *document* the entire structure in a clean, readable Markdown file, and analyze the whole project with *LLM* AI API feedbacks.
 
 Whether you're analyzing someone else's code or sharing your own, Crawlect makes it effortless to generate a comprehensive project snapshot — complete with syntax-highlighted code blocks, a tree-like structure overview, and fine-tuned filtering rules.
 
@@ -14,6 +15,7 @@ Whether you're analyzing someone else's code or sharing your own, Crawlect makes
 
 When starting with a new project — whether you're reviewing, refactoring, or collaborating — understanding its structure and key files is essential. Crawlect does the heavy lifting by:
 
+- Analyze your codebase with integrated *LLM* API calls.
 - Traversing your project directory (recursively if needed),
 - Filtering files and directories with powerful inclusion/exclusion rules,
 - Masking sensitive data (like `.env` values),
@@ -25,8 +27,9 @@ When starting with a new project — whether you're reviewing, refactoring, or c
 
 - Quickly understand an unfamiliar codebase
 - Auto-document your projects
-- Share code context with collaborators (or *LLM*!)
+- Share code context with collaborators
 - Safely include `.env` files without leaking sensitive values
+- Enhancing your workflow with *LLM* code analysis.
 
 ***Think of Crawlect as your markdown-minion; obedient, efficient, and allergic to messy folders.***
 
@@ -47,7 +50,7 @@ pip install git+https://github.com/yvesguillo/crawlect.git
 Then summon your loyal markdown minion from *anywhere* on your system:
 
 ```bash
-crawlect -p . -o digest.md
+crawlect -p . -o digest.md -open
 ```
 
 > No clutter, no drama. It just works.
@@ -94,7 +97,7 @@ pip install -r ./requirements.txt
 ### 3. Run Crawlect
 
 ```bash
-python -m crawlect.crawlect -p . -o ../digest.md
+python -m crawlect -p . -o ../digest.md -open
 ```
 
 > This will scan the current folder and generate a Markdown file named `digest.md` in the parent directory.
@@ -121,11 +124,11 @@ Here are the most useful options Crawlect understands:
 | `-os`, `--output_suffix` | Suffix for dynamic output unique file name (e.g. `.md`). |
 | `-r`, `--recur` | Enable recursive crawling (default: enabled). Use `--no-recur` to disable. |
 | `-d`, `--depth` | Scan depth limit (default is infinite). |
-| `-craig`, `--crawlectignore` | Use .crawlectignore exclusion rules if exist (default: enabled). Use `--no-crawlig` to disable. |
-| `-gitig`, `--gitignore` | Use .gitignore exclusion rules if exist (default: enabled). Use `--no-gitig` to disable. |
-| `-dokig`, `--dockerignore` | Use .dockerignore exclusion rules if exist (default: enabled). Use `--no-dockig` to disable. |
-| `-xen`, `--xenv` | Sanitize .env variables to mitigate sensitive info leak risk (default: enabled). Use `--no-xenv` to disable. |
-| `-tre`, `--tree` | Visualize directory tree in the output file (default: enabled). Use `--no-tree` to disable. |
+| `--crawlig` | Use .crawlectignore exclusion rules if exist (default: enabled). Use `--no-crawlig` to disable. |
+| `--gitig` | Use .gitignore exclusion rules if exist (default: enabled). Use `--no-gitig` to disable. |
+| `--dockig` | Use .dockerignore exclusion rules if exist (default: enabled). Use `--no-dockig` to disable. |
+| `--xenv` | Sanitize .env variables to mitigate sensitive info leak risk (default: enabled). Use `--no-xenv` to disable. |
+| `--tree` | Visualize directory tree in the output file (default: enabled). Use `--no-tree` to disable. |
 | `-llmapi`, `--llm-api` | LLM provider to use (e.g., `openai` or `ollama`). |
 | `-llmost`, `--llm-host` | Host URL for the LLM API (only required for Ollama). |
 | `-llmkey`, `--llm-api-key` | API key for the LLM (only required for OpenAI). |
@@ -136,18 +139,15 @@ Here are the most useful options Crawlect understands:
 
 #### Examples
 
-Scan *awesomeproject* folder and write its *digest.md* in parent folder, including project folder tree, while ignoring `.gitignore` and `.dockerignore` rules but interpreting `.crawlectignore` filtering, without sanitizing `.env` files, then open the generated file with the default system reader.
+Scan *awesomeproject* folder with 2 depth level scan and write its *digest.md* in parent folder, including a project folder tree, while ignoring `.gitignore` and `.dockerignore` rules but interpreting `.crawlectignore` filtering, without sanitizing `.env` files, then open the generated file with the default system reader.
 
 ```bash
 crawlect -p ./awesomeproject \
   -o ../digest.md \
-  -r yes \
   -d 2 \
-  -crawlig yes \
-  -gitig no \
-  -dokig no \
-  -xen no \
-  -tre yes\
+  --no-gitig no \
+  --no-dokig no \
+  --no-xenv no \
   -open
 ```
 
