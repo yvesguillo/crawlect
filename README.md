@@ -1,6 +1,6 @@
 # Crawlect
 
-**Now with *LLM* IA integrated analysis.  
+**Now with *LLM* AI integrated analysis.  
 Crawl, Collect & Document Your Codebase in Markdown.**  
 
 ![Crawlect](images/crawlect.avif)
