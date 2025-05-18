@@ -182,8 +182,10 @@ The responses are then written to a second file (`<output path>.analysis.md`).
 
 ### Supported LLMs
 
-- **OpenAI** – use with `--llm-api openai`, supply your `--llm-api-key`, and pick your `--llm-model` (e.g., `gpt-4.1-nano`).
-- **Ollama** – run local models (like `llama3`) without an internet connection. Just set `--llm-api ollama` and `--llm-host http://localhost:11434`.
+- **Ollama** – Running your own local *Ollama* service?  
+  If not, no worry, give a try to this one: [**LLM-Serve**](https://github.com/yvesguillo/llm-serve)  
+  Then, simply use `--llm-api ollama`, provide your `--llm-host` (e.g. `http://localhost:11434`), choose your `--llm-model` (e.g., `llama3`) and you are good to go!
+- **OpenAI** – Use with `--llm-api openai`, supply your `--llm-api-key`, and pick your `--llm-model` (e.g., `gpt-4.1-nano`).
 
 ### Example
 
