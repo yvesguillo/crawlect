@@ -1,11 +1,13 @@
 # Crawlect
 
 **Now with *LLM* IA integrated analysis.  
-Crawl, Collect & Document Your Codebase in Markdown.**  
+Crawl, Collect & Document Your Codebase in Markdown.**
 
-![Crawlect](images/crawlect.avif)
+![Crawlect](https://raw.githubusercontent.com/yvesguillo/crawlect/main/images/crawlect.avif)
 
-**Crawlect** is a Python module designed to *crawl* a given directory, *collect* relevant files and contents, *document* the entire structure in a clean, readable Markdown file, and analyze the whole project with *LLM* AI API feedbacks.
+[![PyPI version](https://img.shields.io/pypi/v/crawlect)](https://pypi.org/project/crawlect/)
+
+**Crawlect** is a Python module designed to *crawl* a given directory, *collect* relevant files and contents, *document* the entire structure in a clean, readable Markdown file, and analyze the whole project with *LLM* AI API feedback.
 
 Whether you're analyzing someone else's code or sharing your own, Crawlect makes it effortless to generate a comprehensive project snapshot — complete with syntax-highlighted code blocks, a tree-like structure overview, and fine-tuned filtering rules.
 
@@ -15,13 +17,12 @@ Whether you're analyzing someone else's code or sharing your own, Crawlect makes
 
 When starting with a new project — whether you're reviewing, refactoring, or collaborating — understanding its structure and key files is essential. Crawlect does the heavy lifting by:
 
-- Analyze your codebase with integrated *LLM* API calls.
-- Traversing your project directory (recursively if needed),
-- Filtering files and directories with powerful inclusion/exclusion rules,
-- Masking sensitive data (like `.env` values),
-- Embedding file contents in Markdown-formatted code blocks,
+- Analyzes your codebase with integrated *LLM* API calls.
+- Crawl your project directory (recursively if needed),
 - Parsing `.gitignore`/`.dockerignore`/`.crawlectignore` rules to mimic your dev setup,
-- Automatically generating a well-organized, shareable `.md` file.
+- Masking sensitive data (like `.env` values),
+- Automatically generating a well-organized, shareable `.md` file,
+- Embedding file contents in Markdown-formatted code blocks.
 
 ## Use cases
 
@@ -35,7 +36,8 @@ When starting with a new project — whether you're reviewing, refactoring, or c
 
 ## Getting Started
 
-Crawlect is written in Python and requires minimal setup. Install the package or clone it to set up the virtual environment, and you’re ready to document codebases like a Markdown ninja.
+Crawlect is written in Python and requires minimal setup. Install the package or clone it to set up the virtual environment, and you’re ready to document codebases like a Markdown ninja.  
+Requires **Python 3.10+**
 
 ### Install Crawlect via `pip` (The Handy Way™)
 
@@ -44,7 +46,7 @@ Tired of fiddling with virtual environments just to run a CLI tool? We got you.
 You can install Crawlect globally in just a few seconds:
 
 ```bash
-pip install git+https://github.com/yvesguillo/crawlect.git
+pip install crawlect
 ```
 
 Then summon your loyal markdown minion from *anywhere* on your system:
@@ -100,7 +102,7 @@ pip install -r ./requirements.txt
 python -m crawlect -p . -o ../digest.md -open
 ```
 
-> This will scan the current folder and generate a Markdown file named `digest.md` in the parent directory.
+> This scan the current folder and generate a Markdown file named `digest.md` in the parent directory.
 
 ### 4. Teardown (optional)
 
@@ -110,7 +112,7 @@ When you're done (if you used `setup.sh` script), you can clean everything up wi
 ./teardown.sh
 ```
 
-> This will deactivate and delete the `venv`.
+> This deactivates and removes the `venv` and optional artifacts.
 
 ## CLI Options
 
@@ -130,7 +132,7 @@ Here are the most useful options Crawlect understands:
 | `--xenv` | Sanitize .env variables to mitigate sensitive info leak risk (default: enabled). Use `--no-xenv` to disable. |
 | `--tree` | Visualize directory tree in the output file (default: enabled). Use `--no-tree` to disable. |
 | `-llmapi`, `--llm-api` | LLM provider to use (e.g., `openai` or `ollama`). |
-| `-llmost`, `--llm-host` | Host URL for the LLM API (only required for Ollama). |
+| `-llmhost`, `--llm-host` | Host URL for the LLM API (only required for Ollama). |
 | `-llmkey`, `--llm-api-key` | API key for the LLM (only required for OpenAI). |
 | `-llmmod`, `--llm-model` | Model name to use (e.g., `gpt-4.1-nano` or `llama3`). |
 | `-llmreq`, `--llm-request` | LLM tasks to perform: `review`, `docstring`, `readme`. |
@@ -151,7 +153,7 @@ crawlect -p ./awesomeproject \
   -open
 ```
 
-Scan curent folder and write its `digest.md` in parent folder, then request *OpenAi*'s `gpt-4.1-nano` model to review and create docstrings from the codebase.
+Scan current folder and write its `digest.md` in parent folder, then request *OpenAi*'s `gpt-4.1-nano` model to review and create docstrings from the codebase.
 
 ```bash
 crawlect -p . \
@@ -169,7 +171,7 @@ With Crawlect’s *LLM-powered analysis*, it can.
 
 ### What happens under the hood?
 
-When you add the `--llm-*` parameters to your command, Crawlect will:
+When you add the `--llm-*` parameters to your command, Crawlect does:
 
 1. **Generate the full project digest** as Markdown.
 2. **Read that digest** and send it to your favorite LLM (*OpenAI* or *Ollama*, your pick).
@@ -200,7 +202,7 @@ crawlect -p . \
   --llm-request readme
 ```
 
-> Crawlect will write your digest, then generate an `<output path>.analysis.md` file packed with insights.  
+> Crawlect writes your digest, then generates an `<output path>.analysis.md` file packed with insights.  
 > And **Yes!** This *README.md* have been generated like that. Well… with a bit of editing, yet much faster. Spend less time on boilerplate — more on content and *style*.
 
 ### Bonus
@@ -218,27 +220,9 @@ Crawlect supports standard `.gitignore` filtering. You can use:
 - `.crawlectignore` (optional and custom rules — your secret weapon, auto-detected and parsed like Git would)
 - `.gitignore` and `.dockerignore` (auto-detected and parsed like Git would)
 
-These filters follow the [standard `.gitignore` syntax](https://git-scm.com/docs/gitignore), such as:
+These filters follow the [standard `.gitignore` syntax](https://git-scm.com/docs/gitignore).
 
-```gitignore
-# Ignore markdown files
-*.md
-
-# Ignore the venv folder
-venv/
-
-# Ignore one super busy folder except for this very important file.
-.git/*
-!.git/mysuperimportantfile.love
-
-# Ignore logs, but keep error.log
-*.log
-!important-error.log
-```
-
-Just create a `.crawlectignore` at the root of your project for special exclusions / inclusions:
-
-> Bonus: Crawlect will *also* exclude the ignore file itself from the digest, so your `.crawlectignore` or any *ignore* file won’t show up in the output unless you choose not to use these.
+> Bonus: Crawlect *also* exclude the ignore file itself from the digest, so your `.crawlectignore` or any *ignore* file won’t show up in the output unless you choose not to use these.
 
 ## Example Output
 
@@ -270,7 +254,7 @@ def main():
     print(f"Hello! Did you know that one plus one is strictly similar to \n{un_plus_un()}?")
 ```
 
-### main.py  
+### utils.py  
 [`src/utils.py`](src/utils.py)
 
 ```python
@@ -281,7 +265,7 @@ def un_plus_un():
 
 ### Analysis
 
-LLM code analysis will look like that:
+LLM code analysis looks like that:
 
 ```markdown
 ////////////
@@ -319,3 +303,6 @@ Feel free to fork, star, or open an issue — we’d love to hear from you!
 - Markdown code syntax table - From [jincheng9 on GitHub](https://github.com/jincheng9/markdown_supported_languages)
 - Argpars boolean argument treatment - From [Codemia](https://codemia.io/knowledge-hub/path/parsing_boolean_values_with_argparse)
 - [`gitignore_parser`](https://github.com/mherrmann/gitignore_parser) by [Michael Herrmann](https://github.com/mherrmann/)
+
+If you find Crawlect useful, **give it a ☆** to support the project!  
+![GitHub Repo stars](https://img.shields.io/github/stars/yvesguillo/crawlect?style=social)

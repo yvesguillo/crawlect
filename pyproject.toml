@@ -1,7 +1,7 @@
 [project]
 name = "Crawlect"
-version = "1.0.1"
-description = "Crawl, Collect & Document Your Codebase in Markdown."
+version = "1.0.2"
+description = "Crawl, collect & document your codebase in Markdown — now with integrated LLM analysis."
 readme = "README.md"
 authors = [
   {name = "Yves Guillo", email = "yves@yvesguillo.ch"},
@@ -9,11 +9,31 @@ authors = [
 ]
 license = "MIT"
 requires-python = ">=3.10"
+
 dependencies = [
   "gitignore_parser==0.1.12",
   "openai==1.78.1",
   "ollama==0.4.8"
 ]
+
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "Operating System :: OS Independent",
+  "Intended Audience :: Developers",
+  "Topic :: Software Development :: Documentation"
+]
+
+keywords = [
+  "code crawler",
+  "documentation",
+  "markdown",
+  "LLM",
+  "static analysis"
+]
+
+[project.urls]
+"Homepage" = "https://github.com/yvesguillo/crawlect"
+"Issues" = "https://github.com/YOUR_USER/crawlect/issues"
 
 [project.scripts]
 crawlect = "crawlect.__main__:main"
