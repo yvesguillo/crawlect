@@ -303,7 +303,6 @@ Feel free to fork, star, or open an issue — we’d love to hear from you!
 - Markdown code syntax table - From [jincheng9 on GitHub](https://github.com/jincheng9/markdown_supported_languages)
 - Argpars boolean argument treatment - From [Codemia](https://codemia.io/knowledge-hub/path/parsing_boolean_values_with_argparse)
 - [`gitignore_parser`](https://github.com/mherrmann/gitignore_parser) by [Michael Herrmann](https://github.com/mherrmann/)
-<<<<<<< HEAD
 
 If you find Crawlect useful, **give it a ☆** to support the project!  
 ![GitHub Repo stars](https://img.shields.io/github/stars/yvesguillo/crawlect?style=social)
