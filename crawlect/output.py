@@ -25,8 +25,7 @@ class Output:
         self.crawler = crawler
         self.args["crawler"] = self.crawler
 
-        self.currentOutputName = ""
-        self.composition = ()
+        self.current_output_name = ""
 
 
     def compose(self):
@@ -44,14 +43,14 @@ class Output:
 
         # Header
         output_lines.append(
-            f"# {self.crawler.getTitle()}\n"
+            f"# {self.crawler.get_title()}\n"
             f"{date.strftime('%Y.%m.%d %H:%M')}\n\n"
-            f"Generated with {type(self.crawler).__name__}.\n"
+            "Generated with ['Crawlect'](https://pypi.org/project/Crawlect/).\n"
         )
 
         # Tree
         if self.crawler.tree:
-            tree = self.crawler.formatService.makeTreeMd(crawler = self.crawler)
+            tree = self.crawler.format_service.makeTreeMd(crawler = self.crawler)
             output_lines.append(f"## File structure\n\n{tree}")
 
         # Files
@@ -64,7 +63,7 @@ class Output:
                 output_lines.append(f"[`{file.as_posix()}`]({file.as_posix()})")
 
                 try:
-                    content = self.crawler.formatService.insertCodebox(file)
+                    content = self.crawler.format_service.insert_codebox(file)
                     if content:
                         output_lines.append("")
                         output_lines.append(content)
@@ -81,12 +80,12 @@ class Output:
     def write(self, content):
         """Write provided content to output file."""
 
-        self.currentOutputName = self.standard_output_name()
+        self.current_output_name = self.standard_output_name()
 
         # Exclude the output file from scan (post-generation)
-        self.crawler.simplePathToIgnore.append(self.currentOutputName)
+        self.crawler.simple_path_to_ignore.append(self.current_output_name)
 
-        with open(self.currentOutputName, self.crawler.writeRight, encoding = "utf-8") as outputFile:
+        with open(self.current_output_name, self.crawler.write_right, encoding = "utf-8") as outputFile:
             outputFile.write(content)
 
 

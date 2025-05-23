@@ -14,17 +14,25 @@ class LLM:
             if key not in expected:
                 print(f"Unused LLM parameter: {key} = {kwargs[key]}")
 
-        # Auto chat mode attributes
-        self.auto_chat = {
-            "opening": f"Hello {self.get_model_name()}!\n",
-            "closing": "\n"
-        }
-
-        # History
         self.history = {
             "messages": [],
             "responses": []
         }
+
+
+    def inject_context(self, codebase):
+        """
+        Stores the full codebase in memory to use as persistent context across multiple requests.
+        This should be called once before sending follow-up prompts.
+        """
+
+        if not isinstance(codebase, str):
+            raise ValueError("Injected context must be a string.")
+
+        self.context = codebase.strip()
+
+        print("// Injected full codebase context into LLM memory.")
+
 
     def request(self, message = None, auto_chat = True):
         if message is None or not isinstance(message, str):
@@ -32,25 +40,36 @@ class LLM:
 
         message = message.strip()
 
-        # Auto chat formatting
+        # Prepend context if available
+        if hasattr(self, "context") and self.context:
+            context_block = (
+                f"You are a code analysis assistant.\n"
+                f"The following codebase was provided previously:\n"
+                f"[CODEBASE START]\n{self.context}\n[CODEBASE END]\n\n"
+            )
+            message = context_block + message
+
         if auto_chat:
             message = self.auto_chat["opening"] + message + self.auto_chat["closing"]
 
-        response = self._prompt(message = message)
-
+        response = self._prompt(message=message)
         self.history["messages"].append(message)
         self.history["responses"].append(response)
 
         return response
 
-    def _prompt(self, message):
-        return f"\nYou sent this to {self.get_model_name()}:\n\"{message[:100]}{'…' if len(message) > 100 else ''}\"\n"
+
+    def _prompt(self, history):
+        return f"[FAKE RESPONSE from {self.get_model_name()}]\n{history[-1]['content'][:100]}{'…' if len(message) > 100 else ''}\"\n"
+
 
     def get_model_name(self):
         return str(self.model).split(":")[0]
 
+
     def __str__(self):
         return self.__repr__()
+
 
     def __repr__(self):
         parameters = ", ".join(f"{k} = {repr(v)}" for k, v in self.args.items())

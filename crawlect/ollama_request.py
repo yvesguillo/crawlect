@@ -22,9 +22,11 @@ class Ollama_Request(LLM):
 
         self.client = Client(host = host)
 
+
     def _prompt(self, message):
         response = self.client.chat(
             model = self.model,
             messages = [{"role": "user", "content": message}]
         )
+
         return response['message']['content']
