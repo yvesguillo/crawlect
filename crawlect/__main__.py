@@ -15,6 +15,7 @@ from .cli import (
 from .llm_api_loader import get_llm_api_class_map
 
 # Standard modules.
+import sys
 from pathlib import Path
 import argparse
 import traceback
@@ -39,9 +40,11 @@ def main():
 
         # Verssion.
         parser.add_argument(
-            "--version",
+            "-v", "--version",
             action = "version",
-            version = "Crawlect 1.0.5")
+            version = "Crawlect 1.0.5",
+            help = "show Crawlects's version number and exit"
+        )
 
 
         # Core Parameters.
@@ -53,11 +56,10 @@ def main():
             default = ".",
             metavar = "path",
             help = (
-                ">> Group: Core\n"
-                ">> Description: Path to crawl.\n"
-                ">> Values: any valid path\n"
-                ">> Required: false\n"
-                ">> Default: '.'"
+                "Path to crawl.\n"
+                "Values: any valid path\n"
+                "Required: false\n"
+                "Default: '.'\n\n"
             )
         )
 
@@ -66,10 +68,8 @@ def main():
             type = str,
             metavar = "output",
             help = (
-                ">> Group: Core\n"
-                ">> Description: Static output file path.\n"
-                ">> Values: e.g. './digest.md'\n"
-                ">> Required: false"
+                "Static output file path.\n"
+                "Values: e.g. './digest.md'\n\n"
             )
         )
 
@@ -78,10 +78,8 @@ def main():
             type = str,
             metavar = "prefix",
             help = (
-                ">> Group: Core\n"
-                ">> Description: Prefix for dynamic output filename.\n"
-                ">> Values: e.g. './digest'\n"
-                ">> Required: false"
+                "Prefix for dynamic output filename.\n"
+                "Values: e.g. './digest'\n\n"
             )
         )
 
@@ -91,10 +89,8 @@ def main():
             default = ".md",
             metavar = "suffix",
             help = (
-                ">> Group: Core\n"
-                ">> Description: Suffix for dynamic filename.\n"
-                ">> Values: e.g. '.md'\n"
-                ">> Required: false"
+                "Suffix for dynamic filename.\n"
+                "Values: e.g. '.md'\n\n"
             )
         )
 
@@ -108,10 +104,9 @@ def main():
             default = True,
             metavar = "recur",
             help = (
-                ">> Group: Crawling\n"
-                ">> Description: Enable recursive crawling.\n"
-                ">> Values: true | false\n"
-                ">> Default: true"
+                "Enable recursive crawling.\n"
+                "Values: true | false\n"
+                "Default: true\n\n"
             )
         )
 
@@ -121,10 +116,9 @@ def main():
             default = inf,
             metavar = "depth",
             help = (
-                ">> Group: Crawling\n"
-                ">> Description: Maximum scan depth.\n"
-                ">> Values: integer >= 1\n"
-                ">> Default: inf"
+                "Maximum scan depth.\n"
+                "Values: integer >= 1\n"
+                "Default: inf\n\n"
             )
         )
 
@@ -134,10 +128,9 @@ def main():
             default = True,
             metavar = "crawlig",
             help = (
-                ">> Group: Crawling\n"
-                ">> Description: Use .crawlectignore rules.\n"
-                ">> Values: true | false\n"
-                ">> Default: true"
+                "Use .crawlectignore rules.\n"
+                "Values: true | false\n"
+                "Default: true\n\n"
             )
         )
 
@@ -147,10 +140,9 @@ def main():
             default = True,
             metavar = "gitig",
             help = (
-                ">> Group: Crawling\n"
-                ">> Description: Use .gitignore rules.\n"
-                ">> Values: true | false\n"
-                ">> Default: true"
+                "Use .gitignore rules.\n"
+                "Values: true | false\n"
+                "Default: true\n\n"
             )
         )
 
@@ -160,10 +152,9 @@ def main():
             default = True,
             metavar = "dockig",
             help = (
-                ">> Group: Crawling\n"
-                ">> Description: Use .dockerignore rules.\n"
-                ">> Values: true | false\n"
-                ">> Default: true"
+                "Use .dockerignore rules.\n"
+                "Values: true | false\n"
+                "Default: true\n\n"
             )
         )
 
@@ -177,10 +168,9 @@ def main():
             default = True,
             metavar = "xenv",
             help = (
-                ">> Group: Output\n"
-                ">> Description: Sanitize .env values.\n"
-                ">> Values: true | false\n"
-                ">> Default: true"
+                "Sanitize .env values.\n"
+                "Values: true | false\n"
+                "Default: true\n\n"
             )
         )
 
@@ -190,10 +180,9 @@ def main():
             default = True,
             metavar = "tree",
             help = (
-                ">> Group: Output\n"
-                ">> Description: Include file tree structure.\n"
-                ">> Values: true | false\n"
-                ">> Default: true"
+                "Include file tree structure.\n"
+                "Values: true | false\n"
+                "Default: true\n\n"
             )
         )
 
@@ -206,9 +195,8 @@ def main():
             choices=get_llm_api_class_map().keys(),
             metavar = "api",
             help = (
-                ">> Group: LLM\n"
-                ">> Description: LLM provider.\n"
-                ">> Values: openai | ollama"
+                "LLM provider.\n"
+                "Values: openai | ollama\n\n"
             )
         )
 
@@ -216,8 +204,7 @@ def main():
             "-llmhost", "--llm-host",
             metavar = "host",
             help = (
-                ">> Group: LLM\n"
-                ">> Description: LLM host URL (Ollama only)."
+                "LLM host URL (Ollama only).\n\n"
             )
         )
 
@@ -225,16 +212,14 @@ def main():
             "-llmkey", "--llm-api-key",
             metavar = "key",
             help = (
-                ">> Group: LLM\n"
-                ">> Description: LLM API key (OpenAI only)."
+                "LLM API key (OpenAI only).\n\n"
             )
         )
         llm_group.add_argument(
             "-llmmod", "--llm-model",
             metavar = "model",
             help = (
-                ">> Group: LLM\n"
-                ">> Description: Model name."
+                "Model name.\n\n"
             )
         )
 
@@ -243,9 +228,8 @@ def main():
             nargs = "+",
             metavar = "request",
             help = (
-                ">> Group: LLM\n"
-                ">> Description: LLM tasks to perform.\n"
-                ">> Values: review, docstring, readme"
+                "LLM tasks to perform.\n"
+                "Values: review, docstring, readme\n\n"
             )
         )
 
@@ -254,8 +238,7 @@ def main():
             nargs = "+",
             metavar = "requests",
             help = (
-                ">> Group: LLM\n"
-                ">> Description: Custom LLM prompts."
+                "Custom LLM prompts.\n\n"
             )
         )
 
@@ -269,10 +252,9 @@ def main():
             default = True,
             metavar = "verbose",
             help = (
-                ">> Group: UX\n"
-                ">> Description: Toggle verbosity.\n"
-                ">> Values: true | false\n"
-                ">> Default: true"
+                "Toggle verbosity.\n"
+                "Values: true | false\n"
+                "Default: true\n\n"
             )
         )
 
@@ -282,10 +264,21 @@ def main():
             default = False,
             metavar = "open",
             help = (
-                ">> Group: UX\n"
-                ">> Description: Open output after generation.\n"
-                ">> Values: true | false\n"
-                ">> Default: false"
+                "Open output after generation.\n"
+                "Values: true | false\n"
+                "Default: false\n\n"
+            )
+        )
+
+        ux_group.add_argument(
+            "-clischem", "--cli-schema",
+            action = BooleanOptionalAction,
+            default = False,
+            metavar = "schema",
+            help = (
+                "Output CLI options shema.\n"
+                "Values: true | false\n"
+                "Default: false\n\n"
             )
         )
 
@@ -294,6 +287,15 @@ def main():
         # Global.
         global VERBOSE
         VERBOSE = args.verbose
+
+        # Introspect CLI parameters.
+        if args.cli_schema:
+            import json
+            from .cli_option_schema import cli_option_schema
+            schema = cli_option_schema(parser)
+            print(json.dumps(schema, indent = 2))
+            # Exit as this output is the only expected one.
+            sys.exit(0)
 
         # Execute.
         try:
