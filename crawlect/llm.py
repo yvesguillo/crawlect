@@ -19,6 +19,11 @@ class LLM:
             "responses": []
         }
 
+        self.auto_chat = {
+            "opening": f"Hey {self.get_model_name()}!\n",
+            "closing": f"\nThank you {self.get_model_name()}!"
+        }
+
 
     def inject_context(self, codebase):
         """
@@ -49,8 +54,7 @@ class LLM:
             )
             message = context_block + message
 
-        if auto_chat:
-            message = self.auto_chat["opening"] + message + self.auto_chat["closing"]
+        message = self.auto_chat["opening"] + message + self.auto_chat["closing"]
 
         response = self._prompt(message=message)
         self.history["messages"].append(message)

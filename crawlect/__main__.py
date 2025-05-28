@@ -34,7 +34,8 @@ def main():
 
         parser = ArgumentParser(
             description="Crawlect CLI — Crawl, collect and document your codebase in Markdown.",
-            formatter_class = argparse.RawTextHelpFormatter
+            formatter_class = argparse.RawTextHelpFormatter,
+            epilog = "For more information, visit: https://github.com/yvesguillo/crawlect"
         )
 
 
@@ -55,32 +56,21 @@ def main():
             type = str,
             default = ".",
             metavar = "path",
-            help = (
-                "Path to crawl.\n"
-                "Values: any valid path\n"
-                "Required: false\n"
-                "Default: '.'\n\n"
-            )
+            help = "Path to crawl (default: '.')."
         )
 
         core_group.add_argument(
             "-o", "--output",
             type = str,
             metavar = "output",
-            help = (
-                "Static output file path.\n"
-                "Values: e.g. './digest.md'\n\n"
-            )
+            help = "Output file path (e.g. './digest.md')."
         )
 
         core_group.add_argument(
             "-op", "--output-prefix",
             type = str,
             metavar = "prefix",
-            help = (
-                "Prefix for dynamic output filename.\n"
-                "Values: e.g. './digest'\n\n"
-            )
+            help = "Prefix for dynamic output filename (e.g. './digest')."
         )
 
         core_group.add_argument(
@@ -88,10 +78,7 @@ def main():
             type = str,
             default = ".md",
             metavar = "suffix",
-            help = (
-                "Suffix for dynamic filename.\n"
-                "Values: e.g. '.md'\n\n"
-            )
+            help = "Suffix for dynamic filename (e.g. '.md')."
         )
 
 
@@ -103,11 +90,7 @@ def main():
             action = BooleanOptionalAction,
             default = True,
             metavar = "recur",
-            help = (
-                "Enable recursive crawling.\n"
-                "Values: true | false\n"
-                "Default: true\n\n"
-            )
+            help = "Enable recursive crawling (default: enabled)."
         )
 
         crawl_group.add_argument(
@@ -115,11 +98,7 @@ def main():
             type = int,
             default = inf,
             metavar = "depth",
-            help = (
-                "Maximum scan depth.\n"
-                "Values: integer >= 1\n"
-                "Default: inf\n\n"
-            )
+            help = "Maximum scan depth (default: infinity)."
         )
 
         crawl_group.add_argument(
@@ -127,11 +106,7 @@ def main():
             action = BooleanOptionalAction,
             default = True,
             metavar = "crawlig",
-            help = (
-                "Use .crawlectignore rules.\n"
-                "Values: true | false\n"
-                "Default: true\n\n"
-            )
+            help = "Use `.crawlectignore` rules (default: enabled)."
         )
 
         crawl_group.add_argument(
@@ -139,11 +114,7 @@ def main():
             action = BooleanOptionalAction,
             default = True,
             metavar = "gitig",
-            help = (
-                "Use .gitignore rules.\n"
-                "Values: true | false\n"
-                "Default: true\n\n"
-            )
+            help = "Use `.gitignore` rules (default: enabled)."
         )
 
         crawl_group.add_argument(
@@ -151,11 +122,7 @@ def main():
             action = BooleanOptionalAction,
             default = True,
             metavar = "dockig",
-            help = (
-                "Use .dockerignore rules.\n"
-                "Values: true | false\n"
-                "Default: true\n\n"
-            )
+            help = "Use `.dockerignore` rules (default: enabled)."
         )
 
 
@@ -167,11 +134,7 @@ def main():
             action = BooleanOptionalAction,
             default = True,
             metavar = "xenv",
-            help = (
-                "Sanitize .env values.\n"
-                "Values: true | false\n"
-                "Default: true\n\n"
-            )
+            help = "Sanitize `.env` values (default: enabled)."
         )
 
         output_group.add_argument(
@@ -179,11 +142,7 @@ def main():
             action = BooleanOptionalAction,
             default = True,
             metavar = "tree",
-            help = (
-                "Include file tree structure.\n"
-                "Values: true | false\n"
-                "Default: true\n\n"
-            )
+            help = "Include file tree structure (default: enabled)."
         )
 
 
@@ -192,54 +151,40 @@ def main():
 
         llm_group.add_argument(
             "-llmapi", "--llm-api",
-            choices=get_llm_api_class_map().keys(),
+            choices = get_llm_api_class_map().keys(),
             metavar = "api",
-            help = (
-                "LLM provider.\n"
-                "Values: openai | ollama\n\n"
-            )
+            help = "LLM provider ('openai' | 'ollama')."
         )
 
         llm_group.add_argument(
             "-llmhost", "--llm-host",
             metavar = "host",
-            help = (
-                "LLM host URL (Ollama only).\n\n"
-            )
+            help = "LLM host URL (Ollama only)."
         )
 
         llm_group.add_argument(
             "-llmkey", "--llm-api-key",
             metavar = "key",
-            help = (
-                "LLM API key (OpenAI only).\n\n"
-            )
+            help = "LLM API key (OpenAI only)."
         )
         llm_group.add_argument(
             "-llmmod", "--llm-model",
             metavar = "model",
-            help = (
-                "Model name.\n\n"
-            )
+            help = "Model name."
         )
 
         llm_group.add_argument(
             "-llmreq", "--llm-request",
             nargs = "+",
             metavar = "request",
-            help = (
-                "LLM tasks to perform.\n"
-                "Values: review, docstring, readme\n\n"
-            )
+            help = "LLM tasks list to perform."
         )
 
         llm_group.add_argument(
             "-llmcust", "--llm-custom-requests",
             nargs = "+",
             metavar = "requests",
-            help = (
-                "Custom LLM prompts.\n\n"
-            )
+            help = "Custom LLM prompts list."
         )
 
 
@@ -251,11 +196,7 @@ def main():
             action = BooleanOptionalAction,
             default = True,
             metavar = "verbose",
-            help = (
-                "Toggle verbosity.\n"
-                "Values: true | false\n"
-                "Default: true\n\n"
-            )
+            help = "Toggle verbosity (default: enabled)."
         )
 
         ux_group.add_argument(
@@ -263,11 +204,7 @@ def main():
             action = BooleanOptionalAction,
             default = False,
             metavar = "open",
-            help = (
-                "Open output after generation.\n"
-                "Values: true | false\n"
-                "Default: false\n\n"
-            )
+            help = "Open output after generation (default: disabled)."
         )
 
         ux_group.add_argument(
@@ -275,11 +212,7 @@ def main():
             action = BooleanOptionalAction,
             default = False,
             metavar = "schema",
-            help = (
-                "Output CLI options shema.\n"
-                "Values: true | false\n"
-                "Default: false\n\n"
-            )
+            help = "Output CLI options shema (default: disabled)."
         )
 
         args = parser.parse_args()
@@ -292,7 +225,7 @@ def main():
         if args.cli_schema:
             import json
             from .cli_option_schema import cli_option_schema
-            schema = cli_option_schema(parser)
+            schema = cli_option_schema(parser, ignore = ["--cli-schema", "--help", "--version"])
             print(json.dumps(schema, indent = 2))
             # Exit as this output is the only expected one.
             sys.exit(0)

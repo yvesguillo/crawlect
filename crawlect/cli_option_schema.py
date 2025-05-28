@@ -1,6 +1,6 @@
 #! /usr/bin/env python3
 
-def cli_option_schema(parser):
+def cli_option_schema(parser, ignore = []):
     """Introspect given ArgumentParser and return an CLI options schema."""
 
     schema = []
@@ -9,16 +9,17 @@ def cli_option_schema(parser):
         group_name = group.title
 
         for param in group._group_actions:
-            # Skip positional args.
-            if param.option_strings:
+            # Skip unwanted args.
+            if param.option_strings and not any(opt in param.option_strings for opt in ignore):
                 entry = {
-                    "group": str(group_name) if group_name else "",
-                    "flags": param.option_strings if param.option_strings else "",
-                    "type": str(param.type) if param.type else "",
-                    "default": str(param.default) if param.default else "",
-                    "required": str(param.required) if param.required else "",
-                    "metavar": str(param.metavar) if param.metavar else "",
-                    "help": str(param.help.strip()) if param.help else "",
+                    "group":    group_name or "",
+                    "flags":    list(param.option_strings),
+                    "type":     param.type.__name__ if param.type else "",
+                    "choices":  list(param.choices) if param.choices else [],
+                    "default":  str(param.default) if param.default is not None else "",
+                    "required": param.required if param.required is not None else False,
+                    "metavar":  getattr(param, "metavar", "") or getattr(param, "dest", ""),
+                    "help":     param.help.strip() if param.help else ""
                 }
                 schema.append(entry)
 
