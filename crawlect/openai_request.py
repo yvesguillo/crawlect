@@ -23,10 +23,12 @@ class Openai_Request(LLM):
 
         self.client = OpenAI(api_key = api_key)
 
+
     def _prompt(self, message):
         completion = self.client.chat.completions.create(
             model = self.model,
             store = True,
             messages = [{"role": "user", "content": message}]
         )
+
         return completion.choices[0].message.content

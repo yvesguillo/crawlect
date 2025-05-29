@@ -19,7 +19,7 @@ class Scan:
         self.args["crawler"] = self.crawler
 
 
-    def listPathIn(self, path = None, depth = None, files = None):
+    def list_path_in(self, path = None, depth = None, files = None):
         """Append all eligible paths from `crawler.path` as Path object in a list and return it."""
 
         if files is None:
@@ -35,7 +35,7 @@ class Scan:
             try:
                 if (
                     candidatePath.is_file()
-                    and not self.crawler.isPathIgnored(candidatePath)
+                    and not self.crawler.is_path_ignored(candidatePath)
                 ):
                     files.append(candidatePath)
 
@@ -43,10 +43,10 @@ class Scan:
                     candidatePath.is_dir()
                     and self.crawler.recur
                     and depth >= 1
-                    and not self.crawler.isPathIgnored(candidatePath)
+                    and not self.crawler.is_path_ignored(candidatePath)
                 ):
                     files.append(candidatePath)
-                    self.listPathIn(path = candidatePath, depth = depth-1, files = files)
+                    self.list_path_in(path = candidatePath, depth = depth-1, files = files)
 
             except PermissionError as error:
                 print(f"\n!! - {type(error).__name__} :\n{type(self) .__name__} Could not list path due to permission {repr(candidatePath)}: {error} ")

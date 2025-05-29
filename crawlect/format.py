@@ -30,13 +30,13 @@ class Format():
             raise
 
 
-    def insertCodebox(self, file):
+    def insert_codebox(self, file):
         """
-        cette méthode prends en entrée un chemin de fichier avec son extention fourni par searchType()
+        cette méthode prends en entrée un chemin de fichier avec son extention fourni par search_type()
         et retourne une variable string avec tous le code corresponding dans un codbox
         """
 
-        extention = self.searchType(file)
+        extention = self.search_type(file)
 
         if extention == None:
             return None
@@ -87,7 +87,7 @@ class Format():
                 return res
 
 
-    def searchType(self, file):
+    def search_type(self, file):
         """Prend le chemin d'un fichier et retourne le type de fichier à inscrire dans la codebox."""
 
         # recherche sur le nom de fichier
@@ -118,7 +118,7 @@ class Format():
         if level >= crawler.depth + 1 :
             return ""
 
-        if crawler.isPathIgnored(chemin):
+        if crawler.is_path_ignored(chemin):
             return ""
 
         tree = ""
@@ -134,7 +134,7 @@ class Format():
                 tree += f"{indentation}- [{chemin.name.replace(".", "&period;")}](#{chemin.name.replace(" ", "-").replace(".", "&period;")})  \n"
 
             if chemin.is_dir():
-                if self.crawler.isPathIgnored(chemin):
+                if self.crawler.is_path_ignored(chemin):
                     return ""
                 tree += f"{indentation}- `{chemin.name}/`  \n"
 

@@ -31,8 +31,8 @@ class Crawlect:
 
         self.path = kwargs.get("path", ".")
         self.output = kwargs.get("output", "digest.md")
-        self.output_prefix = kwargs.get("output_prefix", "digest")
-        self.output_suffix = kwargs.get("output_suffix", ".md")
+        self.output_prefix = kwargs.get("output-prefix", "digest")
+        self.output_suffix = kwargs.get("output-suffix", ".md")
         self.recur = kwargs.get("recur", True)
         self.depth = kwargs.get("depth", inf)
 
@@ -41,7 +41,7 @@ class Crawlect:
         self.gitignore = kwargs.get("gitignore", True)
         self.dockerignore = kwargs.get("dockerignore", True)
 
-        self.simplePathToIgnore = []
+        self.simple_path_to_ignore = []
         self.ignore_file_list = []
 
         # Advanced features parameters.
@@ -49,17 +49,22 @@ class Crawlect:
         self.tree = kwargs.get("tree", True)
 
         # File overwrite setings.
-        self.writeRight = kwargs.get("writeRight", )
+        self.write_right = kwargs.get("write_right", )
 
-        self.warmUp()
+        # LLM
+        self.llm_service = None
+        self.llm_requested_tasks = []
+        self.llm_custom_requests = []
 
-        self.initServices()
+        self.warmup()
 
-        self.processIgnoreFiles()
+        self.init_services()
 
-        self.generatePathList()
+        self.process_ignore_files()
 
-    def warmUp(self):
+        self.generate_path_list()
+
+    def warmup(self):
         """Set needed variable for Crawlect service init phase"""
         try:
             self.pathObj = Path(self.path)
@@ -76,76 +81,125 @@ class Crawlect:
             raise
 
 
-    def initServices(self):
+    def init_services(self):
         """Build Crawlect services"""
         try:
-            self.scanService = Scan(self)
+            self.scan_service = Scan(self)
 
         except:
             print(f"Error: on {type(self).__name__}:\ncould not refresh and initiate its Scan service.")
             raise
 
         try:
-            self.formatService = Format(self) # Format does not take Crawlect instance as parameter.
+            self.format_service = Format(self) # Format does not take Crawlect instance as parameter.
 
         except:
             print(f"Error: on {type(self).__name__}:\ncould not refresh and initiate its Format service.")
             raise
 
         try:
-            self.outputService = Output(self)
+            self.output_service = Output(self)
 
         except:
             print(f"Error: on {type(self).__name__}:\ncould not refresh and initiate its Output service.")
             raise
 
 
-    def processIgnoreFiles(self):
+    def init_llm_service(self, llm_instance, requests, custom_prompts, codebase_path):
+        """Assign LLM service and tasks from already validated CLI arguments."""
+
+        from .llm_code_analysis import LLM_Code_Analysis
+
+        with open(Path(codebase_path), "r", encoding="utf-8") as f:
+            codebase = f.read()
+
+        self.llm_service = LLM_Code_Analysis(llm_instance, codebase)
+        self.llm_requested_tasks = requests
+        self.llm_custom_requests = custom_prompts
+
+
+    def run_llm_requests(self):
+        """Execute previously requested LLM tasks and write analysis to file."""
+
+        if not self.llm_service or not self.llm_requested_tasks:
+            return
+
+        from pathlib import Path
+
+        output_path = Path(self.output_service.current_output_name).with_suffix(".md.analysis.md")
+
+        # Handle scripted requests.
+        with open(output_path, "w", encoding="utf-8") as f:
+            for request in self.llm_requested_tasks:
+                header = (
+                    f"///{len(request) * '/'}///\n"
+                    f"// {request.upper()} //\n"
+                    f"///{len(request) * '/'}///\n"
+                )
+                f.write(f"{header}\n{getattr(self.llm_service, request)()}\n\n")
+
+            # Handle custom prompts.
+            for index, prompt in enumerate(self.llm_custom_requests):
+                header = (
+                    f"/////////////////{'/' * len(str(index + 1))}///\n"
+                    f"// CUSTOM_PROMPT_{str(index + 1)} //\n"
+                    f"/////////////////{'/' * len(str(index + 1))}///\n\n"
+                    f"**Prompt**: `{prompt[:50]}{'…' if len(prompt) > 50 else ''}`\n\n"
+                )
+
+                response = self.llm_service.llm.request(prompt)
+
+                f.write(f"{header}\n{response}\n\n")
+
+        self.output_service.analysisPathName = str(output_path)
+
+
+    def process_ignore_files(self):
         """Check for ignore files settings and fetch ignore list from these."""
 
         if self.crawlectignore and Path(self.path + "/.crawlectignore").exists():
             # Ignore the ignore file itselfe.
-            self.simplePathToIgnore.append(self.path + "/.crawlectignore")
+            self.simple_path_to_ignore.append(self.path + "/.crawlectignore")
             # Append the ignore file path to the list of ignorefile to interogate for exclusion rules.
             self.ignore_file_list.append(parse_ignorefile(Path(self.path + "/.crawlectignore")))
 
         if self.gitignore and Path(self.path + "/.gitignore").exists():
             # Ignore the ignore file itselfe and .git folder as it seems logic in this case.
-            self.simplePathToIgnore.append(Path(self.path + "/.gitignore"))
-            self.simplePathToIgnore.append(Path(self.path + "/.git"))
+            self.simple_path_to_ignore.append(Path(self.path + "/.gitignore"))
+            self.simple_path_to_ignore.append(Path(self.path + "/.git"))
             # Append the ignore file path to the list of ignorefile to interogate for exclusion rules.
             self.ignore_file_list.append(parse_ignorefile(Path(self.path + "/.gitignore")))
 
         if self.dockerignore and Path(self.path + "/.dockerignore").exists():
             # Ignore the ignore file itselfe.
-            self.simplePathToIgnore.append(Path(self.path + "/.dockerignore"))
+            self.simple_path_to_ignore.append(Path(self.path + "/.dockerignore"))
             # Append the ignore file path to the list of ignorefile to interogate for exclusion rules.
             self.ignore_file_list.append(parse_ignorefile(Path(self.path + "/.dockerignore")))
 
         # Avoid duplicates.
-        self.simplePathToIgnore = list(set(self.simplePathToIgnore))
+        self.simple_path_to_ignore = list(set(self.simple_path_to_ignore))
 
 
-    def generatePathList(self):
+    def generate_path_list(self):
         """Prepare the path list which will be treated and written in output file."""
         try:
-            self.files = self.scanService.listPathIn()
+            self.files = self.scan_service.list_path_in()
 
         except:
             print(f"Error: on {type(self).__name__}:\ncould not refresh and proceed to paths listing.")
             raise
 
 
-    def getTitle(self):
+    def get_title(self):
         """Simply returns path to crawl's name"""
         return self.title
 
 
     # Assess if this should be sent to a common class ("Filter" class ?).
-    def isPathIgnored(self, path):
+    def is_path_ignored(self, path):
         """Check if path match any .gitignore pattern or path include/exclude list parameter item."""
 
-        for ignored in self.simplePathToIgnore:
+        for ignored in self.simple_path_to_ignore:
             if fnmatch(path, ignored):
                 return True
 

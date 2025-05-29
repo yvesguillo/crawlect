@@ -6,7 +6,8 @@ from .llm_code_analysis import LLM_Code_Analysis
 from .cli import (
     validate_crawlect_params,
     validate_llm_params,
-    run_llm_analysis,
+    validate_llm_requests,
+    validate_llm_custom_requests,
     open_file
 )
 
@@ -14,6 +15,7 @@ from .cli import (
 from .llm_api_loader import get_llm_api_class_map
 
 # Standard modules.
+import sys
 from pathlib import Path
 import argparse
 import traceback
@@ -28,133 +30,188 @@ def verbose(message):
 def main():
     try:
         # Parameters.
-        parser = argparse.ArgumentParser(
-            description = "Crawlect is a Python module designed to crawl a given directory, collect relevant files and contents, and document the entire structure in a clean, readable Markdown file.",
-            epilog = "By default, Crawlect applies filtering rules from any .gitignore, .dockerignore or .crawlectignore present in the scanned path's first level."
+        from argparse import ArgumentParser, BooleanOptionalAction
+
+        parser = ArgumentParser(
+            description="Crawlect CLI v1.0.5 — Crawl, collect and document your codebase in Markdown.",
+            epilog = "For more information, visit: https://github.com/yvesguillo/crawlect"
         )
 
+
+        # Verssion.
         parser.add_argument(
+            "-v", "--version",
+            action = "version",
+            version = "Crawlect 1.0.5",
+            help = "show Crawlects's version number and exit"
+        )
+
+
+        # Core Parameters.
+        core_group = parser.add_argument_group("Core Parameters")
+
+        core_group.add_argument(
             "-p", "--path",
             type = str,
             default = ".",
-            help = "Path to crawl (default is current folder '.'').")
+            metavar = "path",
+            help = "Path to crawl (default: '.')."
+        )
 
-        output_group = parser.add_argument_group("Output options")
-
-        exclusive = output_group.add_mutually_exclusive_group()
-
-        exclusive.add_argument(
+        core_group.add_argument(
             "-o", "--output",
             type = str,
-            help = "Static output file path (e.g. './digest.md')."
+            metavar = "output",
+            help = "Output file path (e.g. './digest.md')."
         )
 
-        exclusive.add_argument(
-            "-op", "--output_prefix",
+        core_group.add_argument(
+            "-op", "--output-prefix",
             type = str,
-            help = "Prefix for dynamically generated output file name (e.g. './digest')."
+            metavar = "prefix",
+            help = "Prefix for dynamic output filename (e.g. './digest')."
         )
 
-        # Suffix is optional only if prefix is provided
-        output_group.add_argument(
-            "-os", "--output_suffix",
+        core_group.add_argument(
+            "-os", "--output-suffix",
             type = str,
             default = ".md",
+            metavar = "suffix",
             help = "Suffix for dynamic filename (e.g. '.md')."
         )
 
-        parser.add_argument(
+
+        # Crawling Options.
+        crawl_group = parser.add_argument_group("Crawling Options")
+
+        crawl_group.add_argument(
             "--recur",
-            type = str,
-            action = argparse.BooleanOptionalAction,
+            action = BooleanOptionalAction,
             default = True,
-            help = "Enable recursive crawling (default: enabled). Use --no-recur to disable."
+            metavar = "recur",
+            help = "Enable recursive crawling (default: enabled)."
         )
 
-        parser.add_argument(
+        crawl_group.add_argument(
             "-d", "--depth",
             type = int,
             default = inf,
-            help = "Scan depth limit (default is infinite)."
+            metavar = "depth",
+            help = "Maximum scan depth (default: infinity)."
         )
 
-        # Ignore files handling.
-        parser.add_argument(
+        crawl_group.add_argument(
             "--crawlig",
-            action = argparse.BooleanOptionalAction,
+            action = BooleanOptionalAction,
             default = True,
-            help = "Use .crawlectignore exclusion rules if exist (default: enabled). Use --no-crawlig to disable."
+            metavar = "crawlig",
+            help = "Use `.crawlectignore` rules (default: enabled)."
         )
 
-        parser.add_argument(
+        crawl_group.add_argument(
             "--gitig",
-            action = argparse.BooleanOptionalAction,
+            action = BooleanOptionalAction,
             default = True,
-            help = "Use .gitignore exclusion rules if exist (default: enabled). Use --no-gitig to disable."
+            metavar = "gitig",
+            help = "Use `.gitignore` rules (default: enabled)."
         )
 
-        parser.add_argument(
+        crawl_group.add_argument(
             "--dockig",
-            action = argparse.BooleanOptionalAction,
+            action = BooleanOptionalAction,
             default = True,
-            help = "Use .dockerignore exclusion rules if exist (default: enabled). Use --no-dockig to disable."
+            metavar = "dockig",
+            help = "Use `.dockerignore` rules (default: enabled)."
         )
 
-        # Advanced features parameters.
-        parser.add_argument(
+
+        # Output Formatting.
+        output_group = parser.add_argument_group("Output Formatting")
+
+        output_group.add_argument(
             "--xenv",
-            action = argparse.BooleanOptionalAction,
+            action = BooleanOptionalAction,
             default = True,
-            help = "Sanitize .env variables to mitigate sensitive info leak risk (default: enabled). Use --no-xenv to disable."
+            metavar = "xenv",
+            help = "Sanitize `.env` values (default: enabled)."
         )
 
-        parser.add_argument(
+        output_group.add_argument(
             "--tree",
-            action = argparse.BooleanOptionalAction,
+            action = BooleanOptionalAction,
             default = True,
-            help = "Visualize directory tree in the output file (default: enabled). Use --no-tree to disable."
+            metavar = "tree",
+            help = "Include file tree structure (default: enabled)."
         )
 
-        # LLM parameters.
-        parser.add_argument(
+
+        # LLM Options.
+        llm_group = parser.add_argument_group("LLM Options")
+
+        llm_group.add_argument(
             "-llmapi", "--llm-api",
             choices = get_llm_api_class_map().keys(),
-            help = "LLM provider to use (e.g., 'openai' or 'ollama')."
+            metavar = "api",
+            help = "LLM provider ('openai' | 'ollama')."
         )
 
-        parser.add_argument(
+        llm_group.add_argument(
             "-llmhost", "--llm-host",
-            help = "Host URL for the LLM API (only required for Ollama)."
+            metavar = "host",
+            help = "LLM host URL (Ollama only)."
         )
 
-        parser.add_argument(
+        llm_group.add_argument(
             "-llmkey", "--llm-api-key",
-            help = "API key for the LLM (only required for OpenAI)."
+            metavar = "key",
+            help = "LLM API key (OpenAI only)."
         )
-
-        parser.add_argument(
+        llm_group.add_argument(
             "-llmmod", "--llm-model",
-            help = "Model name to use (e.g., 'gpt-4' or 'llama3')."
+            metavar = "model",
+            help = "Model name."
         )
 
-        parser.add_argument(
+        llm_group.add_argument(
             "-llmreq", "--llm-request",
             nargs = "+",
-            help = "LLM tasks to perform: review, docstring, readme."
+            metavar = "request",
+            help = "LLM tasks list to perform."
         )
 
-        parser.add_argument(
-            "-open", "--open",
-            action = argparse.BooleanOptionalAction,
-            default = False,
-            help = "Open the output files once generated (default: disabled)."
+        llm_group.add_argument(
+            "-llmcust", "--llm-custom-requests",
+            nargs = "+",
+            metavar = "requests",
+            help = "Custom LLM prompts list."
         )
 
-        parser.add_argument(
+
+        # UX Options.
+        ux_group = parser.add_argument_group("User Experience")
+
+        ux_group.add_argument(
             "-verbose", "--verbose",
-            action = argparse.BooleanOptionalAction,
+            action = BooleanOptionalAction,
             default = True,
-            help = "Toggle verbosity (default: enabled). Use --no-verbose to disable."
+            metavar = "verbose",
+            help = "Toggle verbosity (default: enabled)."
+        )
+
+        ux_group.add_argument(
+            "-open", "--open",
+            action = BooleanOptionalAction,
+            default = False,
+            metavar = "open",
+            help = "Open output after generation (default: disabled)."
+        )
+
+        ux_group.add_argument(
+            "-clischem", "--cli-schema",
+            action = BooleanOptionalAction,
+            default = False,
+            metavar = "schema",
+            help = "Output CLI options shema (default: disabled)."
         )
 
         args = parser.parse_args()
@@ -163,21 +220,30 @@ def main():
         global VERBOSE
         VERBOSE = args.verbose
 
+        # Introspect CLI parameters.
+        if args.cli_schema:
+            import json
+            from .cli_option_schema import cli_option_schema
+            schema = cli_option_schema(parser, ignore = ["--cli-schema", "--help", "--version"])
+            print(json.dumps(schema, indent = 2))
+            # Exit as this output is the only expected one.
+            sys.exit(0)
+
         # Execute.
         try:
             # Digest.
             crawlect = validate_crawlect_params(args)
 
             # Launch output file composition.
-            verbose(f"Launched {repr(crawlect.getTitle())} processing.")
-            crawlect.outputService.compose()
+            verbose(f"Launched {repr(crawlect.get_title())} processing.")
+            crawlect.output_service.compose()
 
             # Confirm digest creation.
-            verbose(f"Processed {repr(crawlect.getTitle())} and stored digest in {repr(crawlect.outputService.currentOutputName)}.")
+            verbose(f"Processed {repr(crawlect.get_title())} and stored digest in {repr(crawlect.output_service.current_output_name)}.")
 
             # Open the generated file if requested.
             if args.open:
-                open_file(Path(crawlect.outputService.currentOutputName))
+                open_file(Path(crawlect.output_service.current_output_name))
 
         except Exception as error:
             raise Exception(f"\n!! - {type(error).__name__} :\nCrawlect composition failed:\n{error}")
@@ -186,15 +252,20 @@ def main():
         # Analysis.
         if args.llm_request:
             try:
-                verbose(f"Launched {repr(crawlect.getTitle())} analysis.")
-                run_llm_analysis(crawlect, args)
+                # LLM validation and injection
+                if args.llm_request:
+                    verbose(f"Launched {repr(crawlect.get_title())} analysis.")
 
-                # Confirm analysis.
-                verbose(f"Processed {repr(crawlect.getTitle())} and stored analysis in {repr(crawlect.outputService.analysisPathName)}.")
+                    llm_instance = validate_llm_params(args)
+                    llm_requests = validate_llm_requests(args)
+                    llm_custom_prompts = validate_llm_custom_requests(args)
 
-                # Open the generated file if requested.
-                if args.open:
-                    open_file(Path(crawlect.outputService.analysisPathName))
+                    crawlect.init_llm_service(llm_instance, llm_requests, llm_custom_prompts, crawlect.output_service.current_output_name)
+                    crawlect.run_llm_requests()
+                    verbose(f"Stored analysis in {repr(crawlect.output_service.analysisPathName)}.")
+
+                    if args.open:
+                        open_file(Path(crawlect.output_service.analysisPathName))
 
             except Exception as error:
                 raise Exception(f"\n!! - {type(error).__name__} :\nAnalysis failed:\n{error}")

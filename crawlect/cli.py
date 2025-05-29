@@ -2,7 +2,6 @@
 
 # Custom modules.
 from .crawlect import Crawlect
-from .llm_code_analysis import LLM_Code_Analysis
 
 # Conditionnal Imports.
 from .llm_api_loader import get_llm_api_class_map
@@ -46,7 +45,7 @@ def prompt_overwrite_if_needed(args):
             decision = input("Choose 'proceed' or 'change':\n").strip().lower()
 
             if decision == "proceed":
-                args.writeRight = "w"
+                args.write_right = "w"
                 break
 
             elif decision == "change":
@@ -61,8 +60,8 @@ def prompt_overwrite_if_needed(args):
 def validate_crawlect_params(args):
     """Validate CLI args and return a Crawlect instance."""
 
-    if not hasattr(args, 'writeRight'):
-        args.writeRight = "x"
+    if not hasattr(args, 'write_right'):
+        args.write_right = "x"
 
     if not args.recur:
         args.depth = 1
@@ -145,6 +144,8 @@ def validate_llm_required_fields(args):
 def get_llm_analysis_methods():
     """Return a set of all method names from LLM_Code_Analysis that can be used as requests."""
 
+    from .llm_code_analysis import LLM_Code_Analysis
+
     return {
         name for name in dir(LLM_Code_Analysis)
         if callable(getattr(LLM_Code_Analysis, name))
@@ -172,35 +173,16 @@ def validate_llm_requests(args):
     return args.llm_request
 
 
-def run_llm_analysis(crawlect, args):
-    """
-    Run selected LLM analysis tasks on the generated codebase digest.
-    Writes results to a separate .analysis.md file.
-    """
+def validate_llm_custom_requests(args):
+    """Validate and return custom LLM prompts."""
 
-    validate_llm_required_fields(args)
-    llm = validate_llm_params(args)
-    requests = validate_llm_requests(args)
+    if not args.llm_custom_requests:
+        return []
 
-    digest_path = Path(crawlect.outputService.currentOutputName)
+    if not all(isinstance(prompt, str) for prompt in args.llm_custom_requests):
+        raise ValueError("All --llm-custom-requests entries must be strings.")
 
-    with open(digest_path, "r", encoding="utf-8") as file:
-        codebase = file.read()
-
-    analysis = LLM_Code_Analysis(llm, codebase)
-
-    output_path = digest_path.with_suffix(digest_path.suffix + ".analysis.md")
-
-    with open(output_path, "w", encoding="utf-8") as analysis_file:
-        for request in requests:
-            header = (
-                f"///{len(request) * '/'}///\n"
-                f"// {request.upper()} //\n"
-                f"///{len(request) * '/'}///\n"
-            )
-            analysis_file.write(f"{header}\n{getattr(analysis, request)()}\n\n")
-
-            crawlect.outputService.analysisPathName = str(output_path.as_posix())
+    return args.llm_custom_requests
 
 
 def open_file(path):
