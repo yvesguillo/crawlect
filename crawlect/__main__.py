@@ -30,11 +30,10 @@ def verbose(message):
 def main():
     try:
         # Parameters.
-        from argparse import ArgumentParser, BooleanOptionalAction, RawTextHelpFormatter
+        from argparse import ArgumentParser, BooleanOptionalAction
 
         parser = ArgumentParser(
-            description="Crawlect CLI — Crawl, collect and document your codebase in Markdown.",
-            formatter_class = argparse.RawTextHelpFormatter,
+            description="Crawlect CLI v1.0.5 — Crawl, collect and document your codebase in Markdown.",
             epilog = "For more information, visit: https://github.com/yvesguillo/crawlect"
         )
 
