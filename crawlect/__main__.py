@@ -1,6 +1,7 @@
 #! /usr/bin/env python3
 
 # Custom modules.
+from . import __version__
 from .crawlect import Crawlect
 from .llm_code_analysis import LLM_Code_Analysis
 from .cli import (
@@ -33,7 +34,7 @@ def main():
         from argparse import ArgumentParser, BooleanOptionalAction
 
         parser = ArgumentParser(
-            description="Crawlect CLI v1.0.5 — Crawl, collect and document your codebase in Markdown.",
+            description = f"Crawlect CLI v{__version__} — Crawl, collect and document your codebase in Markdown.",
             epilog = "For more information, visit: https://github.com/yvesguillo/crawlect"
         )
 
@@ -42,7 +43,7 @@ def main():
         parser.add_argument(
             "-v", "--version",
             action = "version",
-            version = "Crawlect 1.0.5",
+            version = f"Crawlect v{__version__}",
             help = "show Crawlects's version number and exit"
         )
 

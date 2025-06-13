@@ -327,4 +327,4 @@ Feel free to fork, star, or open an issue — we’d love to hear from you!
 - [`gitignore_parser`](https://github.com/mherrmann/gitignore_parser) by [Michael Herrmann](https://github.com/mherrmann/)
 
 If you find Crawlect useful, **give it a ☆** to support the project!  
-![GitHub Repo stars](https://img.shields.io/github/stars/yvesguillo/crawlect?style=social)
+[![GitHub Repo stars](https://img.shields.io/github/stars/yvesguillo/crawlect?style=social)](#)

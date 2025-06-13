@@ -1,6 +1,6 @@
 [project]
 name = "Crawlect"
-version = "1.0.5"
+dynamic = ["version"]
 description = "Crawl, collect & document your codebase in Markdown — now with integrated LLM analysis."
 readme = "README.md"
 authors = [
@@ -42,3 +42,7 @@ crawlect = "crawlect.__main__:main"
 
 [tool.setuptools]
 packages = ["crawlect"]
+include-package-data = true
+
+[tool.setuptools.dynamic]
+version = {attr = "crawlect.__version__"}
