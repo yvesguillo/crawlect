@@ -33,15 +33,20 @@ def main():
         import argparse
         from argparse import ArgumentParser, BooleanOptionalAction
 
+        def handle_custom_gui_kwargs(add_func, *args, **kwargs):
+            gui_fields = ["guitype"]
+            gui_metadata = {key: kwargs.pop(key, "") for key in gui_fields}
+
+            action = add_func(*args, **kwargs)
+            for key, value in gui_metadata.items():
+                setattr(action, key, value)
+            return action
+
         # Custom subclass for Add Arg for CLI schema tailored parameters.
         class CustomArgumentParser(argparse.ArgumentParser):
             def add_argument(self, *args, **kwargs):
                 # Remove custom param so argparse won't choke.
-                guitype = kwargs.pop("guitype", None)
-                action = super().add_argument(*args, **kwargs)
-                # Inject as dynamic attribute.
-                action.guitype = guitype
-                return action
+                return handle_custom_gui_kwargs(super().add_argument, *args, **kwargs)
 
             # Uses custom Group Add Arg.
             def add_argument_group(self, *args, **kwargs):
@@ -53,11 +58,7 @@ def main():
         class CustomArgumentGroup(argparse._ArgumentGroup):
             def add_argument(self, *args, **kwargs):
                 # Remove custom param so argparse won't choke.
-                guitype = kwargs.pop("guitype", None)
-                action = super().add_argument(*args, **kwargs)
-                # Inject as dynamic attribute.
-                action.guitype = guitype
-                return action
+                return handle_custom_gui_kwargs(super().add_argument, *args, **kwargs)
 
         parser = CustomArgumentParser(
             description = f"Crawlect CLI v{__version__} — Crawl, collect and document your codebase in Markdown.",
@@ -90,7 +91,8 @@ def main():
             "-o", "--output",
             type = str,
             metavar = "output",
-            help = "Output file path (e.g. './digest.md')."
+            help = "Output file path (e.g. './digest.md').",
+            guitype = "filepath"
         )
 
         core_group.add_argument(
