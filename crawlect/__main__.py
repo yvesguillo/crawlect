@@ -33,14 +33,33 @@ def main():
         import argparse
         from argparse import ArgumentParser, BooleanOptionalAction
 
+        # Custom subclass for Add Arg for CLI schema tailored parameters.
         class CustomArgumentParser(argparse.ArgumentParser):
-            def add_argument(self, *args, guitype = None, **kwargs):
+            def add_argument(self, *args, **kwargs):
+                # Remove custom param so argparse won't choke.
+                guitype = kwargs.pop("guitype", None)
                 action = super().add_argument(*args, **kwargs)
-                # custom attribute on action
+                # Inject as dynamic attribute.
                 action.guitype = guitype
                 return action
 
-        parser = ArgumentParser(
+            # Uses custom Group Add Arg.
+            def add_argument_group(self, *args, **kwargs):
+                group = super().add_argument_group(*args, **kwargs)
+                group.__class__ = CustomArgumentGroup  # Inject our custom logic
+                return group
+
+        # Custom subclass for Group Add Arg for CLI schema tailored parameters.
+        class CustomArgumentGroup(argparse._ArgumentGroup):
+            def add_argument(self, *args, **kwargs):
+                # Remove custom param so argparse won't choke.
+                guitype = kwargs.pop("guitype", None)
+                action = super().add_argument(*args, **kwargs)
+                # Inject as dynamic attribute.
+                action.guitype = guitype
+                return action
+
+        parser = CustomArgumentParser(
             description = f"Crawlect CLI v{__version__} — Crawl, collect and document your codebase in Markdown.",
             epilog = "For more information, visit: https://github.com/yvesguillo/crawlect"
         )
@@ -63,7 +82,8 @@ def main():
             type = str,
             default = ".",
             metavar = "path",
-            help = "Path to crawl (default: '.')."
+            help = "Path to crawl (default: '.').",
+            guitype = "folderpath"
         )
 
         core_group.add_argument(
