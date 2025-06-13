@@ -69,6 +69,7 @@
   ".dpatch": "dpatch",
   ".duel": "duel",
   ".jbst": "duel",
+  ".ipynb": "json",
   ".dyl": "dylan",
   ".dylan": "dylan",
   ".erb": "erb",
