@@ -19,7 +19,8 @@ def cli_option_schema(parser, ignore = []):
                     "default":  str(param.default) if param.default is not None else "",
                     "required": param.required if param.required is not None else False,
                     "metavar":  getattr(param, "metavar", "") or getattr(param, "dest", ""),
-                    "help":     param.help.strip() if param.help else ""
+                    "help":     param.help.strip() if param.help else "",
+                    "guitype":  getattr(param, "guitype", "")
                 }
                 schema.append(entry)
 

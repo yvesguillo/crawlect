@@ -18,7 +18,6 @@ from .llm_api_loader import get_llm_api_class_map
 # Standard modules.
 import sys
 from pathlib import Path
-import argparse
 import traceback
 from math import inf
 
@@ -31,7 +30,15 @@ def verbose(message):
 def main():
     try:
         # Parameters.
+        import argparse
         from argparse import ArgumentParser, BooleanOptionalAction
+
+        class CustomArgumentParser(argparse.ArgumentParser):
+            def add_argument(self, *args, guitype = None, **kwargs):
+                action = super().add_argument(*args, **kwargs)
+                # custom attribute on action
+                action.guitype = guitype
+                return action
 
         parser = ArgumentParser(
             description = f"Crawlect CLI v{__version__} — Crawl, collect and document your codebase in Markdown.",
@@ -202,7 +209,7 @@ def main():
         ux_group.add_argument(
             "-open", "--open",
             action = BooleanOptionalAction,
-            default = False,
+            default = True,
             metavar = "open",
             help = "Open output after generation (default: disabled)."
         )
