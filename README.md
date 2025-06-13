@@ -136,6 +136,7 @@ Here are the most useful options Crawlect understands:
 | `-llmkey`, `--llm-api-key` | API key for the LLM (only required for OpenAI). |
 | `-llmmod`, `--llm-model` | Model name to use (e.g., `gpt-4.1-nano` or `llama3`). |
 | `-llmreq`, `--llm-request` | LLM tasks to perform: `review`, `docstring`, `readme`. |
+| `-llmcust`, `--llm-custom-requests` | Custom LLM analysis prompts list (each prompt wrapped in `"`). |
 | `-open`, `--open` | Open the output files once generated (default: disabled). |
 | `-verbose`, `--verbose` | Toggle verbosity (default: enabled). Use `--no-verbose` to disable. |
 
@@ -161,7 +162,8 @@ crawlect -p . \
   --llm-api openai \
   --llm-api-key yoursupersecretkey \
   --llm-model gpt-4 \
-  --llm-request review docstring
+  --llm-request review docstring \
+  --llm-custom-requests "Is this project awesome? " "Can you write a poem about this codebase?"
 ```
 
 ## How LLM Feature Works
@@ -287,12 +289,32 @@ LLM code analysis looks like that:
 ////////////
 
 <Markdown README suggestion ready to paste>
+
+
+/////////////////////
+// CUSTOM_PROMPT_1 //
+/////////////////////
+
+**Prompt**: `Is this project awesome?`
+
+
+<Markdown-formatted response>
+
+
+/////////////////////
+// CUSTOM_PROMPT_2 //
+/////////////////////
+
+**Prompt**: `Can you write a poem about this codebase?`
+
+
+<Markdown-formatted response>
 ```
 
 ## Roadmap & Crazy Ideas
 
+- [*Crawlect-GUI*](https://github.com/yvesguillo/crawlect-gui) (In the pipe! Alpha version during the end of June 2025…)
 - *HTML* output
-- GUI launcher (Probably, *Swing* training is coming…)
 
 ## Contributing
 Got ideas? Spot a bug? Wanna make this thing even cooler?  

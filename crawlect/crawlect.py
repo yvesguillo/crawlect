@@ -138,18 +138,18 @@ class Crawlect:
                 )
                 f.write(f"{header}\n{getattr(self.llm_service, request)()}\n\n")
 
-        # Handle custom prompts.
-        for index, prompt in enumerate(self.llm_custom_requests):
-            header = (
-                f"/////////////////{'/' * len(str(index + 1))}///\n\n"
-                f"// CUSTOM_PROMPT_{str(index + 1)} //\n"
-                f"/////////////////{'/' * len(str(index + 1))}///\n\n"
-                f"**Prompt**: `{prompt[:50]}{'…' if len(prompt) > 50 else ''}`\n"
-            )
+            # Handle custom prompts.
+            for index, prompt in enumerate(self.llm_custom_requests):
+                header = (
+                    f"/////////////////{'/' * len(str(index + 1))}///\n"
+                    f"// CUSTOM_PROMPT_{str(index + 1)} //\n"
+                    f"/////////////////{'/' * len(str(index + 1))}///\n\n"
+                    f"**Prompt**: `{prompt[:50]}{'…' if len(prompt) > 50 else ''}`\n\n"
+                )
 
-            response = self.llm_service.llm.request(prompt)
+                response = self.llm_service.llm.request(prompt)
 
-            f.write(f"{header}\n{response}\n\n")
+                f.write(f"{header}\n{response}\n\n")
 
         self.output_service.analysisPathName = str(output_path)
 
