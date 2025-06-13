@@ -251,22 +251,21 @@ def main():
 
 
         # Analysis.
-        if args.llm_request:
+        if args.llm_request or args.llm_custom_requests:
             try:
                 # LLM validation and injection
-                if args.llm_request:
-                    verbose(f"Launched {repr(crawlect.get_title())} analysis.")
+                verbose(f"Launched {repr(crawlect.get_title())} analysis.")
 
-                    llm_instance = validate_llm_params(args)
-                    llm_requests = validate_llm_requests(args)
-                    llm_custom_prompts = validate_llm_custom_requests(args)
+                llm_instance = validate_llm_params(args)
+                llm_requests = validate_llm_requests(args)
+                llm_custom_prompts = validate_llm_custom_requests(args)
 
-                    crawlect.init_llm_service(llm_instance, llm_requests, llm_custom_prompts, crawlect.output_service.current_output_name)
-                    crawlect.run_llm_requests()
-                    verbose(f"Stored analysis in {repr(crawlect.output_service.analysisPathName)}.")
+                crawlect.init_llm_service(llm_instance, llm_requests, llm_custom_prompts, crawlect.output_service.current_output_name)
+                crawlect.run_llm_requests()
+                verbose(f"Stored analysis in {repr(crawlect.output_service.analysisPathName)}.")
 
-                    if args.open:
-                        open_file(Path(crawlect.output_service.analysisPathName))
+                if args.open:
+                    open_file(Path(crawlect.output_service.analysisPathName))
 
             except Exception as error:
                 raise Exception(f"\n!! - {type(error).__name__} :\nAnalysis failed:\n{error}")

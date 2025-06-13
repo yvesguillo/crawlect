@@ -108,6 +108,7 @@
   ".npmrc": "ini",
   ".io": "io",
   ".ik": "ioke",
+  ".ipynb": "json",
   ".weechatlog": "irc",
   ".jade": "jade",
   ".java": "java",

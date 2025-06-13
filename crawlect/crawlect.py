@@ -121,7 +121,7 @@ class Crawlect:
     def run_llm_requests(self):
         """Execute previously requested LLM tasks and write analysis to file."""
 
-        if not self.llm_service or not self.llm_requested_tasks:
+        if not self.llm_service or (not self.llm_requested_tasks and not self.llm_custom_requests):
             return
 
         from pathlib import Path
