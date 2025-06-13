@@ -34,7 +34,7 @@ def main():
         from argparse import ArgumentParser, BooleanOptionalAction
 
         def handle_custom_gui_kwargs(add_func, *args, **kwargs):
-            gui_fields = ["guitype"]
+            gui_fields = ["guitype","guilabel", "guitooltip"]
             gui_metadata = {key: kwargs.pop(key, "") for key in gui_fields}
 
             action = add_func(*args, **kwargs)
@@ -61,7 +61,7 @@ def main():
                 return handle_custom_gui_kwargs(super().add_argument, *args, **kwargs)
 
         parser = CustomArgumentParser(
-            description = f"Crawlect CLI v{__version__} — Crawl, collect and document your codebase in Markdown.",
+            description = f"Crawlect CLI v{__version__} - Crawl, collect and document your codebase in Markdown.",
             epilog = "For more information, visit: https://github.com/yvesguillo/crawlect"
         )
 
@@ -84,7 +84,9 @@ def main():
             default = ".",
             metavar = "path",
             help = "Path to crawl (default: '.').",
-            guitype = "folderpath"
+            guitype = "folderpath",
+            guilabel = "Path to crawl",
+            guitooltip = "Select the path you want to crawl."
         )
 
         core_group.add_argument(
@@ -92,7 +94,9 @@ def main():
             type = str,
             metavar = "output",
             help = "Output file path (e.g. './digest.md').",
-            guitype = "filepath"
+            guitype = "filepath",
+            guilabel = "Output file",
+            guitooltip = "Choose the file you want the Markdown digest to be saved on."
         )
 
         core_group.add_argument(
@@ -119,7 +123,9 @@ def main():
             action = BooleanOptionalAction,
             default = True,
             metavar = "recur",
-            help = "Enable recursive crawling (default: enabled)."
+            help = "Enable recursive crawling (default: enabled).",
+            guilabel = "Recursive crawl",
+            guitooltip = "Allow subfolder crawling."
         )
 
         crawl_group.add_argument(
@@ -127,7 +133,9 @@ def main():
             type = int,
             default = inf,
             metavar = "depth",
-            help = "Maximum scan depth (default: infinity)."
+            help = "Maximum crawl depth (default: infinity).",
+            guilabel = "Crawl depth",
+            guitooltip = "Select the maximum crawling depth (if recursive crawl is allowed)."
         )
 
         crawl_group.add_argument(
@@ -135,7 +143,9 @@ def main():
             action = BooleanOptionalAction,
             default = True,
             metavar = "crawlig",
-            help = "Use `.crawlectignore` rules (default: enabled)."
+            help = "Use `.crawlectignore` rules (default: enabled).",
+            guilabel = "Use `.crawlectignore`",
+            guitooltip = "Use `.crawlectignore` filtering rules if the file exists on the path to crawl's root.\n `.crawlectignore` follow the gitignore standard filtering definitions."
         )
 
         crawl_group.add_argument(
@@ -143,7 +153,9 @@ def main():
             action = BooleanOptionalAction,
             default = True,
             metavar = "gitig",
-            help = "Use `.gitignore` rules (default: enabled)."
+            help = "Use `.gitignore` rules (default: enabled).",
+            guilabel = "Use `.gitignore`",
+            guitooltip = "Use `.gitignore` filtering rules if the file exists on the path to crawl's root."
         )
 
         crawl_group.add_argument(
@@ -151,7 +163,9 @@ def main():
             action = BooleanOptionalAction,
             default = True,
             metavar = "dockig",
-            help = "Use `.dockerignore` rules (default: enabled)."
+            help = "Use `.dockerignore` rules (default: enabled).",
+            guilabel = "Use `.dockerignore`",
+            guitooltip = "Use `.dockerignore` filtering rules if the file exists on the path to crawl's root."
         )
 
 
@@ -163,7 +177,9 @@ def main():
             action = BooleanOptionalAction,
             default = True,
             metavar = "xenv",
-            help = "Sanitize `.env` values (default: enabled)."
+            help = "Sanitize `.env` values (default: enabled).",
+            guilabel = "Sanitize `.env`",
+            guitooltip = "Sanitize `*.env` files values for security purposes."
         )
 
         output_group.add_argument(
@@ -171,7 +187,9 @@ def main():
             action = BooleanOptionalAction,
             default = True,
             metavar = "tree",
-            help = "Include file tree structure (default: enabled)."
+            help = "Include file tree structure (default: enabled).",
+            guilabel = "File tree",
+            guitooltip = "Add a crawled file tree to the Markdown digest."
         )
 
 
@@ -182,38 +200,51 @@ def main():
             "-llmapi", "--llm-api",
             choices = get_llm_api_class_map().keys(),
             metavar = "api",
-            help = "LLM provider ('openai' | 'ollama')."
+            help = "LLM provider ('openai' | 'ollama').",
+            guilabel = "LLM engine",
+            guitooltip = "Choose the LLM engine to use for analysis requests."
         )
 
         llm_group.add_argument(
             "-llmhost", "--llm-host",
             metavar = "host",
-            help = "LLM host URL (Ollama only)."
+            help = "LLM host URL (Ollama only).",
+            guilabel = "LLM host URL",
+            guitooltip = "For Ollama only, set the LLM engine host URL."
         )
 
         llm_group.add_argument(
             "-llmkey", "--llm-api-key",
             metavar = "key",
-            help = "LLM API key (OpenAI only)."
+            help = "LLM API key (OpenAI only).",
+            guilabel = "LLM API key",
+            guitooltip = "For OpenAi only, set your API key."
         )
+
         llm_group.add_argument(
             "-llmmod", "--llm-model",
             metavar = "model",
-            help = "Model name."
+            help = "Model name.",
+            guilabel = "LLM model",
+            guitooltip = "Choose the LLM model to use for analysis requests."
         )
 
         llm_group.add_argument(
             "-llmreq", "--llm-request",
             nargs = "+",
             metavar = "request",
-            help = "LLM tasks list to perform."
+            help = "LLM tasks list to perform.",
+            guilabel = "LLM scripted tasks",
+            guitooltip = "List the scripted LLM analysis to perform."
         )
 
         llm_group.add_argument(
             "-llmcust", "--llm-custom-requests",
             nargs = "+",
             metavar = "requests",
-            help = "Custom LLM prompts list."
+            help = "Custom LLM prompts list.",
+            guilabel = "Custom LLM prompts",
+            guitooltip = "List the custom LLM prompts to execute.\nPrompts shall be wrapped in quotation marks and separated with a white space."
         )
 
 
@@ -225,7 +256,9 @@ def main():
             action = BooleanOptionalAction,
             default = True,
             metavar = "verbose",
-            help = "Toggle verbosity (default: enabled)."
+            help = "Toggle verbosity (default: enabled).",
+            guilabel = "Verbosity",
+            guitooltip = "Enable Crawlect Pyton core verbosity."
         )
 
         ux_group.add_argument(
@@ -233,7 +266,9 @@ def main():
             action = BooleanOptionalAction,
             default = True,
             metavar = "open",
-            help = "Open output after generation (default: disabled)."
+            help = "Open output after generation (default: enabled).",
+            guilabel = "Open digest",
+            guitooltip = "Open digest file upon analysis completion."
         )
 
         ux_group.add_argument(
@@ -254,7 +289,8 @@ def main():
         if args.cli_schema:
             import json
             from .cli_option_schema import cli_option_schema
-            schema = cli_option_schema(parser, ignore = ["--cli-schema", "--help", "--version"])
+            # Ignored parameters are listed in the ignore list.
+            schema = cli_option_schema(parser, ignore = ["--cli-schema", "--help", "--version", "--output-prefix", "--output-suffix"])
             print(json.dumps(schema, indent = 2))
             # Exit as this output is the only expected one.
             sys.exit(0)
