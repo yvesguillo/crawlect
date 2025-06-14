@@ -11,7 +11,7 @@ Crawl, Collect & Document Your Codebase in Markdown.**
 
 Whether you're analyzing someone else's code or sharing your own, Crawlect makes it effortless to generate a comprehensive project snapshot — complete with syntax-highlighted code blocks, a tree-like structure overview, and fine-tuned filtering rules.
 
-Even easier with its dedicaded GUI project [*Crawlect-GUI alpha*](https://github.com/yvesguillo/crawlect-gui). simplified settings, parameters rétention, easy test and try; give your keyboard a well-deserved break!
+Even easier with its dedicaded GUI project [*Crawlect-GUI alpha*](https://github.com/yvesguillo/crawlect-gui). simplified settings, parameters retention, easy test and try; give your keyboard a well-deserved break!
 
 > *Crawlect* is a study project initiated by [*Yves Guillo*](https://yvesguillo.ch) & [*Alexandre Jenzer*](https://github.com/Alex141298), supervised by [*Matthieu Ammiguet*](https://matthieuamiguet.ch/) during [*He-Arc*](https://www.he-arc.ch/en/)'s *CAS-IDD*'s *Python* module (2025).
 
@@ -63,11 +63,11 @@ crawlect -p . -o digest.md -open
 
 * You can call `crawlect` from **any folder** — no need to `cd` into the repo.
 * Great for **repeated use** or integrating into your tooling.
-* Keeps your system clean (no extra scripts, venvs, or manual installs).
+* Keeps your system clean (no extra scripts, venvs, or manual installs) and allows the use of [*Crawlect-GUI*](https://github.com/yvesguillo/crawlect-gui)!
 
 ### (Optional) Local Dev Mode
 
-If you're planning to **tinker with Crawlect**, we’ve still got you covered.
+If you're planning to **make it bigger**, we’ve still got you covered.
 
 ### 1. Clone the repo
 
