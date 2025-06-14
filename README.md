@@ -1,6 +1,6 @@
 # Crawlect
 
-**Now with *LLM* AI integrated analysis.  
+**Now with *LLM* AI integrated analysis and [*Crawlect-GUI alpha*](https://github.com/yvesguillo/crawlect-gui).  
 Crawl, Collect & Document Your Codebase in Markdown.**  
 
 ![Crawlect](https://raw.githubusercontent.com/yvesguillo/crawlect/main/images/crawlect.avif)
@@ -10,6 +10,8 @@ Crawl, Collect & Document Your Codebase in Markdown.**
 **Crawlect** is a Python module designed to *crawl* a given directory, *collect* relevant files and contents, *document* the entire structure in a clean, readable Markdown file, and analyze the whole project with *LLM* AI API feedback.
 
 Whether you're analyzing someone else's code or sharing your own, Crawlect makes it effortless to generate a comprehensive project snapshot — complete with syntax-highlighted code blocks, a tree-like structure overview, and fine-tuned filtering rules.
+
+Even easier with its dedicaded GUI project [*Crawlect-GUI alpha*](https://github.com/yvesguillo/crawlect-gui). simplified settings, parameters rétention, easy test and try; give your keyboard a well-deserved break!
 
 > *Crawlect* is a study project initiated by [*Yves Guillo*](https://yvesguillo.ch) & [*Alexandre Jenzer*](https://github.com/Alex141298), supervised by [*Matthieu Ammiguet*](https://matthieuamiguet.ch/) during [*He-Arc*](https://www.he-arc.ch/en/)'s *CAS-IDD*'s *Python* module (2025).
 
@@ -313,8 +315,9 @@ LLM code analysis looks like that:
 
 ## Roadmap & Crazy Ideas
 
-- [*Crawlect-GUI*](https://github.com/yvesguillo/crawlect-gui) (In the pipe! Alpha version during the end of June 2025…)
-- *HTML* output
+- Project analysis from repo URL.
+- Standardized review scores.
+- *HTML* output.
 
 ## Contributing
 Got ideas? Spot a bug? Wanna make this thing even cooler?  
