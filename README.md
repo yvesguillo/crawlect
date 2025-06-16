@@ -321,7 +321,7 @@ LLM code analysis looks like that:
 
 ## Contributing
 Got ideas? Spot a bug? Wanna make this thing even cooler?  
-Feel free to fork, star, or open an issue — we’d love to hear from you!
+Feel free to fork, star, or [open an issue](https://github.com/yvesguillo/crawlect/issues) — we’d love to hear from you!
 
 ## References and thanks
 
