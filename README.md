@@ -9,7 +9,7 @@ Crawl, Collect & Document Your Codebase in Markdown.**
 
 **Crawlect** is a Python module designed to *crawl* a given directory, *collect* relevant files and contents, *document* the entire structure in a clean, readable Markdown file, and analyze the whole project with *LLM* AI API feedback.
 
-Whether you're analyzing someone else's code or sharing your own, Crawlect makes it effortless to generate a comprehensive project snapshot — complete with syntax-highlighted code blocks, a tree-like structure overview, and fine-tuned filtering rules.
+Whether you're analyzing someone else's code or sharing your own, Crawlect makes it effortless to generate a comprehensive project snapshot; complete with syntax-highlighted code blocks, a tree-like structure overview, and fine-tuned filtering rules.
 
 Even easier with its dedicaded GUI project [*Crawlect-GUI alpha*](https://github.com/yvesguillo/crawlect-gui). simplified settings, parameters retention, easy test and try; give your keyboard a well-deserved break!
 
