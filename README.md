@@ -17,7 +17,7 @@ Even easier with its dedicaded GUI project [*Crawlect-GUI alpha*](https://github
 
 ## Why Crawlect?
 
-When starting with a new project — whether you're reviewing, refactoring, or collaborating — understanding its structure and key files is essential. Crawlect does the heavy lifting by:
+When starting with a new project; whether you're reviewing, refactoring, or collaborating; understanding its structure and key files is essential. Crawlect does the heavy lifting by:
 
 - Analyzes your codebase with integrated *LLM* API calls.
 - Crawl your project directory (recursively if needed),
@@ -61,7 +61,7 @@ crawlect -p . -o digest.md -open
 
 #### Why choose the `pip` route?
 
-* You can call `crawlect` from **any folder** — no need to `cd` into the repo.
+* You can call `crawlect` from **any folder**; no need to `cd` into the repo.
 * Great for **repeated use** or integrating into your tooling.
 * Keeps your system clean (no extra scripts, venvs, or manual installs) and allows the use of [*Crawlect-GUI*](https://github.com/yvesguillo/crawlect-gui)!
 
@@ -207,7 +207,7 @@ crawlect -p . \
 ```
 
 > Crawlect writes your digest, then generates an `<output path>.analysis.md` file packed with insights.  
-> And **Yes!** This *README.md* have been generated like that. Well… with a bit of editing, yet much faster. Spend less time on boilerplate — more on content and *style*.
+> And **Yes!** This *README.md* have been generated like that. Well… with a bit of editing, yet much faster. Spend less time on boilerplate; more on content and *style*.
 
 ### Bonus
 
@@ -221,7 +221,7 @@ Crawlect injects the **entire codebase** (in Markdown format) *once*, then asks 
 
 Crawlect supports standard `.gitignore` filtering. You can use:
 
-- `.crawlectignore` (optional and custom rules — your secret weapon, auto-detected and parsed like Git would)
+- `.crawlectignore` (optional and custom rules; your secret weapon, auto-detected and parsed like Git would)
 - `.gitignore` and `.dockerignore` (auto-detected and parsed like Git would)
 
 These filters follow the [standard `.gitignore` syntax](https://git-scm.com/docs/gitignore).
@@ -321,7 +321,7 @@ LLM code analysis looks like that:
 
 ## Contributing
 Got ideas? Spot a bug? Wanna make this thing even cooler?  
-Feel free to fork, star, or [open an issue](https://github.com/yvesguillo/crawlect/issues) — we’d love to hear from you!
+Feel free to fork, star, or [open an issue](https://github.com/yvesguillo/crawlect/issues); we’d love to hear from you!
 
 ## References and thanks
 
