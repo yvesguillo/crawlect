@@ -21,6 +21,7 @@ __pycache__/
 # Personal notes and analysis
 *.memo
 crawlect.md
+digest.md
 
 # Pypi
 .pypirc

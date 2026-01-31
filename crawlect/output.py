@@ -51,7 +51,7 @@ class Output:
         # Tree
         if self.crawler.tree:
             tree = self.crawler.format_service.makeTreeMd(crawler = self.crawler)
-            output_lines.append(f"## File structure\n\n{tree}")
+            output_lines.append(f"## File structure\n\n```\n{tree}\n```\n")
 
         # Files
         sorted_files = sorted(self.crawler.files, key = lambda p: (p.parent, p.name))
@@ -59,8 +59,7 @@ class Output:
 
         for file in sorted_files:
             if file.is_file():
-                output_lines.append(f"### {file.name.replace('.', '&period;')}  ")
-                output_lines.append(f"[`{file.as_posix()}`]({file.as_posix()})")
+                output_lines.append(f"### [`{file.as_posix()}`]({file.as_posix()})")
 
                 try:
                     content = self.crawler.format_service.insert_codebox(file)

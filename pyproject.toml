@@ -1,7 +1,7 @@
 [project]
 name = "Crawlect"
 dynamic = ["version"]
-description = "Crawl, collect & document your codebase in Markdown — now with integrated LLM analysis."
+description = "Crawl, collect & document your codebase in Markdown - now with integrated LLM analysis."
 readme = "README.md"
 authors = [
   {name = "Yves Guillo & Alexandre Jenzer", email = "yves@yvesguillo.ch"}
