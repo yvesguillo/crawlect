@@ -59,14 +59,13 @@ class Output:
 
         for file in sorted_files:
             if file.is_file():
-                output_lines.append(f"### [`{file.as_posix()}`]({file.as_posix()})")
-
+                current_file_link = f"### [`{file.as_posix()}`]({file.as_posix()})"
                 try:
                     content = self.crawler.format_service.insert_codebox(file)
                     if content:
-                        output_lines.append("")
-                        output_lines.append(content)
-                        output_lines.append("")
+                        output_lines.append(f"{current_file_link}\n\n{content}\n")
+                    else:
+                        output_lines.append(f"{current_file_link}\n")
                 except Exception as error:
                     print(
                         f"\n!! - {type(error).__name__}:\n"
