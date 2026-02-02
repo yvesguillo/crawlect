@@ -139,7 +139,7 @@ class Format():
             # Filter ignored.
             items = [p for p in items if not crawler.is_path_ignored(p)]
             # Sort: directories first, then files.
-            items.sort(key=lambda p: (p.is_file(), p.name.lower()))
+            items.sort(key = lambda p: (p.is_file(), p.name.lower()))
             return items
 
         def walk(node: Path, current_prefix: str, current_level: int):
@@ -173,4 +173,4 @@ class Format():
             walk(chemin, prefix, level + 1)
 
         # Agregate lines.
-        return "  \n".join(lines) + "\n"
+        return "\n".join(lines) + "\n"

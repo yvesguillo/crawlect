@@ -189,7 +189,6 @@ class Crawlect:
             print(f"Error: on {type(self).__name__}:\ncould not refresh and proceed to paths listing.")
             raise
 
-
     def get_title(self):
         """Simply returns path to crawl's name"""
         return self.title

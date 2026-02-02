@@ -3,6 +3,7 @@
 # Standard modules.
 from datetime import datetime
 from random import choices
+from urllib.parse import quote
 import string
 
 class Output:
@@ -54,18 +55,17 @@ class Output:
             output_lines.append(f"## File structure\n\n```\n{tree}\n```\n")
 
         # Files
-        sorted_files = sorted(self.crawler.files, key = lambda p: (p.parent, p.name))
         output_lines.append("## Files:\n")
 
-        for file in sorted_files:
+        for file in self.crawler.files:
             if file.is_file():
-                current_file_link = f"### [`{file.as_posix()}`]({file.as_posix()})"
+                current_file_link = f"### [`{file.name}`]({quote(file.as_posix(), safe="/._-")})\n\n`{file.as_posix()}`:"
                 try:
                     content = self.crawler.format_service.insert_codebox(file)
                     if content:
                         output_lines.append(f"{current_file_link}\n\n{content}\n")
                     else:
-                        output_lines.append(f"{current_file_link}\n")
+                        pass
                 except Exception as error:
                     print(
                         f"\n!! - {type(error).__name__}:\n"
