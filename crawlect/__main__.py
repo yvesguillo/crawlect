@@ -251,7 +251,7 @@ def main():
             "-verbose", "--verbose",
             action = BooleanOptionalAction,
             default = False,
-            help = "Toggle verbosity (default: enabled).",
+            help = "Toggle verbosity (default: disabled).",
             guilabel = "Verbosity",
             guitooltip = "Enable Crawlect Pyton core verbosity."
         )
