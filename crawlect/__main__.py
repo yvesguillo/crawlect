@@ -21,6 +21,8 @@ from pathlib import Path
 import traceback
 from math import inf
 
+# Verbose value will be passed from cli params later.
+VERBOSE = False
 def verbose(message):
     """Handle verbosity"""
 
@@ -122,7 +124,6 @@ def main():
             "--recur",
             action = BooleanOptionalAction,
             default = True,
-            metavar = "recur",
             help = "Enable recursive crawling (default: enabled).",
             guilabel = "Recursive crawl",
             guitooltip = "Allow subfolder crawling."
@@ -142,7 +143,6 @@ def main():
             "--crawlig",
             action = BooleanOptionalAction,
             default = True,
-            metavar = "crawlig",
             help = "Use `.crawlectignore` rules (default: enabled).",
             guilabel = "Use `.crawlectignore`",
             guitooltip = "Use `.crawlectignore` filtering rules if the file exists on the path to crawl's root.\n `.crawlectignore` follow the gitignore standard filtering definitions."
@@ -152,7 +152,6 @@ def main():
             "--gitig",
             action = BooleanOptionalAction,
             default = True,
-            metavar = "gitig",
             help = "Use `.gitignore` rules (default: enabled).",
             guilabel = "Use `.gitignore`",
             guitooltip = "Use `.gitignore` filtering rules if the file exists on the path to crawl's root."
@@ -162,7 +161,6 @@ def main():
             "--dockig",
             action = BooleanOptionalAction,
             default = True,
-            metavar = "dockig",
             help = "Use `.dockerignore` rules (default: enabled).",
             guilabel = "Use `.dockerignore`",
             guitooltip = "Use `.dockerignore` filtering rules if the file exists on the path to crawl's root."
@@ -176,7 +174,6 @@ def main():
             "--xenv",
             action = BooleanOptionalAction,
             default = True,
-            metavar = "xenv",
             help = "Sanitize `.env` values (default: enabled).",
             guilabel = "Sanitize `.env`",
             guitooltip = "Sanitize `*.env` files values for security purposes."
@@ -186,7 +183,6 @@ def main():
             "--tree",
             action = BooleanOptionalAction,
             default = True,
-            metavar = "tree",
             help = "Include file tree structure (default: enabled).",
             guilabel = "File tree",
             guitooltip = "Add a crawled file tree to the Markdown digest."
@@ -254,8 +250,7 @@ def main():
         ux_group.add_argument(
             "-verbose", "--verbose",
             action = BooleanOptionalAction,
-            default = True,
-            metavar = "verbose",
+            default = False,
             help = "Toggle verbosity (default: enabled).",
             guilabel = "Verbosity",
             guitooltip = "Enable Crawlect Pyton core verbosity."
@@ -265,7 +260,6 @@ def main():
             "-open", "--open",
             action = BooleanOptionalAction,
             default = True,
-            metavar = "open",
             help = "Open output after generation (default: enabled).",
             guilabel = "Open digest",
             guitooltip = "Open digest file upon analysis completion."
@@ -275,7 +269,6 @@ def main():
             "-clischem", "--cli-schema",
             action = BooleanOptionalAction,
             default = False,
-            metavar = "schema",
             help = "Output CLI options shema (default: disabled)."
         )
 
